@@ -1,0 +1,26 @@
+{
+  "name": "priv_broker_order",
+  "domain": "equity",
+  "task": "anomaly",
+  "frequency": "minute",
+  "n_features": 1,
+  "feature_names": [
+    "flow",
+    "label"
+  ],
+  "n_obs": 600,
+  "date_range": [
+    "",
+    ""
+  ],
+  "split": {},
+  "license": "proprietary",
+  "source": "PROPRIETARY — requires user data / model upload",
+  "open": false,
+  "requires_download": true,
+  "target": "flow",
+  "lookback": 60,
+  "horizon": 10,
+  "rolling": true,
+  "notes": "CLOSED/proprietary placeholder. Contains NO real data. The user must provide the data or upload their own model to be evaluated; until then only the synthetic stub is present."
+}

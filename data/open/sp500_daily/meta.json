@@ -1,0 +1,25 @@
+{
+  "name": "sp500_daily",
+  "domain": "index",
+  "task": "forecast",
+  "frequency": "day",
+  "n_features": 1,
+  "feature_names": [
+    "close"
+  ],
+  "n_obs": 1000,
+  "date_range": [
+    "",
+    ""
+  ],
+  "split": {},
+  "license": "open",
+  "source": "S&P 500 via yfinance (synthetic fallback)",
+  "open": true,
+  "requires_download": false,
+  "target": "close",
+  "lookback": 120,
+  "horizon": 10,
+  "rolling": true,
+  "notes": "Open dataset. Real data when available; synthetic fallback otherwise."
+}

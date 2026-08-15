@@ -1,0 +1,26 @@
+{
+  "name": "return_classify",
+  "domain": "equity",
+  "task": "classify",
+  "frequency": "day",
+  "n_features": 1,
+  "feature_names": [
+    "close",
+    "label"
+  ],
+  "n_obs": 1000,
+  "date_range": [
+    "",
+    ""
+  ],
+  "split": {},
+  "license": "open",
+  "source": "Synthetic return sign classifier (synthetic fallback)",
+  "open": true,
+  "requires_download": false,
+  "target": "label",
+  "lookback": 60,
+  "horizon": 1,
+  "rolling": true,
+  "notes": "Open dataset. Real data when available; synthetic fallback otherwise."
+}

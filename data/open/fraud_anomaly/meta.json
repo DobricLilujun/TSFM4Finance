@@ -1,0 +1,26 @@
+{
+  "name": "fraud_anomaly",
+  "domain": "fraud",
+  "task": "anomaly",
+  "frequency": "hour",
+  "n_features": 1,
+  "feature_names": [
+    "flow",
+    "label"
+  ],
+  "n_obs": 1000,
+  "date_range": [
+    "",
+    ""
+  ],
+  "split": {},
+  "license": "open",
+  "source": "Synthetic transaction/flow stream (synthetic fallback)",
+  "open": true,
+  "requires_download": false,
+  "target": "flow",
+  "lookback": 100,
+  "horizon": 24,
+  "rolling": true,
+  "notes": "Open dataset. Real data when available; synthetic fallback otherwise."
+}

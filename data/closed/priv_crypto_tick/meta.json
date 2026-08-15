@@ -1,0 +1,25 @@
+{
+  "name": "priv_crypto_tick",
+  "domain": "crypto",
+  "task": "forecast",
+  "frequency": "minute",
+  "n_features": 1,
+  "feature_names": [
+    "close"
+  ],
+  "n_obs": 600,
+  "date_range": [
+    "",
+    ""
+  ],
+  "split": {},
+  "license": "proprietary",
+  "source": "PROPRIETARY — requires user data / model upload",
+  "open": false,
+  "requires_download": true,
+  "target": "close",
+  "lookback": 60,
+  "horizon": 10,
+  "rolling": true,
+  "notes": "CLOSED/proprietary placeholder. Contains NO real data. The user must provide the data or upload their own model to be evaluated; until then only the synthetic stub is present."
+}

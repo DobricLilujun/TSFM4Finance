@@ -1,0 +1,6 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.deploy/
+# data/ 与 backend/leaderboard.json 作为真实数据提交

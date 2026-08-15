@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Finance TSFMs Arena — 金融时间序列预测基准排行榜</title>
+<style>
+:root{
+  --bg:#0d1117; --panel:#161b22; --panel2:#1c2330; --line:#2a3441;
+  --txt:#e6edf3; --dim:#9aa7b5; --muted:#6b7a8a;
+  --blue:#3b82f6; --teal:#2dd4bf; --gold:#f5a623; --red:#f85149;
+  --green:#3fb950; --purple:#a78bfa;
+  --radius:14px; --shadow:0 8px 30px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',-apple-system,'Segoe UI',Roboto,'PingFang SC','Microsoft YaHei',sans-serif;
+  background:radial-gradient(1200px 600px at 70% -10%,#182436 0%,var(--bg) 60%);
+  color:var(--txt);line-height:1.5;-webkit-font-smoothing:antialiased;min-height:100vh}
+a{color:var(--teal);text-decoration:none}
+.container{max-width:1180px;margin:0 auto;padding:0 22px}
+
+/* nav */
+header{position:sticky;top:0;z-index:50;backdrop-filter:blur(12px);
+  background:rgba(13,17,23,.8);border-bottom:1px solid var(--line)}
+.nav{display:flex;align-items:center;justify-content:space-between;padding:14px 22px;max-width:1180px;margin:0 auto}
+.brand{display:flex;align-items:center;gap:11px;font-weight:800;font-size:18px;letter-spacing:.3px}
+.brand .logo{width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,var(--blue),var(--teal));
+  display:grid;place-items:center;font-size:16px;box-shadow:0 0 18px rgba(59,130,246,.4)}
+.nav .links{display:flex;gap:6px;flex-wrap:wrap}
+.nav .links a{color:var(--dim);font-weight:600;font-size:14px;padding:8px 13px;border-radius:9px;transition:.15s}
+.nav .links a:hover,.nav .links a.active{background:var(--panel2);color:var(--txt)}
+
+/* hero */
+.hero{padding:64px 0 40px;text-align:center;position:relative;overflow:hidden}
+.hero .glow{position:absolute;inset:0;background:radial-gradient(600px 300px at 50% 0%,rgba(45,212,191,.12),transparent 70%);pointer-events:none}
+.hero h1{font-size:52px;font-weight:800;letter-spacing:-1px;background:linear-gradient(120deg,#fff,#9ec9ff 55%,var(--teal));
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;line-height:1.1}
+.hero p{color:var(--dim);font-size:19px;margin:20px auto 0;max-width:680px}
+.hero .badges{display:flex;gap:10px;justify-content:center;margin-top:28px;flex-wrap:wrap}
+.badge{background:var(--panel2);border:1px solid var(--line);padding:8px 16px;border-radius:30px;font-size:13px;color:var(--dim);font-weight:600}
+.badge b{color:var(--teal)}
+
+/* sections */
+section{padding:54px 0;scroll-margin-top:80px}
+.sec-head{margin-bottom:26px}
+.sec-head h2{font-size:30px;font-weight:800;letter-spacing:-.5px}
+.sec-head p{color:var(--dim);margin-top:8px;font-size:15px}
+.eyebrow{color:var(--teal);font-weight:700;font-size:13px;letter-spacing:2px;text-transform:uppercase;margin-bottom:10px}
+
+/* leaderboard table */
+.lb-wrap{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)}
+table{width:100%;border-collapse:collapse}
+th,td{padding:14px 18px;text-align:left;font-size:14px}
+thead th{background:var(--panel2);color:var(--dim);font-weight:700;font-size:12px;letter-spacing:.5px;text-transform:uppercase;border-bottom:1px solid var(--line)}
+tbody tr{border-bottom:1px solid var(--line);transition:.12s}
+tbody tr:hover{background:var(--panel2)}
+tbody tr:last-child{border-bottom:none}
+.rk{font-weight:800;font-size:15px;width:48px}
+.rk.g{color:var(--gold)}.rk.s{color:#c0c0d0}.rk.b{color:#cd7f32}
+.model{font-weight:700}
+.tag{display:inline-block;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600;background:var(--panel2);border:1px solid var(--line);color:var(--dim)}
+.tag.open{color:var(--green);border-color:rgba(63,185,80,.3)}
+.tag.closed{color:var(--gold);border-color:rgba(245,166,35,.3)}
+.score{font-weight:800;font-size:15px;color:var(--teal)}
+.bar{height:7px;border-radius:4px;background:linear-gradient(90deg,var(--blue),var(--teal));margin-top:6px}
+.muted{color:var(--muted);font-size:12px}
+
+/* cards grid */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:18px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:20px;transition:.18s}
+.card:hover{transform:translateY(-4px);border-color:var(--teal);box-shadow:var(--shadow)}
+.card h3{font-size:16px;font-weight:700;margin-bottom:6px}
+.card .sub{color:var(--dim);font-size:13px;margin-bottom:14px}
+.card .rows{display:flex;flex-direction:column;gap:7px;font-size:13px}
+.card .row{display:flex;justify-content:space-between;color:var(--dim)}
+.card .row b{color:var(--txt);font-weight:600}
+
+/* forms */
+.form{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:26px;box-shadow:var(--shadow)}
+.form h3{font-size:18px;margin-bottom:4px}
+.form .hint{color:var(--dim);font-size:13px;margin-bottom:18px}
+label{display:block;font-size:13px;font-weight:600;color:var(--dim);margin:14px 0 6px}
+select,input,textarea{width:100%;background:var(--panel2);border:1px solid var(--line);border-radius:10px;
+  padding:11px 13px;color:var(--txt);font-size:14px;font-family:inherit}
+select:focus,input:focus{outline:none;border-color:var(--teal)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.btn{background:linear-gradient(135deg,var(--blue),var(--teal));color:#fff;border:none;padding:13px 22px;
+  border-radius:11px;font-weight:700;font-size:15px;cursor:pointer;transition:.15s;width:100%;margin-top:22px}
+.btn:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(45,212,191,.3)}
+.btn.ghost{background:var(--panel2);border:1px solid var(--line);color:var(--txt)}
+.mode-toggle{display:flex;gap:10px;margin:18px 0 4px}
+.mode-toggle .opt{flex:1;text-align:center;padding:12px;border:1px solid var(--line);border-radius:11px;cursor:pointer;font-weight:600;font-size:13px;transition:.15s}
+.mode-toggle .opt.sel{border-color:var(--teal);background:rgba(45,212,191,.1);color:var(--teal)}
+.result{margin-top:20px;background:var(--panel2);border:1px solid var(--line);border-radius:11px;padding:18px;display:none}
+.result.show{display:block}
+.result .big{font-size:34px;font-weight:800;color:var(--teal)}
+.metric-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px;margin-top:16px}
+.metric{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px;text-align:center}
+.metric .v{font-size:20px;font-weight:800}
+.metric .k{font-size:11px;color:var(--dim);text-transform:uppercase;letter-spacing:.5px;margin-top:4px}
+
+/* about */
+.about-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px}
+.note{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--gold);border-radius:10px;padding:16px 18px;color:var(--dim);font-size:14px}
+.note b{color:var(--txt)}
+footer{border-top:1px solid var(--line);padding:30px 0;color:var(--muted);font-size:13px;text-align:center}
+.hidden{display:none}
+@media(max-width:640px){.hero h1{font-size:34px}.row2{grid-template-columns:1fr}.nav .links{display:none}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="nav">
+    <div class="brand"><span class="logo">📈</span> Finance TSFMs Arena</div>
+    <nav class="links">
+      <a href="#leaderboard" class="active">排行榜</a>
+      <a href="#datasets">数据集</a>
+      <a href="#evaluate">评测</a>
+      <a href="#about">关于</a>
+    </nav>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="hero" id="top">
+  <div class="glow"></div>
+  <div class="container">
+    <h1>Finance TSFMs Arena</h1>
+    <p>面向金融时间序列预测的统一基准排行榜。统一接口、开源 + 闭源双轨、<br>多领域多任务 —— 在同一个擂台上公平对比你的模型。</p>
+    <div class="badges" id="heroBadges">
+      <span class="badge">加载中…</span>
+    </div>
+  </div>
+</section>
+
+<!-- LEADERBOARD -->
+<section id="leaderboard">
+  <div class="container">
+    <div class="sec-head">
+      <div class="eyebrow">Leaderboard</div>
+      <h2>综合排行榜</h2>
+      <p>综合评分 = 0.5×(1−MASE) + 0.3×方向准确率 + 0.2×相关系数。点击行可展开明细。</p>
+    </div>
+    <div class="lb-wrap">
+      <table id="lbTable">
+        <thead><tr><th class="rk">#</th><th>模型</th><th>数据集</th><th>领域</th><th>任务</th><th>频率</th><th>评分</th></tr></thead>
+        <tbody id="lbBody"><tr><td colspan="7" class="muted" style="text-align:center;padding:30px">加载中…</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- DATASETS -->
+<section id="datasets">
+  <div class="container">
+    <div class="sec-head">
+      <div class="eyebrow">Datasets</div>
+      <h2>数据集</h2>
+      <p>覆盖多金融子领域与任务类型。开源数据可公开评测；闭源数据需上传模型或提供数据。</p>
+    </div>
+    <div class="grid" id="dsGrid"><div class="card muted" style="grid-column:1/-1">加载中…</div></div>
+  </div>
+</section>
+
+<!-- EVALUATE -->
+<section id="evaluate">
+  <div class="container">
+    <div class="sec-head">
+      <div class="eyebrow">Evaluate</div>
+      <h2>评测你的模型</h2>
+      <p>选择「公开」模式提交到排行榜；选择「私密」模式仅本地评测、不公开模型。</p>
+    </div>
+    <div class="form" style="max-width:720px;margin:0 auto">
+      <h3>运行评测</h3>
+      <div class="hint">选择数据集与模型，选择模式后提交。私密模式下结果不会写入公共排行榜。</div>
+      <div class="row2">
+        <div><label>数据集</label><select id="fDataset"></select></div>
+        <div><label>模型</label><select id="fModel"></select></div>
+      </div>
+      <div class="mode-toggle" id="modeToggle">
+        <div class="opt sel" data-mode="open">🌐 公开（写入排行榜）</div>
+        <div class="opt" data-mode="private">🔒 私密（仅本地评测）</div>
+      </div>
+      <button class="btn" id="runBtn">运行评测</button>
+      <div class="result" id="result"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section id="about">
+  <div class="container">
+    <div class="sec-head">
+      <div class="eyebrow">About</div>
+      <h2>关于本系统</h2>
+    </div>
+    <div class="about-grid">
+      <div class="note"><b>统一接口</b><br>所有模型/数据统一为「时间戳 × 特征」矩阵，显式声明 context window 与 horizon，见 <code>docs/02_unified_interface_spec.md</code>。</div>
+      <div class="note"><b>开源 / 闭源双轨</b><br>开源数据公开评测进排行榜；闭源数据需上传模型（私密模式）或由你提供数据。</div>
+      <div class="note"><b>多领域多任务</b><br>股票/指数/外汇/加密货币/债券/欺诈，任务含预测/分类/异常检测。</div>
+      <div class="note"><b>待补（需你协助）</b><br>部分闭源数据集（如券商订单流、基金申赎）需你下载/提供；真实金融数据可替换当前合成 fallback。</div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">Finance TSFMs Arena · 本地 demo · 后端 FastAPI :8000 · 前端静态站</div>
+</footer>
+
+<script>
+// backend base url — relative when served by the same server; override with ?api=...
+const API = window.location.search.includes('api=')
+  ? new URLSearchParams(window.location.search).get('api')
+  : '';
+
+async function api(path, opts){ try{ const r=await fetch(API+path,opts); if(!r.ok) throw new Error(r.status); return await r.json(); }catch(e){ return null; } }
+
+// ---- leaderboard ----
+async function loadLB(){
+  const d = await api('/api/leaderboard');
+  const body = document.getElementById('lbBody');
+  if(!d || !d.rows || !d.rows.length){ body.innerHTML='<tr><td colspan="7" class="muted" style="text-align:center;padding:30px">排行榜为空 —— 运行评测后会生成。</td></tr>'; return; }
+  body.innerHTML='';
+  d.rows.forEach(r=>{
+    const cls = r.rank===1?'g':r.rank===2?'s':r.rank===3?'b':'';
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td class="rk ${cls}">${r.rank}</td>
+      <td class="model">${r.model}</td>
+      <td>${r.dataset}</td>
+      <td><span class="tag">${r.domain}</span></td>
+      <td>${r.task}</td>
+      <td>${r.frequency}</td>
+      <td><span class="score">${(r.score*100).toFixed(1)}</span><div class="bar" style="width:${Math.max(6,r.score*100)}%"></div></td>`;
+    body.appendChild(tr);
+  });
+}
+
+// ---- datasets ----
+async function loadDatasets(){
+  const d = await api('/api/datasets');
+  const grid=document.getElementById('dsGrid');
+  if(!d){ grid.innerHTML='<div class="card muted" style="grid-column:1/-1">无法加载数据集（后端未启动？）</div>'; return; }
+  grid.innerHTML='';
+  d.forEach(m=>{
+    const c=document.createElement('div'); c.className='card';
+    c.innerHTML=`<h3>${m.name}</h3><div class="sub">${m.domain} · ${m.frequency} · ${m.n_features} 特征</div>
+      <div class="rows">
+        <div class="row"><span>任务</span><b>${m.task}</b></div>
+        <div class="row"><span>类型</span><b><span class="tag ${m.open?'open':'closed'}">${m.open?'开源':'闭源'}</span></b></div>
+        <div class="row"><span>lookback</span><b>${m.lookback}</b></div>
+        <div class="row"><span>horizon</span><b>${m.horizon}</b></div>
+        <div class="row"><span>来源</span><b style="font-size:11px">${m.source}</b></div>
+      </div>`;
+    grid.appendChild(c);
+  });
+  // hero badges
+  const hb=document.getElementById('heroBadges');
+  const open=d.filter(x=>x.open).length, closed=d.length-open;
+  hb.innerHTML=`<span class="badge"><b>${d.length}</b> 数据集</span>
+    <span class="badge"><b>${open}</b> 开源</span>
+    <span class="badge"><b>${closed}</b> 闭源</span>
+    <span class="badge">3 类任务</span>`;
+}
+
+// ---- populate form ----
+async function loadForm(){
+  const ds=await api('/api/datasets'); const ms=await api('/api/models');
+  const sEl=document.getElementById('fDataset'), mEl=document.getElementById('fModel');
+  if(ds) sEl.innerHTML=ds.map(m=>`<option value="${m.name}">${m.name} (${m.domain}/${m.task})</option>`).join('');
+  if(ms){ mEl.innerHTML=Object.entries(ms).map(([k,v])=>`<option value="${k}" ${v.installed?'':'disabled'}>${v.name}${v.installed?'':' (未安装)'}</option>`).join(''); }
+}
+
+// ---- mode toggle ----
+let mode='open';
+document.getElementById('modeToggle').addEventListener('click',e=>{
+  const o=e.target.closest('.opt'); if(!o)return;
+  document.querySelectorAll('#modeToggle .opt').forEach(x=>x.classList.remove('sel'));
+  o.classList.add('sel'); mode=o.dataset.mode;
+});
+
+// ---- run ----
+document.getElementById('runBtn').addEventListener('click',async()=>{
+  const ds=document.getElementById('fDataset').value;
+  const mdl=document.getElementById('fModel').value;
+  const btn=document.getElementById('runBtn'); btn.textContent='评测中…'; btn.disabled=true;
+  const res=await api('/api/evaluate',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({dataset:ds,model:mdl,mode})});
+  btn.textContent='运行评测'; btn.disabled=false;
+  const box=document.getElementById('result');
+  if(!res){ box.innerHTML='<div class="muted">评测失败（后端不可用）。请启动后端：<code>uv run python -m backend.app</code></div>'; box.classList.add('show'); return; }
+  const m=res.metrics||{};
+  const metricCards=[['MASE',m.mase,'x'],['方向准确率',m.directional_accuracy,''],['相关系数',m.pearson,''],
+    ['MAPE',m.mape,'%'],['RMSE',m.rmse,'']].map(([k,v,u])=>
+      `<div class="metric"><div class="v">${v==null||isNaN(v)?'—':v.toFixed(3)}${u||''}</div><div class="k">${k}</div></div>`).join('');
+  box.innerHTML=`<div class="big">综合评分 ${(res.score*100).toFixed(1)}</div>
+    <div class="muted" style="margin-top:6px">${res.dataset} · ${res.model} · 模式 ${res.mode} · ${m.n_points} 个滚动点</div>
+    <div class="metric-grid">${metricCards}</div>`;
+  box.classList.add('show');
+  loadLB();
+});
+
+// ---- nav active ----
+document.querySelectorAll('.nav .links a').forEach(a=>a.addEventListener('click',()=>{
+  document.querySelectorAll('.nav .links a').forEach(x=>x.classList.remove('active')); a.classList.add('active');
+}));
+
+// init
+loadLB(); loadDatasets(); loadForm();
+</script>
+</body>
+</html>

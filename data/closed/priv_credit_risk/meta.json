@@ -1,0 +1,26 @@
+{
+  "name": "priv_credit_risk",
+  "domain": "bond",
+  "task": "classify",
+  "frequency": "day",
+  "n_features": 1,
+  "feature_names": [
+    "close",
+    "label"
+  ],
+  "n_obs": 600,
+  "date_range": [
+    "",
+    ""
+  ],
+  "split": {},
+  "license": "proprietary",
+  "source": "PROPRIETARY — requires user data / model upload",
+  "open": false,
+  "requires_download": true,
+  "target": "label",
+  "lookback": 60,
+  "horizon": 1,
+  "rolling": true,
+  "notes": "CLOSED/proprietary placeholder. Contains NO real data. The user must provide the data or upload their own model to be evaluated; until then only the synthetic stub is present."
+}

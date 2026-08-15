@@ -1,0 +1,243 @@
+[
+  {
+    "dataset": "sp500_daily",
+    "model": "moving_average",
+    "mode": "open",
+    "domain": "index",
+    "task": "forecast",
+    "frequency": "day",
+    "score": 0.44464166666666666,
+    "metrics": {
+      "rmse": 5.996339610338257,
+      "mae": 5.380353505789963,
+      "mse": 44.70202695987681,
+      "mape": 2.672517054895323,
+      "smape": 2.670591265375867,
+      "mase": 3.8926468081375636,
+      "directional_accuracy": 1.0,
+      "return_rank_corr": 0.0,
+      "pearson": 3.616727719373683e-15,
+      "score": 0.44464166666666666,
+      "n_points": 12
+    },
+    "rank": 8
+  },
+  {
+    "dataset": "sp500_daily",
+    "model": "arima",
+    "mode": "open",
+    "domain": "index",
+    "task": "forecast",
+    "frequency": "day",
+    "score": 0.4993,
+    "metrics": {
+      "rmse": 4.46543400785732,
+      "mae": 3.748453164742747,
+      "mse": 28.747012752187477,
+      "mape": 1.8668669406899923,
+      "smape": 1.8493420323185576,
+      "mase": 2.7119787262094857,
+      "directional_accuracy": 1.0,
+      "return_rank_corr": -0.05050505050505053,
+      "pearson": -0.09404073009413443,
+      "score": 0.4993,
+      "n_points": 12
+    },
+    "rank": 6
+  },
+  {
+    "dataset": "sp500_daily",
+    "model": "chronos",
+    "mode": "open",
+    "domain": "index",
+    "task": "forecast",
+    "frequency": "day",
+    "score": 0.5288083333333334,
+    "metrics": {
+      "rmse": 4.704905232440469,
+      "mae": 4.041595108102665,
+      "mse": 29.84494536858065,
+      "mape": 2.008457056651889,
+      "smape": 1.998822901835845,
+      "mase": 2.9240647999076637,
+      "directional_accuracy": 1.0,
+      "return_rank_corr": 0.0727272727272727,
+      "pearson": 0.08217749483220751,
+      "score": 0.5288083333333334,
+      "n_points": 12
+    },
+    "rank": 5
+  },
+  {
+    "dataset": "eur_usd_fx",
+    "model": "arima",
+    "mode": "open",
+    "domain": "fx",
+    "task": "forecast",
+    "frequency": "day",
+    "score": 0.5526166666666666,
+    "metrics": {
+      "rmse": 1.0951351121950024,
+      "mae": 0.9734177836184772,
+      "mse": 1.5942200772678614,
+      "mape": 0.6993935409007178,
+      "smape": 0.6992625823483638,
+      "mase": 1.7436943851674964,
+      "directional_accuracy": 1.0,
+      "return_rank_corr": 0.03749999999999998,
+      "pearson": 0.031184495647845516,
+      "score": 0.5526166666666666,
+      "n_points": 24
+    },
+    "rank": 2
+  },
+  {
+    "dataset": "eur_usd_fx",
+    "model": "chronos",
+    "mode": "open",
+    "domain": "fx",
+    "task": "forecast",
+    "frequency": "day",
+    "score": 0.5314333333333333,
+    "metrics": {
+      "rmse": 1.1340692936387036,
+      "mae": 1.0117137030854872,
+      "mse": 1.699083962502302,
+      "mape": 0.7270011258771764,
+      "smape": 0.7267550559697905,
+      "mase": 1.8122943027704237,
+      "directional_accuracy": 1.0,
+      "return_rank_corr": 0.04583333333333336,
+      "pearson": 0.021848906820734443,
+      "score": 0.5314333333333333,
+      "n_points": 24
+    },
+    "rank": 3
+  },
+  {
+    "dataset": "btc_crypto",
+    "model": "seasonal_naive",
+    "mode": "open",
+    "domain": "crypto",
+    "task": "forecast",
+    "frequency": "day",
+    "score": 0.46674285714285707,
+    "metrics": {
+      "rmse": 10.329099434791553,
+      "mae": 8.727957327512849,
+      "mse": 133.0984126259576,
+      "mape": 7.0757698025386055,
+      "smape": 7.16105158320072,
+      "mase": 2.390294129907294,
+      "directional_accuracy": 1.0,
+      "return_rank_corr": -0.15586992159713745,
+      "pearson": -0.11912146269166521,
+      "score": 0.46674285714285707,
+      "n_points": 21
+    },
+    "rank": 7
+  },
+  {
+    "dataset": "return_classify",
+    "model": "arima",
+    "mode": "open",
+    "domain": "equity",
+    "task": "classify",
+    "frequency": "day",
+    "score": 0.53,
+    "metrics": {
+      "accuracy": 0.55,
+      "f1": 0.55,
+      "precision": 0.55,
+      "recall": 0.55,
+      "auc": 0.5,
+      "score": 0.53,
+      "n_points": 60
+    },
+    "rank": 4
+  },
+  {
+    "dataset": "fraud_anomaly",
+    "model": "naive",
+    "mode": "open",
+    "domain": "fraud",
+    "task": "anomaly",
+    "frequency": "hour",
+    "score": 0.20600000000000002,
+    "metrics": {
+      "f1": 0.01,
+      "precision": 0.005208333333333333,
+      "recall": 0.125,
+      "auc": 0.5,
+      "score": 0.20600000000000002,
+      "n_points": 4
+    },
+    "rank": 10
+  },
+  {
+    "dataset": "priv_fund_flow",
+    "model": "arima",
+    "mode": "open",
+    "domain": "equity",
+    "task": "forecast",
+    "frequency": "day",
+    "score": 0.553425,
+    "metrics": {
+      "rmse": 1.7300124460124355,
+      "mae": 1.5172977825664844,
+      "mse": 3.590410108678044,
+      "mape": 1.5649302291340366,
+      "smape": 1.5789514507989342,
+      "mase": 1.597619990267444,
+      "directional_accuracy": 1.0,
+      "return_rank_corr": 0.1458333333333333,
+      "pearson": 0.12630356792046088,
+      "score": 0.553425,
+      "n_points": 24
+    },
+    "submitted_ref": "user_arima_v1",
+    "rank": 1
+  },
+  {
+    "dataset": "priv_broker_order",
+    "model": "naive",
+    "mode": "open",
+    "domain": "equity",
+    "task": "anomaly",
+    "frequency": "minute",
+    "score": 0.21816666666666665,
+    "metrics": {
+      "f1": 0.030303030303030304,
+      "precision": 0.016666666666666666,
+      "recall": 0.16666666666666666,
+      "auc": 0.5,
+      "score": 0.21816666666666665,
+      "n_points": 6
+    },
+    "submitted_ref": "local-registry",
+    "rank": 9
+  },
+  {
+    "dataset": "priv_fund_flow",
+    "model": "arima",
+    "mode": "open",
+    "domain": "equity",
+    "task": "forecast",
+    "frequency": "day",
+    "score": 0.553425,
+    "metrics": {
+      "rmse": 1.7300124460124355,
+      "mae": 1.5172977825664844,
+      "mse": 3.590410108678044,
+      "mape": 1.5649302291340366,
+      "smape": 1.5789514507989342,
+      "mase": 1.597619990267444,
+      "directional_accuracy": 1.0,
+      "return_rank_corr": 0.1458333333333333,
+      "pearson": 0.12630356792046088,
+      "score": 0.553425,
+      "n_points": 24
+    },
+    "submitted_ref": "my_model_v9"
+  }
+]

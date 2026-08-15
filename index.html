@@ -1,136 +1,179 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Finance TSFMs Arena — 金融时间序列预测基准排行榜</title>
+<title>Finance TSFMs Arena — Financial Time-Series Forecasting Benchmark</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=Noto+Sans+Arabic:wght@400;600&display=swap" rel="stylesheet">
 <style>
+/* ============================================================
+   Finance TSFMs Arena — refined FINANCIAL / ACADEMIC theme
+   (inspired by SWE-bench's clean leaderboard aesthetic;
+   navy + gold, serif headings, NOT a neon "geek" look)
+   ============================================================ */
 :root{
-  --bg:#0d1117; --panel:#161b22; --panel2:#1c2330; --line:#2a3441;
-  --txt:#e6edf3; --dim:#9aa7b5; --muted:#6b7a8a;
-  --blue:#3b82f6; --teal:#2dd4bf; --gold:#f5a623; --red:#f85149;
-  --green:#3fb950; --purple:#a78bfa;
-  --radius:14px; --shadow:0 8px 30px rgba(0,0,0,.35);
+  --ink:#0b1f33;            /* deep navy */
+  --ink2:#12314f;
+  --paper:#f7f5ef;         /* warm ivory paper */
+  --paper2:#efe9df;
+  --card:#ffffff;
+  --line:#d9d2c4;
+  --txt:#1a2a38;
+  --dim:#5c6b7a;
+  --muted:#8a94a1;
+  --gold:#b8862b;          /* muted financial gold */
+  --gold2:#d8ab4a;
+  --navy:#12314f;
+  --navy2:#1c4a72;
+  --green:#2f7a4d;
+  --red:#b23a3a;
+  --radius:10px;
+  --shadow:0 10px 40px rgba(11,31,51,.10);
 }
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Inter',-apple-system,'Segoe UI',Roboto,'PingFang SC','Microsoft YaHei',sans-serif;
-  background:radial-gradient(1200px 600px at 70% -10%,#182436 0%,var(--bg) 60%);
-  color:var(--txt);line-height:1.5;-webkit-font-smoothing:antialiased;min-height:100vh}
-a{color:var(--teal);text-decoration:none}
-.container{max-width:1180px;margin:0 auto;padding:0 22px}
+body{font-family:'Inter',-apple-system,'Segoe UI',Roboto,sans-serif;
+  background:var(--paper);color:var(--txt);line-height:1.6;-webkit-font-smoothing:antialiased}
+h1,h2,h3,.serif{font-family:'Fraunces','Georgia',serif}
+a{color:var(--navy2);text-decoration:none}
+.container{max-width:1120px;margin:0 auto;padding:0 24px}
 
-/* nav */
-header{position:sticky;top:0;z-index:50;backdrop-filter:blur(12px);
-  background:rgba(13,17,23,.8);border-bottom:1px solid var(--line)}
-.nav{display:flex;align-items:center;justify-content:space-between;padding:14px 22px;max-width:1180px;margin:0 auto}
-.brand{display:flex;align-items:center;gap:11px;font-weight:800;font-size:18px;letter-spacing:.3px}
-.brand .logo{width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,var(--blue),var(--teal));
-  display:grid;place-items:center;font-size:16px;box-shadow:0 0 18px rgba(59,130,246,.4)}
-.nav .links{display:flex;gap:6px;flex-wrap:wrap}
-.nav .links a{color:var(--dim);font-weight:600;font-size:14px;padding:8px 13px;border-radius:9px;transition:.15s}
-.nav .links a:hover,.nav .links a.active{background:var(--panel2);color:var(--txt)}
+/* ---- header / nav ---- */
+header{position:sticky;top:0;z-index:60;background:var(--ink);border-bottom:1px solid #0a1a2b}
+.nav{display:flex;align-items:center;justify-content:space-between;padding:0 24px;max-width:1120px;margin:0 auto;height:64px}
+.brand{display:flex;align-items:center;gap:12px;color:#fff;font-family:'Fraunces',serif;font-weight:700;font-size:20px;letter-spacing:.2px}
+.brand .mark{width:34px;height:34px;border-radius:8px;background:linear-gradient(135deg,var(--gold),var(--gold2));
+  display:grid;place-items:center;font-size:17px;color:#0b1f33;font-family:'Inter',sans-serif;font-weight:800}
+.nav .links{display:flex;gap:4px;align-items:center}
+.nav .links a{color:#c3d0dc;font-family:'Inter',sans-serif;font-weight:600;font-size:14px;padding:8px 14px;border-radius:8px;transition:.15s}
+.nav .links a:hover{color:#fff;background:rgba(255,255,255,.08)}
+.lang{display:flex;gap:2px;background:rgba(255,255,255,.08);border-radius:9px;padding:3px}
+.lang button{background:transparent;border:none;color:#c3d0dc;font-family:'Inter',sans-serif;font-weight:600;font-size:12px;
+  padding:6px 9px;border-radius:7px;cursor:pointer;transition:.12s}
+.lang button:hover{color:#fff}
+.lang button.sel{background:var(--gold);color:#0b1f33}
 
-/* hero */
-.hero{padding:64px 0 40px;text-align:center;position:relative;overflow:hidden}
-.hero .glow{position:absolute;inset:0;background:radial-gradient(600px 300px at 50% 0%,rgba(45,212,191,.12),transparent 70%);pointer-events:none}
-.hero h1{font-size:52px;font-weight:800;letter-spacing:-1px;background:linear-gradient(120deg,#fff,#9ec9ff 55%,var(--teal));
-  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;line-height:1.1}
-.hero p{color:var(--dim);font-size:19px;margin:20px auto 0;max-width:680px}
-.hero .badges{display:flex;gap:10px;justify-content:center;margin-top:28px;flex-wrap:wrap}
-.badge{background:var(--panel2);border:1px solid var(--line);padding:8px 16px;border-radius:30px;font-size:13px;color:var(--dim);font-weight:600}
-.badge b{color:var(--teal)}
+/* ---- hero ---- */
+.hero{background:linear-gradient(180deg,var(--ink) 0%,#0d2942 70%);padding:70px 0 56px;position:relative;overflow:hidden}
+.hero::after{content:"";position:absolute;right:-120px;bottom:-160px;width:520px;height:520px;
+  background:radial-gradient(circle,rgba(184,134,43,.18),transparent 65%);pointer-events:none}
+.hero .container{position:relative;z-index:2}
+.hero h1{color:#fff;font-size:46px;font-weight:700;letter-spacing:-.5px;line-height:1.08}
+.hero p{color:#b9c8d6;font-size:18px;max-width:640px;margin:22px 0 0}
+.hero .badges{display:flex;gap:10px;flex-wrap:wrap;margin-top:30px}
+.badge{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);color:#dce6ef;padding:9px 17px;border-radius:30px;font-size:13px;font-weight:600}
+.badge b{color:var(--gold2);font-family:'Fraunces',serif}
 
-/* sections */
-section{padding:54px 0;scroll-margin-top:80px}
-.sec-head{margin-bottom:26px}
-.sec-head h2{font-size:30px;font-weight:800;letter-spacing:-.5px}
-.sec-head p{color:var(--dim);margin-top:8px;font-size:15px}
-.eyebrow{color:var(--teal);font-weight:700;font-size:13px;letter-spacing:2px;text-transform:uppercase;margin-bottom:10px}
+/* ---- sections ---- */
+section{padding:58px 0}
+.sec-head{margin-bottom:28px}
+.sec-head .eyebrow{color:var(--gold);font-weight:700;font-size:12px;letter-spacing:2.5px;text-transform:uppercase;margin-bottom:8px}
+.sec-head h2{font-size:30px;font-weight:600;color:var(--ink)}
+.sec-head p{color:var(--dim);font-size:15px;margin-top:8px;max-width:680px}
 
-/* leaderboard table */
-.lb-wrap{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)}
+/* ---- leaderboard (SWE-bench style) ---- */
+.lb-wrap{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)}
 table{width:100%;border-collapse:collapse}
-th,td{padding:14px 18px;text-align:left;font-size:14px}
-thead th{background:var(--panel2);color:var(--dim);font-weight:700;font-size:12px;letter-spacing:.5px;text-transform:uppercase;border-bottom:1px solid var(--line)}
-tbody tr{border-bottom:1px solid var(--line);transition:.12s}
-tbody tr:hover{background:var(--panel2)}
+th,td{padding:13px 16px;text-align:left;font-size:14px;vertical-align:middle}
+thead th{background:var(--paper2);color:var(--dim);font-weight:700;font-size:11px;letter-spacing:.6px;text-transform:uppercase;border-bottom:1px solid var(--line)}
+tbody tr{border-bottom:1px solid var(--line)}
 tbody tr:last-child{border-bottom:none}
-.rk{font-weight:800;font-size:15px;width:48px}
-.rk.g{color:var(--gold)}.rk.s{color:#c0c0d0}.rk.b{color:#cd7f32}
-.model{font-weight:700}
-.tag{display:inline-block;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600;background:var(--panel2);border:1px solid var(--line);color:var(--dim)}
-.tag.open{color:var(--green);border-color:rgba(63,185,80,.3)}
-.tag.closed{color:var(--gold);border-color:rgba(245,166,35,.3)}
-.score{font-weight:800;font-size:15px;color:var(--teal)}
-.bar{height:7px;border-radius:4px;background:linear-gradient(90deg,var(--blue),var(--teal));margin-top:6px}
-.muted{color:var(--muted);font-size:12px}
+tbody tr:hover{background:#faf7f1}
+.rk{font-family:'Fraunces',serif;font-weight:700;font-size:16px;width:52px}
+.rk.g{color:var(--gold)}.rk.s{color:#8a8a95}.rk.b{color:#a9702f}
+.model{font-weight:700;color:var(--ink)}
+.tag{display:inline-block;padding:2px 10px;border-radius:20px;font-size:11px;font-weight:600;background:var(--paper2);border:1px solid var(--line);color:var(--dim)}
+.tag.open{color:var(--green);border-color:rgba(47,122,77,.3);background:rgba(47,122,77,.06)}
+.tag.closed{color:var(--gold);border-color:rgba(184,134,43,.3);background:rgba(184,134,43,.06)}
+.score{font-family:'Fraunces',serif;font-weight:700;font-size:16px;color:var(--navy)}
+.bar{height:6px;border-radius:3px;background:linear-gradient(90deg,var(--navy),var(--gold));margin-top:7px}
+.muted{color:var(--muted);font-size:13px}
 
-/* cards grid */
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:18px}
-.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:20px;transition:.18s}
-.card:hover{transform:translateY(-4px);border-color:var(--teal);box-shadow:var(--shadow)}
-.card h3{font-size:16px;font-weight:700;margin-bottom:6px}
-.card .sub{color:var(--dim);font-size:13px;margin-bottom:14px}
-.card .rows{display:flex;flex-direction:column;gap:7px;font-size:13px}
+/* ---- dataset cards ---- */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(248px,1fr));gap:18px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:20px;transition:.16s;box-shadow:var(--shadow)}
+.card:hover{transform:translateY(-3px);border-color:var(--gold)}
+.card.off{opacity:.55}
+.card h3{font-size:17px;color:var(--ink)}
+.card .sub{color:var(--dim);font-size:13px;margin:4px 0 14px}
+.card .rows{display:flex;flex-direction:column;gap:6px;font-size:13px}
 .card .row{display:flex;justify-content:space-between;color:var(--dim)}
 .card .row b{color:var(--txt);font-weight:600}
+.switch{display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:600;color:var(--dim);margin-top:12px}
+.switch .dot{width:9px;height:9px;border-radius:50%;background:var(--green)}
+.switch .dot.off{background:var(--muted)}
 
-/* forms */
-.form{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:26px;box-shadow:var(--shadow)}
-.form h3{font-size:18px;margin-bottom:4px}
-.form .hint{color:var(--dim);font-size:13px;margin-bottom:18px}
+/* ---- evaluate form ---- */
+.form{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:28px;box-shadow:var(--shadow)}
+.form h3{font-size:19px;color:var(--ink)}
+.form .hint{color:var(--dim);font-size:13px;margin:6px 0 18px}
 label{display:block;font-size:13px;font-weight:600;color:var(--dim);margin:14px 0 6px}
-select,input,textarea{width:100%;background:var(--panel2);border:1px solid var(--line);border-radius:10px;
-  padding:11px 13px;color:var(--txt);font-size:14px;font-family:inherit}
-select:focus,input:focus{outline:none;border-color:var(--teal)}
+select,input{width:100%;background:var(--paper);border:1px solid var(--line);border-radius:9px;padding:11px 13px;color:var(--txt);font-size:14px;font-family:inherit}
+select:focus,input:focus{outline:none;border-color:var(--gold)}
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-.btn{background:linear-gradient(135deg,var(--blue),var(--teal));color:#fff;border:none;padding:13px 22px;
-  border-radius:11px;font-weight:700;font-size:15px;cursor:pointer;transition:.15s;width:100%;margin-top:22px}
-.btn:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(45,212,191,.3)}
-.btn.ghost{background:var(--panel2);border:1px solid var(--line);color:var(--txt)}
 .mode-toggle{display:flex;gap:10px;margin:18px 0 4px}
-.mode-toggle .opt{flex:1;text-align:center;padding:12px;border:1px solid var(--line);border-radius:11px;cursor:pointer;font-weight:600;font-size:13px;transition:.15s}
-.mode-toggle .opt.sel{border-color:var(--teal);background:rgba(45,212,191,.1);color:var(--teal)}
-.result{margin-top:20px;background:var(--panel2);border:1px solid var(--line);border-radius:11px;padding:18px;display:none}
+.mode-toggle .opt{flex:1;text-align:center;padding:11px;border:1px solid var(--line);border-radius:9px;cursor:pointer;font-weight:600;font-size:13px;transition:.12s;color:var(--dim)}
+.mode-toggle .opt.sel{border-color:var(--gold);background:rgba(184,134,43,.08);color:var(--gold)}
+.btn{background:var(--ink);color:#fff;border:none;padding:13px 22px;border-radius:9px;font-weight:700;font-size:15px;cursor:pointer;transition:.15s;width:100%;margin-top:22px;font-family:inherit}
+.btn:hover{background:var(--navy2)}
+.result{margin-top:20px;background:var(--paper2);border:1px solid var(--line);border-radius:9px;padding:18px;display:none}
 .result.show{display:block}
-.result .big{font-size:34px;font-weight:800;color:var(--teal)}
-.metric-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px;margin-top:16px}
-.metric{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px;text-align:center}
-.metric .v{font-size:20px;font-weight:800}
+.result .big{font-family:'Fraunces',serif;font-size:34px;font-weight:700;color:var(--navy)}
+.metric-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:12px;margin-top:16px}
+.metric{background:var(--card);border:1px solid var(--line);border-radius:9px;padding:12px;text-align:center}
+.metric .v{font-family:'Fraunces',serif;font-size:19px;font-weight:700}
 .metric .k{font-size:11px;color:var(--dim);text-transform:uppercase;letter-spacing:.5px;margin-top:4px}
 
-/* about */
-.about-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px}
-.note{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--gold);border-radius:10px;padding:16px 18px;color:var(--dim);font-size:14px}
+/* ---- about ---- */
+.about-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:18px}
+.note{background:var(--card);border:1px solid var(--line);border-left:3px solid var(--gold);border-radius:9px;padding:16px 18px;color:var(--dim);font-size:14px;box-shadow:var(--shadow)}
 .note b{color:var(--txt)}
-footer{border-top:1px solid var(--line);padding:30px 0;color:var(--muted);font-size:13px;text-align:center}
+code{background:var(--paper2);padding:1px 6px;border-radius:5px;font-size:12px;color:var(--navy2)}
+
+/* ---- footer with university logos ---- */
+footer{background:var(--ink);color:#9fb0bf;padding:40px 0 30px;margin-top:20px}
+.unis{display:flex;gap:28px;flex-wrap:wrap;align-items:center;justify-content:center;margin-bottom:22px}
+.uni{display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center}
+.uni .chip{background:#fff;border-radius:9px;padding:8px 14px;box-shadow:0 4px 14px rgba(0,0,0,.25);display:grid;place-items:center}
+.uni .chip img{height:30px;width:auto;display:block}
+.uni .name{font-family:'Fraunces',serif;font-size:12px;color:#c3d0dc}
+footer .fine{font-size:12px;color:#7d8f9e;text-align:center;border-top:1px solid #1a2c3c;padding-top:18px}
 .hidden{display:none}
-@media(max-width:640px){.hero h1{font-size:34px}.row2{grid-template-columns:1fr}.nav .links{display:none}}
+@media(max-width:640px){.hero h1{font-size:32px}.row2{grid-template-columns:1fr}.nav .links{display:none}}
+[dir="rtl"] .brand{flex-direction:row-reverse}
+[dir="rtl"] .bar{direction:ltr}
 </style>
 </head>
 <body>
 
 <header>
   <div class="nav">
-    <div class="brand"><span class="logo">📈</span> Finance TSFMs Arena</div>
-    <nav class="links">
-      <a href="#leaderboard" class="active">排行榜</a>
-      <a href="#datasets">数据集</a>
-      <a href="#evaluate">评测</a>
-      <a href="#about">关于</a>
-    </nav>
+    <div class="brand"><span class="mark">₮</span> Finance TSFMs Arena</div>
+    <div class="links" style="display:flex;align-items:center;gap:6px">
+      <nav class="links" style="gap:4px">
+        <a href="#leaderboard" class="navlink" data-i18n="nav_leaderboard">Leaderboard</a>
+        <a href="#datasets" class="navlink" data-i18n="nav_datasets">Datasets</a>
+        <a href="#evaluate" class="navlink" data-i18n="nav_evaluate">Evaluate</a>
+        <a href="#about" class="navlink" data-i18n="nav_about">About</a>
+      </nav>
+      <div class="lang" id="langBar">
+        <button data-lang="en" class="sel">EN</button>
+        <button data-lang="fr">FR</button>
+        <button data-lang="lb">Lët</button>
+        <button data-lang="ar">ع</button>
+        <button data-lang="de">DE</button>
+      </div>
+    </div>
   </div>
 </header>
 
 <!-- HERO -->
 <section class="hero" id="top">
-  <div class="glow"></div>
   <div class="container">
-    <h1>Finance TSFMs Arena</h1>
-    <p>面向金融时间序列预测的统一基准排行榜。统一接口、开源 + 闭源双轨、<br>多领域多任务 —— 在同一个擂台上公平对比你的模型。</p>
-    <div class="badges" id="heroBadges">
-      <span class="badge">加载中…</span>
-    </div>
+    <h1 data-i18n="hero_title">Finance TSFMs Arena</h1>
+    <p data-i18n="hero_sub">A unified benchmark and leaderboard for financial time-series forecasting. One interface, open + closed tracks, multiple domains and tasks — compare your models on a single fair stage.</p>
+    <div class="badges" id="heroBadges"><span class="badge" data-i18n="loading">Loading…</span></div>
   </div>
 </section>
 
@@ -138,14 +181,22 @@ footer{border-top:1px solid var(--line);padding:30px 0;color:var(--muted);font-s
 <section id="leaderboard">
   <div class="container">
     <div class="sec-head">
-      <div class="eyebrow">Leaderboard</div>
-      <h2>综合排行榜</h2>
-      <p>综合评分 = 0.5×(1−MASE) + 0.3×方向准确率 + 0.2×相关系数。点击行可展开明细。</p>
+      <div class="eyebrow" data-i18n="eyebrow_leaderboard">Leaderboard</div>
+      <h2 data-i18n="lb_title">Overall Leaderboard</h2>
+      <p data-i18n="lb_desc">Composite score = 0.5×(1−MASE) + 0.3×directional accuracy + 0.2×correlation. Only supported datasets are shown.</p>
     </div>
     <div class="lb-wrap">
       <table id="lbTable">
-        <thead><tr><th class="rk">#</th><th>模型</th><th>数据集</th><th>领域</th><th>任务</th><th>频率</th><th>评分</th></tr></thead>
-        <tbody id="lbBody"><tr><td colspan="7" class="muted" style="text-align:center;padding:30px">加载中…</td></tr></tbody>
+        <thead><tr>
+          <th class="rk">#</th>
+          <th data-i18n="th_model">Model</th>
+          <th data-i18n="th_dataset">Dataset</th>
+          <th data-i18n="th_domain">Domain</th>
+          <th data-i18n="th_task">Task</th>
+          <th data-i18n="th_freq">Freq.</th>
+          <th data-i18n="th_score">Score</th>
+        </tr></thead>
+        <tbody id="lbBody"><tr><td colspan="7" class="muted" style="text-align:center;padding:30px" data-i18n="loading">Loading…</td></tr></tbody>
       </table>
     </div>
   </div>
@@ -155,11 +206,11 @@ footer{border-top:1px solid var(--line);padding:30px 0;color:var(--muted);font-s
 <section id="datasets">
   <div class="container">
     <div class="sec-head">
-      <div class="eyebrow">Datasets</div>
-      <h2>数据集</h2>
-      <p>覆盖多金融子领域与任务类型。开源数据可公开评测；闭源数据需上传模型或提供数据。</p>
+      <div class="eyebrow" data-i18n="eyebrow_datasets">Datasets</div>
+      <h2 data-i18n="ds_title">Datasets</h2>
+      <p data-i18n="ds_desc">Multiple financial sub-domains and task types. Open data is evaluated publicly; closed data requires a model upload or data provisioning.</p>
     </div>
-    <div class="grid" id="dsGrid"><div class="card muted" style="grid-column:1/-1">加载中…</div></div>
+    <div class="grid" id="dsGrid"><div class="card muted" style="grid-column:1/-1" data-i18n="loading">Loading…</div></div>
   </div>
 </section>
 
@@ -167,22 +218,22 @@ footer{border-top:1px solid var(--line);padding:30px 0;color:var(--muted);font-s
 <section id="evaluate">
   <div class="container">
     <div class="sec-head">
-      <div class="eyebrow">Evaluate</div>
-      <h2>评测你的模型</h2>
-      <p>选择「公开」模式提交到排行榜；选择「私密」模式仅本地评测、不公开模型。</p>
+      <div class="eyebrow" data-i18n="eyebrow_evaluate">Evaluate</div>
+      <h2 data-i18n="eval_title">Evaluate Your Model</h2>
+      <p data-i18n="eval_desc">Submit in “public” mode to the leaderboard, or “private” mode to evaluate locally without publishing.</p>
     </div>
     <div class="form" style="max-width:720px;margin:0 auto">
-      <h3>运行评测</h3>
-      <div class="hint">选择数据集与模型，选择模式后提交。私密模式下结果不会写入公共排行榜。</div>
+      <h3 data-i18n="run_title">Run an evaluation</h3>
+      <div class="hint" data-i18n="run_hint">Choose a dataset and model, then submit. In private mode results are not written to the public leaderboard.</div>
       <div class="row2">
-        <div><label>数据集</label><select id="fDataset"></select></div>
-        <div><label>模型</label><select id="fModel"></select></div>
+        <div><label data-i18n="lbl_dataset">Dataset</label><select id="fDataset"></select></div>
+        <div><label data-i18n="lbl_model">Model</label><select id="fModel"></select></div>
       </div>
       <div class="mode-toggle" id="modeToggle">
-        <div class="opt sel" data-mode="open">🌐 公开（写入排行榜）</div>
-        <div class="opt" data-mode="private">🔒 私密（仅本地评测）</div>
+        <div class="opt sel" data-mode="open" data-i18n="mode_open">🌐 Public (to leaderboard)</div>
+        <div class="opt" data-mode="private" data-i18n="mode_private">🔒 Private (local only)</div>
       </div>
-      <button class="btn" id="runBtn">运行评测</button>
+      <button class="btn" id="runBtn" data-i18n="run_btn">Run Evaluation</button>
       <div class="result" id="result"></div>
     </div>
   </div>
@@ -192,61 +243,80 @@ footer{border-top:1px solid var(--line);padding:30px 0;color:var(--muted);font-s
 <section id="about">
   <div class="container">
     <div class="sec-head">
-      <div class="eyebrow">About</div>
-      <h2>关于本系统</h2>
+      <div class="eyebrow" data-i18n="eyebrow_about">About</div>
+      <h2 data-i18n="about_title">About This System</h2>
     </div>
     <div class="about-grid">
-      <div class="note"><b>统一接口</b><br>所有模型/数据统一为「时间戳 × 特征」矩阵，显式声明 context window 与 horizon，见 <code>docs/02_unified_interface_spec.md</code>。</div>
-      <div class="note"><b>开源 / 闭源双轨</b><br>开源数据公开评测进排行榜；闭源数据需上传模型（私密模式）或由你提供数据。</div>
-      <div class="note"><b>多领域多任务</b><br>股票/指数/外汇/加密货币/债券/欺诈，任务含预测/分类/异常检测。</div>
-      <div class="note"><b>待补（需你协助）</b><br>部分闭源数据集（如券商订单流、基金申赎）需你下载/提供；真实金融数据可替换当前合成 fallback。</div>
+      <div class="note"><b data-i18n="about_unified_b">Unified interface</b><br><span data-i18n="about_unified">All models and data are unified into a “timestamp × feature” matrix, with explicit context window and horizon. See <code>docs/02_unified_interface_spec.md</code>.</span></div>
+      <div class="note"><b data-i18n="about_dual_b">Open / closed dual track</b><br><span data-i18n="about_dual">Open data is evaluated publicly into the leaderboard; closed data requires a model upload (private mode) or data provisioning.</span></div>
+      <div class="note"><b data-i18n="about_multi_b">Multi-domain, multi-task</b><br><span data-i18n="about_multi">Stocks / indices / FX / crypto / bonds / commodities — tasks include forecast / classification / anomaly detection.</span></div>
+      <div class="note"><b data-i18n="about_todo_b">Configurable</b><br><span data-i18n="about_todo">The supported dataset list is managed in the encrypted admin backend — toggle datasets on or off and the site updates automatically.</span></div>
     </div>
   </div>
 </section>
 
 <footer>
-  <div class="container">Finance TSFMs Arena · 本地 demo · 后端 FastAPI :8000 · 前端静态站</div>
+  <div class="container">
+    <div class="unis">
+      <div class="uni">
+        <div class="chip"><img src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiIHN0YW5kYWxvbmU9Im5vIj8+CjwhLS0gQ3JlYXRlZCB3aXRoIElua3NjYXBlIChodHRwOi8vd3d3Lmlua3NjYXBlLm9yZy8pIC0tPgo8c3ZnCiAgIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIKICAgeG1sbnM6Y2M9Imh0dHA6Ly9jcmVhdGl2ZWNvbW1vbnMub3JnL25zIyIKICAgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIgogICB4bWxuczpzdmc9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIgogICB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciCiAgIHhtbG5zOnNvZGlwb2RpPSJodHRwOi8vc29kaXBvZGkuc291cmNlZm9yZ2UubmV0L0RURC9zb2RpcG9kaS0wLmR0ZCIKICAgeG1sbnM6aW5rc2NhcGU9Imh0dHA6Ly93d3cuaW5rc2NhcGUub3JnL25hbWVzcGFjZXMvaW5rc2NhcGUiCiAgIGlkPSJzdmczMzc0IgogICBzb2RpcG9kaTp2ZXJzaW9uPSIwLjMyIgogICBpbmtzY2FwZTp2ZXJzaW9uPSIwLjQ2IgogICB3aWR0aD0iMzEyIgogICBoZWlnaHQ9IjM0OCIKICAgdmVyc2lvbj0iMS4wIgogICBzb2RpcG9kaTpkb2NuYW1lPSJQcmluY2V0b24gVW5pdmVyc2l0eSBTaGllbGQuc3ZnIgogICBpbmtzY2FwZTpvdXRwdXRfZXh0ZW5zaW9uPSJvcmcuaW5rc2NhcGUub3V0cHV0LnN2Zy5pbmtzY2FwZSI+CiAgPG1ldGFkYXRhCiAgICAgaWQ9Im1ldGFkYXRhMzM3OSI+CiAgICA8cmRmOlJERj4KICAgICAgPGNjOldvcmsKICAgICAgICAgcmRmOmFib3V0PSIiPgogICAgICAgIDxkYzpmb3JtYXQ+aW1hZ2Uvc3ZnK3htbDwvZGM6Zm9ybWF0PgogICAgICAgIDxkYzp0eXBlCiAgICAgICAgICAgcmRmOnJlc291cmNlPSJodHRwOi8vcHVybC5vcmcvZGMvZGNtaXR5cGUvU3RpbGxJbWFnZSIgLz4KICAgICAgPC9jYzpXb3JrPgogICAgPC9yZGY6UkRGPgogIDwvbWV0YWRhdGE+CiAgPGRlZnMKICAgICBpZD0iZGVmczMzNzciPgogICAgPGlua3NjYXBlOnBlcnNwZWN0aXZlCiAgICAgICBzb2RpcG9kaTp0eXBlPSJpbmtzY2FwZTpwZXJzcDNkIgogICAgICAgaW5rc2NhcGU6dnBfeD0iMCA6IDUyNi4xODEwOSA6IDEiCiAgICAgICBpbmtzY2FwZTp2cF95PSIwIDogMTAwMCA6IDAiCiAgICAgICBpbmtzY2FwZTp2cF96PSI3NDQuMDk0NDggOiA1MjYuMTgxMDkgOiAxIgogICAgICAgaW5rc2NhcGU6cGVyc3AzZC1vcmlnaW49IjM3Mi4wNDcyNCA6IDM1MC43ODczOSA6IDEiCiAgICAgICBpZD0icGVyc3BlY3RpdmUzMzgxIiAvPgogIDwvZGVmcz4KICA8c29kaXBvZGk6bmFtZWR2aWV3CiAgICAgaW5rc2NhcGU6d2luZG93LWhlaWdodD0iODUwIgogICAgIGlua3NjYXBlOndpbmRvdy13aWR0aD0iMTQ0MCIKICAgICBpbmtzY2FwZTpwYWdlc2hhZG93PSIyIgogICAgIGlua3NjYXBlOnBhZ2VvcGFjaXR5PSIwLjAiCiAgICAgZ3VpZGV0b2xlcmFuY2U9IjEwLjAiCiAgICAgZ3JpZHRvbGVyYW5jZT0iMTAuMCIKICAgICBvYmplY3R0b2xlcmFuY2U9IjEwLjAiCiAgICAgYm9yZGVyb3BhY2l0eT0iMS4wIgogICAgIGJvcmRlcmNvbG9yPSIjNjY2NjY2IgogICAgIHBhZ2Vjb2xvcj0iI2ZmZmZmZiIKICAgICBpZD0iYmFzZSIKICAgICBzaG93Z3JpZD0iZmFsc2UiCiAgICAgaW5rc2NhcGU6em9vbT0iMS42MzIxODM5IgogICAgIGlua3NjYXBlOmN4PSIyNDAuNjE3MTMiCiAgICAgaW5rc2NhcGU6Y3k9IjE5Ni4zNjIiCiAgICAgaW5rc2NhcGU6d2luZG93LXg9Ii00IgogICAgIGlua3NjYXBlOndpbmRvdy15PSItMyIKICAgICBpbmtzY2FwZTpjdXJyZW50LWxheWVyPSJzdmczMzc0IiAvPgogIDxwYXRoCiAgICAgc3R5bGU9ImZpbGw6IzAwMDAwMCIKICAgICBkPSJNIDE0NS4yNTM1MywzNDMuNjA0NTkgQyAxMjUuOTQyMzMsMzMwLjA4MzE3IDEwMy45MTcyNiwzMDguNDcyNDQgODguNzMyNzQ0LDI4OC4xNDcwNCBDIDU1LjQ4NDc1NywyNDMuNjQyNjUgMzYuMDkzMjQ0LDE5MS40NjQyMSAzMC4wMjY0MDIsMTMwLjE4MDc5IEMgMjguNjc3MzE2LDExNi41NTMxNiAyOS4yMjk4NDEsNTYuODY0NDU5IDMwLjc3NzY5Myw0OS4wMTk2NTcgTCAzMS40NjgxMzUsNDUuNTIwMzY5IEwgMzkuMTI2MDUyLDQ5LjIzOTEyNiBDIDU0LjM2NzA4OCw1Ni42NDAzMTYgNzQuMzMyMDE5LDU5LjEzOTQ1MSA4OS4xODU1MDIsNTUuNTA1Mzc2IEMgMTEwLjYwNDgsNTAuMjY0OTAxIDEzMS42MTY0NywzMy44NjgwNCAxNDcuMTM5NzgsMTAuMjc5NjIzIEMgMTUwLjUwMzc1LDUuMTY3OTA2NyAxNTMuNjQ5NzMsMC45ODU1OTg0IDE1NC4xMzA4NSwwLjk4NTU5ODQgQyAxNTQuNjExOTcsMC45ODU1OTg0IDE1Ni4xOTEzMiwyLjkzOTgxNTEgMTU3LjY0MDUyLDUuMzI4Mjk4NCBDIDE2Mi42OTAzNiwxMy42NTEwOSAxNzMuNDc2NywyNy4wODY1ODYgMTgwLjIzNTEyLDMzLjQ3MjE4OSBDIDE5OS44MzQ4Miw1MS45OTA2ODkgMjIyLjI3Njk1LDU5Ljk4OTkzNSAyNDUuMDM3MTcsNTYuNTcwMTQyIEMgMjU0LjYyMzgxLDU1LjEyOTcyMSAyNzAuOTcwMzYsNDkuNDg3Nzk3IDI3My44MjM0NSw0Ni42MzQ3MDkgQyAyNzQuODY2NDEsNDUuNTkxNzU5IDI3NS43NTM1MSw0NS40MDk0MDYgMjc2LjIwNzg4LDQ2LjE0NDU3OCBDIDI3OS41Njc0MSw1MS41ODA0MTMgMjgwLjM5OTYxLDExMS40ODkyOSAyNzcuNDY5MjksMTM2Ljk1MTkxIEMgMjY4LjkwNzc1LDIxMS4zNDYyMSAyMzkuNDI3OTMsMjczLjQ5MjU0IDE5MC4zNDk4NCwzMjAuNjA4MTQgQyAxNzYuMjIxNTQsMzM0LjE3MTUgMTU3LjY1MTg0LDM0OC40MDE0MSAxNTQuMDgwMywzNDguNDAxNDEgQyAxNTIuOTkzNTIsMzQ4LjQwMTQxIDE0OS4wMjE0NywzNDYuMjQyODQgMTQ1LjI1MzUzLDM0My42MDQ1OSB6IE0gMTYxLjY2NDc5LDM0MS4yNTI0OCBDIDE3Ny45NTMxMiwzMjkuNzU2MiAxOTYuNDc4OTcsMzEyLjM0NDgxIDIxMC42ODI5NCwyOTUuMTgzMDggTCAyMTcuODI4MzIsMjg2LjU0OTc4IEwgMTg1LjkzNTAzLDI1NC42NTY0OSBMIDE1NC4wNDE3NSwyMjIuNzYzMiBMIDEyMi4yNzM1NSwyNTQuNTE1NjUgTCA5MC41MDUzMzUsMjg2LjI2ODA5IEwgOTUuOTI1MTk0LDI5My4yOTAxMiBDIDEwNS4wMDgyNSwzMDUuMDU4MjEgMTI4LjQ1MjEsMzI3Ljg2NTU0IDE0MS4wOTA5OSwzMzcuMjI5NjQgQyAxNDcuNjY0OTYsMzQyLjEwMDI2IDE1My40NDI3OCwzNDYuMDg1MyAxNTMuOTMwNTcsMzQ2LjA4NTMgQyAxNTQuNDE4MzYsMzQ2LjA4NTMgMTU3Ljg5ODc2LDM0My45MTA1MyAxNjEuNjY0NzksMzQxLjI1MjQ4IHogTSAxMDguNTc3NDUsMTkyLjkzODM0IEwgMTU0LjAzNjQ2LDE0Ny40OTAyNiBMIDE5OS43NTMzMywxOTMuMTk2MTUgQyAyMjguMzcxNTIsMjIxLjgwNzQ2IDI0NS44NjQ3MywyMzguNDgwNzYgMjQ2LjUyNTA0LDIzNy43NzU2OCBDIDI0OC4zMTcwNywyMzUuODYyMTUgMjU1LjQxNTQxLDIxOC43NDIyIDI1OS43ODk4LDIwNS43ODMzOCBDIDI2Ni4wNjM3MiwxODcuMTk3MzIgMjcwLjAzMTkxLDE3MC40NzkwNiAyNzMuOTcyMjcsMTQ2LjAzMTcxIEwgMjc0LjU3ODg5LDE0Mi4yNjgwMyBMIDE1NC4wMTA5LDE0Mi4yNjgwMyBDIDM5Ljc0MzAzNSwxNDIuMjY4MDMgMzMuNDcyMTQsMTQyLjM3MzkyIDM0LjAwMjYxMywxNDQuMjk0NjIgQyAzNC4zMTA0NTksMTQ1LjQwOTI1IDM0LjkwMDE1NSwxNDguOTI2ODQgMzUuMzEzMDQ3LDE1Mi4xMTE0OCBDIDM2LjU5ODU1NSwxNjIuMDI2NjIgNDIuNjA2NDM3LDE4Ny43NTg4NiA0Ni40MzA4ODIsMTk5LjczMDA3IEMgNTIuMDI3ODEsMjE3LjI0OTQ2IDYwLjY1Nzk4NCwyMzguMzg2NCA2Mi4yMTQxOTIsMjM4LjM4NjQgQyA2Mi43MTE1MzcsMjM4LjM4NjQgODMuNTc1MDAyLDIxNy45MzQ3OCAxMDguNTc3NDUsMTkyLjkzODM0IHoiCiAgICAgaWQ9InBhdGgzMzg1IgogICAgIHNvZGlwb2RpOm5vZGV0eXBlcz0iY3NzY2Njc3Nzc3Nzc3Nzc3NjY2NjY2NjY2Nzc2NjY2Nzc2NjY3Nzc3NjIiAvPgogIDxwYXRoCiAgICAgc3R5bGU9ImZpbGw6I2Y5YTAzMztmaWxsLW9wYWNpdHk6MTtmaWxsLXJ1bGU6bm9uemVybztzdHJva2U6I2Y5YTAzMztzdHJva2Utd2lkdGg6MC42MTI2NzYwNzk5OTk5OTk5NjtzdHJva2Utb3BhY2l0eToxIgogICAgIGQ9Ik0gNTkuNDYwNzA5LDIzMy4xMzEyNyBDIDQ5LjI2NDY4MywyMTAuNzU3NTcgNDEuMDE4Mjc4LDE4Mi45NzY1NiAzNS45MTAzNDksMTUzLjc5MzMyIEwgMzQuMTk4ODkzLDE0NC4wMTUxMyBMIDM1LjQ4OTM0OCwxNDMuNTM5OSBDIDM2LjE5OTA5NywxNDMuMjc4NTQgOTAuMjIyMTE0LDE0Mi45Njg3IDE1NS41NDA1LDE0Mi44NTEzOCBMIDI3NC4zMDEyLDE0Mi42MzgwNyBMIDI3My45NjA2MSwxNDQuMzUwMzYgQyAyNzMuNzczMjYsMTQ1LjI5MjExIDI3Mi45MDE1NCwxNTAuMTk4MjEgMjcyLjAyMzQ1LDE1NS4yNTI3OSBDIDI2Ny44MzMxOCwxNzkuMzczMjEgMjYyLjYyNzQ1LDE5OC4yNTcyNyAyNTQuMjgwNzgsMjE5LjYxNTc0IEMgMjUwLjE1NzIzLDIzMC4xNjc0MSAyNDYuOTIyODUsMjM3LjA0NTA0IDI0Ni4wODQxNiwyMzcuMDQ1MDQgQyAyNDUuMDIwNjgsMjM3LjA0NTA0IDIzNC4yNTQzNiwyMjYuNjg2MDIgMTk0Ljc0NzU0LDE4Ny42NTAyNSBDIDE3Mi40NTA5MywxNjUuNjE5NTEgMTUzLjk5NTkzLDE0Ny41OTQzNCAxNTMuNzM2NDUsMTQ3LjU5NDM0IEMgMTUzLjQ3Njk0LDE0Ny41OTQzNCAxMzIuOTQ3MzUsMTY3Ljg1ODYgMTA4LjExNTExLDE5Mi42MjYwMyBDIDgzLjI4Mjg4NCwyMTcuMzkzNDYgNjIuNjQxMTA1LDIzNy42NTc3MiA2Mi4yNDQ1MjYsMjM3LjY1NzcyIEMgNjEuODQ3OTQ3LDIzNy42NTc3MiA2MC41OTUyMjYsMjM1LjYyMDgxIDU5LjQ2MDcwMywyMzMuMTMxMjcgTCA1OS40NjA3MDksMjMzLjEzMTI3IHoiCiAgICAgaWQ9InBhdGgzMzg4IiAvPgogIDxwYXRoCiAgICAgc3R5bGU9ImZpbGw6I2Y5YTAzMztmaWxsLW9wYWNpdHk6MTtmaWxsLXJ1bGU6bm9uemVybztzdHJva2U6I2Y5YTAzMztzdHJva2Utd2lkdGg6MC42MTI2NzYwODtzdHJva2Utb3BhY2l0eToxIgogICAgIGQ9Ik0gMTQ2LjQxODQsMzQwLjYwOTM5IEMgMTM0LjY0ODAzLDMzMi4xODM3MyAxMjIuMTcwODUsMzIxLjAzMjM4IDEwOC4zNDE5NSwzMDYuNTc4OTUgQyAxMDAuMTUzMjIsMjk4LjAyMDM4IDkxLjI4OTQzMywyODcuNTI5NjEgOTEuMjYxNDU4LDI4Ni4zNjMyMyBDIDkxLjI1MzMyMiwyODYuMDI1MDUgMTA1LjM3NzU0LDI3MS42MTk0OSAxMjIuNjQ4NTYsMjU0LjM1MDkxIEwgMTU0LjA1MDQxLDIyMi45NTM0OSBMIDE4NS44MDc0OCwyNTQuNzE0OTcgTCAyMTcuNTY0NTUsMjg2LjQ3NjQ1IEwgMjE0LjAxNDMyLDI5MC43MDk2OSBDIDE5OC43MDQzMywzMDguOTY1MTIgMTgyLjMyMjI1LDMyNS4xNDA5NSAxNjguNTEwOTQsMzM1LjY0MDIgQyAxNjEuMjA1MzMsMzQxLjE5Mzg5IDE1NC44NzMyMiwzNDUuNDg4NyAxNTMuOTkwNzUsMzQ1LjQ4ODcgQyAxNTMuNTc0OTMsMzQ1LjQ4ODcgMTUwLjE2NzM2LDM0My4yOTMwMSAxNDYuNDE4NDIsMzQwLjYwOTM5IEwgMTQ2LjQxODQsMzQwLjYwOTM5IHoiCiAgICAgaWQ9InBhdGgzODk5IiAvPgo8L3N2Zz4K" alt="Princeton University"></div>
+        <div class="name">Princeton University</div>
+      </div>
+      <div class="uni">
+        <div class="chip"><img src="data:image/png;base64,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" alt="University of Luxembourg"></div>
+        <div class="name">University of Luxembourg</div>
+      </div>
+      <div class="uni">
+        <div class="chip"><img src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4NCjwhLS0gR2VuZXJhdG9yOiBBZG9iZSBJbGx1c3RyYXRvciAyNi4zLjEsIFNWRyBFeHBvcnQgUGx1Zy1JbiAuIFNWRyBWZXJzaW9uOiA2LjAwIEJ1aWxkIDApICAtLT4NCjxzdmcgdmVyc2lvbj0iMS4xIiBpZD0iTGF5ZXJfMSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgeD0iMHB4IiB5PSIwcHgiDQoJIHZpZXdCb3g9IjAgMCAxOTUgMzgiIHN0eWxlPSJlbmFibGUtYmFja2dyb3VuZDpuZXcgMCAwIDE5NSAzODsiIHhtbDpzcGFjZT0icHJlc2VydmUiPg0KPHN0eWxlIHR5cGU9InRleHQvY3NzIj4NCgkuc3Qwe2ZpbGwtcnVsZTpldmVub2RkO2NsaXAtcnVsZTpldmVub2RkO30NCgkuc3Qxe2ZpbGwtcnVsZTpldmVub2RkO2NsaXAtcnVsZTpldmVub2RkO2ZpbGw6I0M4MTAyRTt9DQo8L3N0eWxlPg0KPGcgaWQ9IlBhZ2UtMSI+DQoJPGcgaWQ9Ikdyb3VwIj4NCgkJPHBhdGggaWQ9IkZpbGwtMSIgY2xhc3M9InN0MCIgZD0iTTEzNSwxNC42bDAsMy43YzAsMi40LDEuMyw0LjEsNC41LDQuMWMzLjIsMCw0LjUtMS43LDQuNC00LjFsMC0zYzAtMS41LDAuNC0xLjgsMS4xLTJsMC0wLjQNCgkJCWwtMywwbDAsMC40YzAuNywwLjIsMS4xLDAuNiwxLjEsMmwwLDNjMCwyLjEtMS4xLDMuMS0zLjIsMy4xYy0yLjEsMC0zLjItMS0zLjItMy4xbDAtMy44YzAtMC45LDAuMy0xLjEsMS4xLTEuMmwwLTAuNGwtMy44LDANCgkJCWwwLDAuNEMxMzQuOCwxMy41LDEzNSwxMy43LDEzNSwxNC42TDEzNSwxNC42eiBNMTQ4LjcsMjEuOWMtMC43LTAuMS0wLjgtMC4zLTAuOC0xbDAtMi45YzAuNi0wLjYsMS4xLTAuOCwxLjYtMC44DQoJCQljMC42LDAsMC44LDAuMywwLjgsMC45bDAsMi44YzAsMC43LTAuMSwwLjktMC44LDFsMCwwLjRsMy4yLDBsMC0wLjRjLTAuNy0wLjEtMC44LTAuMy0wLjgtMWwwLTNjMC0xLTAuNC0xLjctMS43LTEuNw0KCQkJYy0wLjgsMC0xLjUsMC41LTIuMywxLjFsMC0xLjJsLTAuNiwwbC0xLjgsMS4ydjAuM2wwLjksMGwwLDMuM2MwLDAuNy0wLjEsMC45LTAuOCwxbDAsMC40bDMuMiwwTDE0OC43LDIxLjl6IE0xNTUsMTUuMw0KCQkJYzAuNSwwLDAuOS0wLjQsMC45LTFjMC0wLjUtMC40LTAuOS0wLjktMC45Yy0wLjYsMC0xLDAuNC0xLDAuOUMxNTQuMSwxNC45LDE1NC41LDE1LjMsMTU1LDE1LjNMMTU1LDE1LjN6IE0xNTYuOCwyMS45DQoJCQljLTAuOC0wLjEtMC45LTAuMy0wLjktMWwwLTQuOGwtMC42LDBsLTEuOCwxLjJ2MC4zbDAuOSwwbDAsMy4zYzAsMC43LTAuMSwwLjgtMC45LDFsMCwwLjRsMy4zLDBMMTU2LjgsMjEuOXogTTE2Mi41LDE4LjENCgkJCWMwLjUtMSwwLjYtMS4yLDEuMS0xLjRsMC0wLjNsLTIuNSwwbDAsMC4zYzAuOCwwLjIsMC45LDAuNiwwLjUsMS41bC0wLjksMi4zbC0xLjItMi43Yy0wLjMtMC42LTAuMi0wLjksMC42LTFsMC0wLjRsLTMuMywwbDAsMC40DQoJCQljMC40LDAuMSwwLjYsMC4zLDAuOSwxbDIuMSw0LjZsMC43LDBMMTYyLjUsMTguMXogTTE2OS4xLDIxLjJsLTAuMy0wLjNjLTAuMywwLjQtMC44LDAuNi0xLjQsMC43Yy0xLjIsMC0xLjgtMC45LTItMmwzLjgtMS4zDQoJCQljLTAuMS0xLjMtMS4xLTItMi4zLTJjLTEuNywwLTMsMS40LTMsMy4xYzAsMS43LDEuMSwzLDMsM0MxNjcuOSwyMi40LDE2OC42LDIxLjksMTY5LjEsMjEuMkwxNjkuMSwyMS4yeiBNMTY1LjEsMTguNQ0KCQkJYzAtMSwwLjQtMS42LDEuMi0xLjZjMC42LDAsMC45LDAuNCwxLjEsMS4ybC0yLjMsMC44QzE2NS4xLDE4LjgsMTY1LjEsMTguNywxNjUuMSwxOC41TDE2NS4xLDE4LjV6IE0xNzMsMjEuOQ0KCQkJYy0wLjgtMC4xLTAuOS0wLjMtMC45LTEuMWwwLTIuNmMwLjItMC40LDAuNS0wLjgsMC43LTFjMCwwLjUsMC4zLDAuOCwwLjgsMC44czAuOC0wLjMsMC44LTFjMC0wLjUtMC4zLTAuOS0wLjktMC45DQoJCQljLTAuNiwwLTEuMSwwLjUtMS41LDEuMmwwLTEuM2wtMC42LDBsLTEuOCwxLjJsMCwwLjNsMC45LDBsMCwzLjNjMCwwLjctMC4xLDAuOS0wLjgsMWwwLDAuNGwzLjMsMEwxNzMsMjEuOXogTTE3OS41LDIwLjQNCgkJCWMwLTEuMi0xLTEuNS0xLjktMS44Yy0wLjktMC4zLTEuNS0wLjUtMS41LTEuMWMwLTAuMywwLjMtMC43LDAuOC0wLjdjMC42LDAsMS4yLDAuNCwxLjksMS4xbDAuMy0wLjFsLTAuNS0xLjVoLTAuMmwtMC4yLDAuMg0KCQkJYy0wLjQtMC4xLTAuOC0wLjItMS4yLTAuMmMtMS4zLDAtMi4yLDAuOC0yLjIsMS45YzAsMS4yLDEsMS41LDEuOSwxLjhjMC45LDAuMywxLjUsMC41LDEuNSwxLjFjMCwwLjQtMC4zLDAuNy0wLjksMC43DQoJCQljLTAuOCwwLTEuNS0wLjUtMi4yLTEuNWwtMC4zLDAuMWwwLjUsMS45aDAuMmwwLjQtMC4zYzAuNCwwLjIsMC45LDAuMywxLjQsMC4zQzE3OC40LDIyLjQsMTc5LjUsMjEuNywxNzkuNSwyMC40TDE3OS41LDIwLjR6DQoJCQkgTTE4MS43LDE1LjJjMC41LDAsMS0wLjQsMC45LTFjMC0wLjUtMC40LTAuOS0wLjktMC45Yy0wLjYsMC0xLDAuNC0xLDAuOUMxODAuOCwxNC44LDE4MS4yLDE1LjIsMTgxLjcsMTUuMkwxODEuNywxNS4yeg0KCQkJIE0xODMuNSwyMS45Yy0wLjgtMC4xLTAuOS0wLjMtMC45LTFsMC00LjhsLTAuNiwwbC0xLjgsMS4ybDAsMC4zbDAuOSwwbDAsMy4zYzAsMC43LTAuMSwwLjgtMC45LDFsMCwwLjRsMy4zLDBMMTgzLjUsMjEuOXoNCgkJCSBNMTg4LjIsMjEuN2wtMC4yLTAuNGMtMC4zLDAuMi0wLjYsMC4yLTAuOSwwLjJjLTAuNiwwLTAuNy0wLjMtMC43LTAuN2wwLTMuN2wxLjYsMGwwLTAuN2wtMS42LDBsMC0xLjJsLTAuMiwwbC0yLjIsMS41bDAsMC40DQoJCQlsMC45LDBsMCw0LjFjMCwwLjgsMC41LDEuMiwxLjQsMS4yQzE4Ni45LDIyLjQsMTg3LjYsMjIuMiwxODguMiwyMS43TDE4OC4yLDIxLjd6IE0xOTEuNSwyMy4zbDIuNC01LjJjMC41LTEsMC42LTEuMiwxLjEtMS40DQoJCQlsMC0wLjNsLTIuNSwwbDAsMC4zYzAuOCwwLjIsMC45LDAuNiwwLjUsMS41bC0wLjksMi4zbC0xLjItMi43Yy0wLjMtMC42LTAuMi0wLjksMC42LTFsMC0wLjRsLTMuMywwbDAsMC40YzAuNCwwLjEsMC41LDAuMywwLjksMQ0KCQkJbDIuMSw0LjVsLTAuMywwLjdjLTAuMiwwLjQtMC40LDAuOC0wLjYsMC45Yy0wLjItMC41LTAuNC0wLjgtMC45LTAuOGMtMC40LDAtMC44LDAuMy0wLjgsMC45YzAsMC42LDAuNSwxLDEsMQ0KCQkJQzE5MC40LDI1LDE5MC45LDI0LjYsMTkxLjUsMjMuM0wxOTEuNSwyMy4zeiIvPg0KCQk8cGF0aCBpZD0iRmlsbC0yIiBjbGFzcz0ic3QwIiBkPSJNNjAuMywxNmMwLTEuNSwwLjQtMS44LDEuMS0ybDAtMC40bC0zLDBsMCwwLjRjMC43LDAuMiwxLjEsMC42LDEuMSwybDAsNC40TDUzLjEsMTQNCgkJCWMtMC40LTAuMy0wLjUtMC40LTAuNy0wLjRsLTIuNCwwbDAsMC40YzAuNSwwLDAuOCwwLjIsMS40LDAuOGMwLjIsMC4yLDAuNCwwLjQsMC40LDAuN2wwLDVjMCwxLjUtMC40LDEuOC0xLjEsMmwwLDAuNGwzLDBsMC0wLjQNCgkJCWMtMC43LTAuMi0xLjEtMC42LTEuMS0ybDAtNC43bDcuMiw3LjFsMC41LDBMNjAuMywxNnogTTY4LjUsMTkuOWMwLTEuNi0xLjEtMy0zLjEtM2MtMiwwLTMuMywxLjUtMy4zLDMuMWMwLDEuNiwxLjEsMywzLjEsMw0KCQkJQzY3LjMsMjMsNjguNSwyMS41LDY4LjUsMTkuOUw2OC41LDE5Ljl6IE02My43LDE5LjNjMC0xLjEsMC41LTEuOCwxLjUtMS44YzEuMywwLDEuNywxLjYsMS43LDMuMWMwLDEuMS0wLjUsMS44LTEuNSwxLjgNCgkJCUM2NC4xLDIyLjQsNjMuNywyMC44LDYzLjcsMTkuM0w2My43LDE5LjN6IE03Mi44LDIyLjVjLTAuOC0wLjEtMC45LTAuMy0wLjktMS4xbDAtMi42YzAuMy0wLjQsMC41LTAuOCwwLjctMQ0KCQkJYzAsMC41LDAuMywwLjgsMC44LDAuOHMwLjgtMC4zLDAuOC0xYzAtMC41LTAuMy0wLjktMC45LTAuOWMtMC42LDAtMS4xLDAuNS0xLjUsMS4ybDAtMS4zbC0wLjYsMEw2OS40LDE4bDAsMC4zbDAuOSwwbDAsMy4zDQoJCQljMCwwLjctMC4xLDAuOS0wLjgsMWwwLDAuNGwzLjMsMEw3Mi44LDIyLjV6IE03OSwyMi4zbC0wLjItMC40Yy0wLjMsMC4xLTAuNiwwLjItMC45LDAuMmMtMC42LDAtMC43LTAuMy0wLjctMC43bDAtMy43bDEuNiwwDQoJCQlsMC0wLjdsLTEuNiwwbDAtMS4yaC0wLjJsLTIuMywxLjVsMCwwLjRsMC45LDBsMCw0LjFjMCwwLjgsMC41LDEuMiwxLjQsMS4yQzc3LjcsMjMsNzguNCwyMi43LDc5LDIyLjNMNzksMjIuM3ogTTgyLjYsMjIuNQ0KCQkJYy0wLjctMC4xLTAuOC0wLjMtMC44LTFsMC0yLjljMC42LTAuNSwxLjEtMC44LDEuNi0wLjhjMC42LDAsMC44LDAuMywwLjgsMC45bDAsMi44YzAsMC43LTAuMSwwLjktMC44LDFsMCwwLjRsMy4yLDBsMC0wLjQNCgkJCWMtMC43LTAuMS0wLjgtMC4zLTAuOC0xbDAtM2MwLTEtMC40LTEuNy0xLjctMS43Yy0wLjgsMC0xLjUsMC40LTIuMywxLjFsMC00LjlsLTAuNSwwbC0yLDEuM3YwLjNsMC45LDBsMCw2LjkNCgkJCWMwLDAuNy0wLjEsMC45LTAuOCwxbDAsMC40bDMuMiwwTDgyLjYsMjIuNXogTTkyLjYsMjEuN2wtMC4zLTAuM2MtMC4zLDAuNC0wLjksMC42LTEuNCwwLjZjLTEuMiwwLTEuOC0wLjktMi4xLTJsMy44LTEuMg0KCQkJYy0wLjEtMS4zLTEuMS0yLTIuMy0yYy0xLjgsMC0zLDEuNC0zLDMuMWMwLDEuNywxLjEsMywzLjEsM0M5MS41LDIzLDkyLjIsMjIuNCw5Mi42LDIxLjdMOTIuNiwyMS43eiBNODguNiwxOS4xDQoJCQljMC0xLDAuNC0xLjYsMS4zLTEuNmMwLjYsMCwwLjksMC40LDEuMSwxLjJsLTIuMywwLjhDODguNywxOS4zLDg4LjcsMTkuMiw4OC42LDE5LjFMODguNiwxOS4xeiBNOTcuNiwyMi45YzAuNSwwLDEuMS0wLjIsMS41LTAuNQ0KCQkJTDk5LDIyYy0wLjYsMC4xLTAuOCwwLTAuOC0wLjRsMC0zLjNjMC0xLTAuNC0xLjUtMS45LTEuNWMtMS42LDAtMi44LDAuOC0yLjgsMS42YzAsMC40LDAuMywwLjcsMC43LDAuN2MwLjUsMCwwLjgtMC4zLDAuOC0wLjcNCgkJCWMwLjEtMC40LTAuMS0wLjctMC4yLTAuOGMwLjMtMC4xLDAuNi0wLjIsMS0wLjJjMC41LDAsMC44LDAuMiwwLjgsMC43bDAsMS4yYy0yLjMsMC41LTMuMywxLTMuMywyLjJjMCwwLjksMC42LDEuNCwxLjUsMS40DQoJCQljMC42LDAsMS4zLTAuMywxLjgtMC43Qzk2LjgsMjIuNyw5NywyMi45LDk3LjYsMjIuOUw5Ny42LDIyLjl6IE05NC44LDIxLjJjMC0wLjYsMC4zLTAuOSwxLjgtMS4zbDAsMS44Yy0wLjQsMC4zLTAuNywwLjQtMSwwLjQNCgkJCUM5NS4xLDIyLjEsOTQuOCwyMS44LDk0LjgsMjEuMkw5NC44LDIxLjJ6IE0xMDQuNSwyMWMwLTEuMi0xLTEuNS0xLjktMS44Yy0wLjktMC4zLTEuNS0wLjUtMS41LTEuMWMwLTAuMywwLjMtMC43LDAuOC0wLjcNCgkJCWMwLjYsMCwxLjIsMC40LDEuOSwxLjFsMC4zLTAuMWwtMC41LTEuNWgtMC4ybC0wLjIsMC4yYy0wLjQtMC4xLTAuOC0wLjItMS4yLTAuMmMtMS4zLDAtMi4yLDAuOC0yLjIsMS45YzAsMS4yLDEsMS41LDEuOSwxLjgNCgkJCWMwLjksMC4zLDEuNSwwLjUsMS41LDEuMWMwLDAuNC0wLjMsMC43LTAuOSwwLjdjLTAuOCwwLTEuNS0wLjUtMi4zLTEuNUw5OS43LDIxbDAuNSwxLjloMC4ybDAuNC0wLjNjMC40LDAuMiwwLjksMC4zLDEuNCwwLjMNCgkJCUMxMDMuNCwyMi45LDEwNC41LDIyLjIsMTA0LjUsMjFMMTA0LjUsMjF6IE0xMDkuMywyMi4ybC0wLjItMC40Yy0wLjMsMC4xLTAuNiwwLjItMC45LDAuMmMtMC42LDAtMC43LTAuMy0wLjctMC43bDAtMy43bDEuNiwwDQoJCQlsMC0wLjdsLTEuNiwwbDAtMS4ybC0wLjIsMGwtMi4zLDEuNWwwLDAuNGwwLjksMGwwLDQuMWMwLDAuOCwwLjUsMS4yLDEuNCwxLjJDMTA4LDIyLjksMTA4LjcsMjIuNywxMDkuMywyMi4yTDEwOS4zLDIyLjJ6DQoJCQkgTTExNS4xLDIxLjdsLTAuMy0wLjNjLTAuMywwLjQtMC45LDAuNi0xLjQsMC42Yy0xLjIsMC0xLjgtMC45LTIuMS0ybDMuOC0xLjJjLTAuMS0xLjMtMS4xLTItMi4zLTJjLTEuNywwLTMsMS40LTMsMy4xDQoJCQljMCwxLjcsMS4xLDMsMy4xLDNDMTEzLjksMjIuOSwxMTQuNywyMi40LDExNS4xLDIxLjdMMTE1LjEsMjEuN3ogTTExMS4xLDE5YzAtMSwwLjQtMS42LDEuMy0xLjZjMC42LDAsMC45LDAuNCwxLjEsMS4ybC0yLjMsMC44DQoJCQlDMTExLjEsMTkuMywxMTEuMSwxOS4yLDExMS4xLDE5TDExMS4xLDE5eiBNMTE5LDIyLjRjLTAuOC0wLjEtMC45LTAuMy0wLjktMS4xbDAtMi42YzAuMy0wLjQsMC41LTAuOCwwLjctMQ0KCQkJYzAsMC41LDAuMywwLjgsMC44LDAuOGMwLjQsMCwwLjgtMC4zLDAuOC0xYzAtMC41LTAuMy0wLjktMC45LTAuOWMtMC42LDAtMS4xLDAuNS0xLjUsMS4ybDAtMS4zbC0wLjYsMGwtMS44LDEuMmwwLDAuM2wwLjksMA0KCQkJbDAsMy4zYzAsMC43LTAuMSwwLjktMC44LDFsMCwwLjRsMy4zLDBMMTE5LDIyLjR6IE0xMjQsMjIuNGMtMC43LTAuMS0wLjgtMC4zLTAuOC0xbDAtMi45YzAuNi0wLjYsMS4xLTAuOCwxLjYtMC44DQoJCQljMC42LDAsMC44LDAuMywwLjgsMC45bDAsMi44YzAsMC43LTAuMSwwLjktMC44LDFsMCwwLjRsMy4yLDBsMC0wLjRjLTAuNy0wLjEtMC44LTAuMy0wLjgtMWwwLTNjMC0xLTAuNC0xLjctMS43LTEuNw0KCQkJYy0wLjgsMC0xLjUsMC41LTIuMywxLjFsMC0xLjJsLTAuNiwwbC0xLjgsMS4ybDAsMC4zbDAuOSwwbDAsMy4zYzAsMC43LTAuMSwwLjktMC44LDFsMCwwLjRsMy4yLDBMMTI0LDIyLjRMMTI0LDIyLjR6Ii8+DQoJCTxwYXRoIGlkPSJGaWxsLTMiIGNsYXNzPSJzdDEiIGQ9Ik00Mi44LDEwLjdjMC02LjEsMi4xLTguMiw2LjItOS43VjBIMzUuNXYxYzQuMSwxLjYsNi4yLDMuNiw2LjIsOS43djE4TDEzLjIsMS40DQoJCQlDMTEuOSwwLjIsMTEuNiwwLDEwLjcsMEgwdjFjMi40LDAuMywzLjgsMC45LDcuMiw0LjJsMS4zLDEuM1YyN2MwLDYuMS0yLjEsOC4yLTYuMiw5Ljd2MWgxMy41di0xYy00LjEtMS42LTYuMi0zLjYtNi4yLTkuN1Y3LjQNCgkJCUw0MS44LDM4aDFWMTAuNyIvPg0KCQk8cG9seWxpbmUgaWQ9IkZpbGwtNCIgY2xhc3M9InN0MCIgcG9pbnRzPSI1My4yLDM2LjEgNTcsMzYuMSA1NywzOCA1MSwzOCA1MSwyOSA1My4yLDI5IDUzLjIsMzYuMSAJCSIvPg0KCQk8cGF0aCBpZD0iRmlsbC01IiBjbGFzcz0ic3QwIiBkPSJNNjAuMSwzNC41YzAsMS4zLDAuNSwxLjksMS40LDEuOWMwLjgsMCwxLjQtMC42LDEuNC0xLjljMC0xLjMtMC41LTEuOC0xLjQtMS44DQoJCQlDNjAuNywzMi42LDYwLjEsMzMuMiw2MC4xLDM0LjV6IE02NSwzNC41YzAsMi4xLTEuNCwzLjUtMy41LDMuNWMtMi4yLDAtMy41LTEuNS0zLjUtMy41YzAtMi4xLDEuMy0zLjUsMy41LTMuNQ0KCQkJQzYzLjcsMzEsNjUsMzIuNSw2NSwzNC41TDY1LDM0LjV6Ii8+DQoJCTxwYXRoIGlkPSJGaWxsLTYiIGNsYXNzPSJzdDAiIGQ9Ik03MiwzMy42VjM4aC0ydi0zLjhjMC0wLjktMC4yLTEuNC0wLjktMS40Yy0wLjcsMC0xLjEsMC42LTEuMSwxLjVWMzhoLTJ2LTYuOGgxLjl2MC45DQoJCQljMC41LTAuOCwxLjItMS4xLDItMS4xQzcxLjIsMzEsNzIsMzEuOSw3MiwzMy42Ii8+DQoJCTxwYXRoIGlkPSJGaWxsLTciIGNsYXNzPSJzdDAiIGQ9Ik03NS4yLDM0LjVjMCwxLjMsMC41LDEuOSwxLjQsMS45YzAuOCwwLDEuNC0wLjYsMS40LTEuOWMwLTEuMy0wLjYtMS45LTEuNC0xLjkNCgkJCUM3NS43LDMyLjUsNzUuMiwzMy4yLDc1LjIsMzQuNXogTTgwLDM3LjhoLTIuMXYtMC43Yy0wLjUsMC42LTEuMiwwLjktMiwwLjljLTEuOCwwLTMtMS41LTMtMy42YzAtMi4yLDEuNC0zLjYsMy4xLTMuNg0KCQkJYzAuOCwwLDEuNCwwLjMsMS44LDAuN1YyOUg4MFYzNy44TDgwLDM3Ljh6Ii8+DQoJCTxwYXRoIGlkPSJGaWxsLTgiIGNsYXNzPSJzdDAiIGQ9Ik04My4xLDM0LjVjMCwxLjMsMC41LDEuOSwxLjQsMS45YzAuOCwwLDEuNC0wLjYsMS40LTEuOWMwLTEuMy0wLjUtMS44LTEuNC0xLjgNCgkJCUM4My43LDMyLjYsODMuMSwzMy4yLDgzLjEsMzQuNXogTTg4LDM0LjVjMCwyLjEtMS40LDMuNS0zLjUsMy41Yy0yLjIsMC0zLjUtMS41LTMuNS0zLjVjMC0yLjEsMS4zLTMuNSwzLjUtMy41DQoJCQlDODYuNywzMSw4OCwzMi41LDg4LDM0LjVMODgsMzQuNXoiLz4NCgkJPHBhdGggaWQ9IkZpbGwtOSIgY2xhc3M9InN0MCIgZD0iTTk1LDMzLjZWMzhoLTJ2LTMuOGMwLTAuOS0wLjItMS40LTAuOS0xLjRjLTAuNywwLTEuMSwwLjYtMS4xLDEuNVYzOGgtMnYtNi44aDEuOXYwLjkNCgkJCWMwLjUtMC44LDEuMi0xLjEsMi0xLjFDOTQuMiwzMSw5NSwzMS45LDk1LDMzLjYiLz4NCgk8L2c+DQo8L2c+DQo8L3N2Zz4NCg==" alt="Northeastern University"></div>
+        <div class="name">Northeastern University</div>
+      </div>
+    </div>
+    <div class="fine" id="finePrint">Finance TSFMs Arena · benchmark &amp; leaderboard · backend FastAPI :8000</div>
+  </div>
 </footer>
 
+<script src="static/i18n.js"></script>
 <script>
 // backend base url — relative when served by the same server; override with ?api=...
 const API = window.location.search.includes('api=')
   ? new URLSearchParams(window.location.search).get('api')
   : '';
 
-// ===== 部署版：真实数据已烘焙（GitHub Pages 无后端时回落到此） =====
-const DATA = {
-  leaderboard:{"total": 55, "rows": [{"dataset": "eth_crypto", "model": "arima", "mode": "open", "domain": "crypto", "task": "forecast", "frequency": "day", "score": 0.5982095238095239, "metrics": {"rmse": 77.2362801766642, "mae": 67.15884323261493, "mse": 8373.656819767531, "mape": 3.4606296029352697, "smape": 3.4951512436634187, "mase": 0.942861103362674, "directional_accuracy": 1.0, "return_rank_corr": -0.06802721088435375, "pearson": -0.0845286012918886, "score": 0.5982095238095239, "n_points": 21}, "rank": 1}, {"dataset": "eur_usd_fx", "model": "arima", "mode": "open", "domain": "fx", "task": "forecast", "frequency": "day", "score": 0.5568833333333334, "metrics": {"rmse": 0.005390873680722173, "mae": 0.004679114445122551, "mse": 3.865525581340184e-05, "mape": 0.4041762507288928, "smape": 0.4039118179694113, "mase": 1.3161725119588146, "directional_accuracy": 1.0, "return_rank_corr": 0.05000000000000001, "pearson": 0.017210633132196895, "score": 0.5568833333333334, "n_points": 24}, "rank": 2}, {"dataset": "eur_usd_fx", "model": "timesfm", "mode": "open", "domain": "fx", "task": "forecast", "frequency": "day", "score": 0.5502083333333333, "metrics": {"rmse": 0.00561803586197, "mae": 0.0048589309056599915, "mse": 4.433328046905176e-05, "mape": 0.42004822289399457, "smape": 0.4194186140119051, "mase": 1.3667524850141453, "directional_accuracy": 1.0, "return_rank_corr": -0.012500000000000016, "pearson": 0.02554170160599989, "score": 0.5502083333333333, "n_points": 24}, "rank": 3}, {"dataset": "eur_usd_fx", "model": "seasonal_naive", "mode": "open", "domain": "fx", "task": "forecast", "frequency": "day", "score": 0.5484166666666667, "metrics": {"rmse": 0.007596383945945944, "mae": 0.0066064973672231185, "mse": 8.482872947297466e-05, "mape": 0.5708734049766849, "smape": 0.5703574292331222, "mase": 1.8583196322823878, "directional_accuracy": 1.0, "return_rank_corr": 0.18333333333333332, "pearson": 0.1064530338762492, "score": 0.5484166666666667, "n_points": 24}, "rank": 4}, {"dataset": "btc_crypto", "model": "arima", "mode": "open", "domain": "crypto", "task": "forecast", "frequency": "day", "score": 0.5446190476190477, "metrics": {"rmse": 2150.843320899812, "mae": 1837.5152404321243, "mse": 6256040.822089162, "mape": 2.6669916089820584, "smape": 2.6833334390822183, "mase": 1.3939932446672765, "directional_accuracy": 1.0, "return_rank_corr": -0.059523809523809534, "pearson": -0.038854106768382, "score": 0.5446190476190477, "n_points": 21}, "rank": 5}, {"dataset": "us_treasury_7y", "model": "chronos", "mode": "open", "domain": "bond", "task": "forecast", "frequency": "day", "score": 0.5399, "metrics": {"rmse": 0.4305159662255151, "mae": 0.37399894650242776, "mse": 0.22141904020368858, "mape": 0.3998072350448828, "smape": 0.39907238172863146, "mase": 1.319990948375378, "directional_accuracy": 1.0, "return_rank_corr": 0.06166108338106319, "pearson": 0.026640115331834836, "score": 0.5399, "n_points": 17}, "rank": 6}, {"dataset": "eth_crypto", "model": "seasonal_naive", "mode": "open", "domain": "crypto", "task": "forecast", "frequency": "day", "score": 0.5380666666666668, "metrics": {"rmse": 100.46117253192712, "mae": 86.56572365274235, "mse": 13492.957568174923, "mape": 4.531457403313423, "smape": 4.463993851477584, "mase": 1.2153195288654917, "directional_accuracy": 1.0, "return_rank_corr": 0.08313062485180663, "pearson": 0.004797947046401894, "score": 0.5380666666666668, "n_points": 21}, "rank": 7}, {"dataset": "eth_crypto", "model": "moving_average", "mode": "open", "domain": "crypto", "task": "forecast", "frequency": "day", "score": 0.5283619047619047, "metrics": {"rmse": 102.65847765395631, "mae": 93.66964460100446, "mse": 16241.006380322993, "mape": 4.916624949707242, "smape": 4.806290923244224, "mase": 1.3150533899786143, "directional_accuracy": 1.0, "return_rank_corr": 0.0, "pearson": -2.6705833508673718e-15, "score": 0.5283619047619047, "n_points": 21}, "rank": 8}, {"dataset": "us_treasury_7y", "model": "arima", "mode": "open", "domain": "bond", "task": "forecast", "frequency": "day", "score": 0.5188529411764706, "metrics": {"rmse": 0.42814941920683236, "mae": 0.3746731523219106, "mse": 0.21621304098611893, "mape": 0.4004869286899437, "smape": 0.4000687646912306, "mase": 1.3223704887120074, "directional_accuracy": 1.0, "return_rank_corr": -0.0853977401483486, "pearson": -0.177639279663982, "score": 0.5188529411764706, "n_points": 17}, "rank": 9}, {"dataset": "russell2000_daily", "model": "arima", "mode": "open", "domain": "index", "task": "forecast", "frequency": "day", "score": 0.51885, "metrics": {"rmse": 70.30238874400743, "mae": 63.47523423917963, "mse": 6557.564080393694, "mape": 2.268249812406302, "smape": 2.2899384832930565, "mase": 2.910398475620338, "directional_accuracy": 1.0, "return_rank_corr": 0.1333333333333333, "pearson": 0.10415659149865676, "score": 0.51885, "n_points": 12}, "rank": 10}, {"dataset": "eth_crypto", "model": "naive", "mode": "open", "domain": "crypto", "task": "forecast", "frequency": "day", "score": 0.5176952380952381, "metrics": {"rmse": 81.85678722413553, "mae": 70.79638256669855, "mse": 8291.74327211325, "mape": 3.669484475200357, "smape": 3.644363281003844, "mase": 0.993929498602597, "directional_accuracy": 1.0, "return_rank_corr": 0.0, "pearson": 0.0, "score": 0.5176952380952381, "n_points": 21}, "rank": 11}, {"dataset": "eur_usd_fx", "model": "chronos", "mode": "open", "domain": "fx", "task": "forecast", "frequency": "day", "score": 0.5159916666666667, "metrics": {"rmse": 0.005692670678087178, "mae": 0.004998649160067239, "mse": 4.294692544052717e-05, "mape": 0.43218661540556114, "smape": 0.43146983178159964, "mase": 1.4060533672700544, "directional_accuracy": 1.0, "return_rank_corr": -0.14166666666666666, "pearson": -0.1316952215271703, "score": 0.5159916666666667, "n_points": 24}, "rank": 12}, {"dataset": "sp500_daily", "model": "timesfm", "mode": "open", "domain": "index", "task": "forecast", "frequency": "day", "score": 0.5123, "metrics": {"rmse": 163.35318939082592, "mae": 148.69059244791666, "mse": 34382.475570702554, "mape": 2.077622070250676, "smape": 2.085769143294844, "mase": 4.068190220307141, "directional_accuracy": 1.0, "return_rank_corr": 0.057575757575757565, "pearson": -0.008597775519963121, "score": 0.5123, "n_points": 12}, "rank": 13}, {"dataset": "sp500_daily", "model": "arima", "mode": "open", "domain": "index", "task": "forecast", "frequency": "day", "score": 0.5075500000000001, "metrics": {"rmse": 158.2418894047137, "mae": 143.02406512290898, "mse": 34284.40258737924, "mape": 2.0003355465853896, "smape": 2.0099911536593766, "mase": 3.9131534377697768, "directional_accuracy": 1.0, "return_rank_corr": 0.048484848484848464, "pearson": 0.019683416292291988, "score": 0.5075500000000001, "n_points": 12}, "rank": 14}, {"dataset": "btc_crypto", "model": "timesfm", "mode": "open", "domain": "crypto", "task": "forecast", "frequency": "day", "score": 0.5037952380952382, "metrics": {"rmse": 2352.781200429024, "mae": 2066.851190476191, "mse": 7220440.817167529, "mape": 3.034800756635391, "smape": 3.0077059381848947, "mase": 1.5679742588577215, "directional_accuracy": 1.0, "return_rank_corr": -0.05272108843537417, "pearson": -0.13808827472420532, "score": 0.5037952380952382, "n_points": 21}, "rank": 15}, {"dataset": "eur_usd_fx", "model": "random_walk", "mode": "open", "domain": "fx", "task": "forecast", "frequency": "day", "score": 0.5026458333333333, "metrics": {"rmse": 0.021148476005128355, "mae": 0.01862328529617017, "mse": 0.000472149140457141, "mape": 1.6110316730392487, "smape": 1.593581434395902, "mase": 5.238481870161644, "directional_accuracy": 1.0, "return_rank_corr": -0.016666666666666646, "pearson": -0.04380941916124772, "score": 0.5026458333333333, "n_points": 24}, "rank": 16}, {"dataset": "nasdaq_daily", "model": "chronos", "mode": "open", "domain": "index", "task": "forecast", "frequency": "day", "score": 0.5018583333333333, "metrics": {"rmse": 783.3998495194611, "mae": 704.8385742187498, "mse": 836010.3096103668, "mape": 2.8245671080134453, "smape": 2.8604299812393648, "mase": 4.3374267093241095, "directional_accuracy": 1.0, "return_rank_corr": -0.016161616161616155, "pearson": -0.06098290725076239, "score": 0.5018583333333333, "n_points": 12}, "rank": 17}, {"dataset": "sp500_daily", "model": "random_walk", "mode": "open", "domain": "index", "task": "forecast", "frequency": "day", "score": 0.49995833333333334, "metrics": {"rmse": 288.26268857829103, "mae": 260.8694008499181, "mse": 98486.18180311528, "mape": 3.653229234172073, "smape": 3.558831590042404, "mase": 7.13741419576871, "directional_accuracy": 1.0, "return_rank_corr": 0.13333333333333333, "pearson": 0.14198363051502572, "score": 0.49995833333333334, "n_points": 12}, "rank": 18}, {"dataset": "eur_usd_fx", "model": "naive", "mode": "open", "domain": "fx", "task": "forecast", "frequency": "day", "score": 0.49969166666666665, "metrics": {"rmse": 0.005271700345252488, "mae": 0.0045744180679321315, "mse": 3.7694551361037564e-05, "mape": 0.3951112962021564, "smape": 0.3947602996435653, "mase": 1.286722816856071, "directional_accuracy": 1.0, "return_rank_corr": 0.0, "pearson": 0.0, "score": 0.49969166666666665, "n_points": 24}, "rank": 19}, {"dataset": "btc_crypto", "model": "chronos", "mode": "open", "domain": "crypto", "task": "forecast", "frequency": "day", "score": 0.49883809523809525, "metrics": {"rmse": 2340.979313767846, "mae": 2031.1942495748303, "mse": 7215817.404560529, "mape": 2.9833028109251125, "smape": 2.964198837280437, "mase": 1.5409238520647375, "directional_accuracy": 1.0, "return_rank_corr": -0.22789115646258506, "pearson": -0.29538228587005516, "score": 0.49883809523809525, "n_points": 21}, "rank": 20}, {"dataset": "sp500_daily", "model": "chronos", "mode": "open", "domain": "index", "task": "forecast", "frequency": "day", "score": 0.4985083333333333, "metrics": {"rmse": 161.27050894810745, "mae": 146.64325358072915, "mse": 36448.18754740158, "mape": 2.0361949993139326, "smape": 2.054766045508441, "mase": 4.0121748139520665, "directional_accuracy": 1.0, "return_rank_corr": -0.12222222222222219, "pearson": -0.12558999387241718, "score": 0.4985083333333333, "n_points": 12}, "rank": 21}, {"dataset": "gold_commodity", "model": "timesfm", "mode": "open", "domain": "commodity", "task": "forecast", "frequency": "day", "score": 0.49736470588235304, "metrics": {"rmse": 139.6817674274657, "mae": 119.9861311712185, "mse": 31815.8868254914, "mape": 2.6986040569568246, "smape": 2.6619653484541854, "mase": 4.2704386400537775, "directional_accuracy": 1.0, "return_rank_corr": -0.05672268907563026, "pearson": -0.022925509743647144, "score": 0.49736470588235304, "n_points": 17}, "rank": 22}, {"dataset": "btc_crypto", "model": "seasonal_naive", "mode": "open", "domain": "crypto", "task": "forecast", "frequency": "day", "score": 0.49618095238095233, "metrics": {"rmse": 2820.450154660905, "mae": 2455.5333227040815, "mse": 10332269.515421549, "mape": 3.6151980906718544, "smape": 3.569536208775768, "mase": 1.8628399855338902, "directional_accuracy": 1.0, "return_rank_corr": 0.07187335273645781, "pearson": 0.06151432866479932, "score": 0.49618095238095233, "n_points": 21}, "rank": 23}, {"dataset": "nasdaq_daily", "model": "random_walk", "mode": "open", "domain": "index", "task": "forecast", "frequency": "day", "score": 0.4948333333333333, "metrics": {"rmse": 1410.3978868993888, "mae": 1272.7808623652875, "mse": 2429301.770857516, "mape": 5.212697480306823, "smape": 5.017286767727912, "mase": 7.832422783697459, "directional_accuracy": 1.0, "return_rank_corr": 0.10202020202020197, "pearson": 0.07210833386317302, "score": 0.4948333333333333, "n_points": 12}, "rank": 24}, {"dataset": "nasdaq_daily", "model": "arima", "mode": "open", "domain": "index", "task": "forecast", "frequency": "day", "score": 0.494825, "metrics": {"rmse": 741.3743488868964, "mae": 664.9978789082805, "mse": 729440.9725532257, "mape": 2.6671174297000424, "smape": 2.693583148737099, "mase": 4.092255542083136, "directional_accuracy": 1.0, "return_rank_corr": -0.026262626262626255, "pearson": -0.03183346778153919, "score": 0.494825, "n_points": 12}, "rank": 25}, {"dataset": "russell2000_daily", "model": "random_walk", "mode": "open", "domain": "index", "task": "forecast", "frequency": "day", "score": 0.49252500000000005, "metrics": {"rmse": 160.94676585616304, "mae": 145.12941378335452, "mse": 30282.57223025613, "mape": 5.241843216521242, "smape": 5.049162144234863, "mase": 6.654318486658447, "directional_accuracy": 1.0, "return_rank_corr": 0.06464646464646462, "pearson": 0.0525992324365565, "score": 0.49252500000000005, "n_points": 12}, "rank": 26}, {"dataset": "gold_commodity", "model": "chronos", "mode": "open", "domain": "commodity", "task": "forecast", "frequency": "day", "score": 0.49155882352941177, "metrics": {"rmse": 141.7598722336508, "mae": 123.89765378807773, "mse": 31598.88914933926, "mape": 2.776153297332545, "smape": 2.749640359529529, "mase": 4.409654040712407, "directional_accuracy": 1.0, "return_rank_corr": -0.09663865546218489, "pearson": -0.14840466613721726, "score": 0.49155882352941177, "n_points": 17}, "rank": 27}, {"dataset": "priv_credit_risk", "model": "naive (placeholder)", "mode": "private", "domain": "bond", "task": "classify", "frequency": "day", "score": 0.49, "metrics": {"accuracy": 0.48333333333333334, "f1": 0.48333333333333334, "precision": 0.48333333333333334, "recall": 0.48333333333333334, "auc": 0.5, "score": 0.49, "n_points": 60}, "note": "PROPRIETARY placeholder — no real data; requires user data / model upload.", "rank": 28}, {"dataset": "priv_fund_flow", "model": "naive (placeholder)", "mode": "private", "domain": "equity", "task": "forecast", "frequency": "day", "score": 0.4868791666666666, "metrics": {"rmse": 1.603745710016046, "mae": 1.396628700198976, "mse": 3.131609137999518, "mape": 1.4323618558176232, "smape": 1.443333110868598, "mase": 1.4705629679659482, "directional_accuracy": 1.0, "return_rank_corr": 0.0, "pearson": 4.760936183839485e-15, "score": 0.4868791666666666, "n_points": 24}, "note": "PROPRIETARY placeholder — no real data; requires user data / model upload.", "rank": 29}, {"dataset": "eth_crypto", "model": "random_walk", "mode": "open", "domain": "crypto", "task": "forecast", "frequency": "day", "score": 0.48460000000000003, "metrics": {"rmse": 427.4657971844282, "mae": 391.8215425446117, "mse": 196648.95219983795, "mape": 19.749022346125663, "smape": 17.56189063544423, "mase": 5.500888254511604, "directional_accuracy": 1.0, "return_rank_corr": 0.15306122448979598, "pearson": 0.1456631625564792, "score": 0.48460000000000003, "n_points": 21}, "rank": 30}, {"dataset": "nasdaq_daily", "model": "timesfm", "mode": "open", "domain": "index", "task": "forecast", "frequency": "day", "score": 0.4826833333333333, "metrics": {"rmse": 800.9022619004344, "mae": 724.0197265625002, "mse": 804657.6809962591, "mape": 2.9284027655143436, "smape": 2.951534115359681, "mase": 4.455463442179731, "directional_accuracy": 1.0, "return_rank_corr": -0.12929292929292927, "pearson": -0.18554527743397078, "score": 0.4826833333333333, "n_points": 12}, "rank": 31}, {"dataset": "btc_crypto", "model": "random_walk", "mode": "open", "domain": "crypto", "task": "forecast", "frequency": "day", "score": 0.48255238095238095, "metrics": {"rmse": 9944.660837336853, "mae": 9029.77297735016, "mse": 105454275.55795553, "mape": 13.151372734293375, "smape": 12.125953538213878, "mase": 6.850252043811666, "directional_accuracy": 1.0, "return_rank_corr": 0.1003401360544218, "pearson": 0.07241648093896788, "score": 0.48255238095238095, "n_points": 21}, "rank": 32}, {"dataset": "priv_crypto_tick", "model": "naive (placeholder)", "mode": "private", "domain": "crypto", "task": "forecast", "frequency": "minute", "score": 0.4825333333333333, "metrics": {"rmse": 0.8624001570377136, "mae": 0.7478579083299249, "mse": 0.8150170016633522, "mape": 1.5718563567436112, "smape": 1.5717594583209928, "mase": 1.1440594510152777, "directional_accuracy": 1.0, "return_rank_corr": 0.0, "pearson": 6.68903865783271e-15, "score": 0.4825333333333333, "n_points": 6}, "note": "PROPRIETARY placeholder — no real data; requires user data / model upload.", "rank": 33}, {"dataset": "gold_commodity", "model": "random_walk", "mode": "open", "domain": "commodity", "task": "forecast", "frequency": "day", "score": 0.48158235294117646, "metrics": {"rmse": 537.4403917600997, "mae": 480.5294338207213, "mse": 315436.56020689546, "mape": 10.790271512056682, "smape": 10.048265205487136, "mase": 17.102572120963686, "directional_accuracy": 1.0, "return_rank_corr": -0.08823529411764706, "pearson": -0.04351167170129852, "score": 0.48158235294117646, "n_points": 17}, "rank": 34}, {"dataset": "gold_commodity", "model": "arima", "mode": "open", "domain": "commodity", "task": "forecast", "frequency": "day", "score": 0.4812176470588235, "metrics": {"rmse": 147.65567883860413, "mae": 128.5924213119872, "mse": 35724.58816004935, "mape": 2.87008197002733, "smape": 2.8335931851030516, "mase": 4.5767459907942305, "directional_accuracy": 1.0, "return_rank_corr": -0.22058823529411767, "pearson": -0.17812209451763222, "score": 0.4812176470588235, "n_points": 17}, "rank": 35}, {"dataset": "eur_usd_fx", "model": "moving_average", "mode": "open", "domain": "fx", "task": "forecast", "frequency": "day", "score": 0.4794541666666667, "metrics": {"rmse": 0.007925376914641987, "mae": 0.007342339754104619, "mse": 8.903747575968663e-05, "mape": 0.6344528148977406, "smape": 0.6335937875871162, "mase": 2.065302285540023, "directional_accuracy": 1.0, "return_rank_corr": 0.0, "pearson": 0.0, "score": 0.4794541666666667, "n_points": 24}, "rank": 36}, {"dataset": "btc_crypto", "model": "naive", "mode": "open", "domain": "crypto", "task": "forecast", "frequency": "day", "score": 0.47805238095238095, "metrics": {"rmse": 2125.8763746052146, "mae": 1836.4682185374154, "mse": 5783857.007223325, "mape": 2.6877912581391, "smape": 2.677620184168865, "mase": 1.3931989429841511, "directional_accuracy": 1.0, "return_rank_corr": 0.0, "pearson": 0.0, "score": 0.47805238095238095, "n_points": 21}, "rank": 37}, {"dataset": "us_treasury_7y", "model": "naive", "mode": "open", "domain": "bond", "task": "forecast", "frequency": "day", "score": 0.4757470588235294, "metrics": {"rmse": 0.4202357588991389, "mae": 0.36744388612378537, "mse": 0.20161643177378513, "mape": 0.392702469196677, "smape": 0.39227041842638327, "mase": 1.296855534634832, "directional_accuracy": 1.0, "return_rank_corr": 0.0, "pearson": 0.0, "score": 0.4757470588235294, "n_points": 17}, "rank": 38}, {"dataset": "russell2000_daily", "model": "seasonal_naive", "mode": "open", "domain": "index", "task": "forecast", "frequency": "day", "score": 0.47555, "metrics": {"rmse": 75.95845562862299, "mae": 66.22741088867188, "mse": 7477.886464824776, "mape": 2.380797005789862, "smape": 2.405388653652516, "mase": 3.0365883325200875, "directional_accuracy": 1.0, "return_rank_corr": 0.022566773346211006, "pearson": -0.060822043944285954, "score": 0.47555, "n_points": 12}, "rank": 39}, {"dataset": "gold_commodity", "model": "seasonal_naive", "mode": "open", "domain": "commodity", "task": "forecast", "frequency": "day", "score": 0.47537058823529404, "metrics": {"rmse": 159.56527522386207, "mae": 137.45884076286765, "mse": 37509.24669153651, "mape": 3.060382430806187, "smape": 3.030623516478525, "mase": 4.8923116303591385, "directional_accuracy": 1.0, "return_rank_corr": -0.06204234134160568, "pearson": -0.03150305258035389, "score": 0.47537058823529404, "n_points": 17}, "rank": 40}, {"dataset": "us_treasury_7y", "model": "seasonal_naive", "mode": "open", "domain": "bond", "task": "forecast", "frequency": "day", "score": 0.4743058823529412, "metrics": {"rmse": 0.5705790486922099, "mae": 0.48251983899028467, "mse": 0.3767020412047689, "mape": 0.5153262271777581, "smape": 0.5146367843832701, "mase": 1.7030043154803007, "directional_accuracy": 1.0, "return_rank_corr": -0.21554747919483783, "pearson": -0.24774698971267717, "score": 0.4743058823529412, "n_points": 17}, "rank": 41}, {"dataset": "us_treasury_7y", "model": "random_walk", "mode": "open", "domain": "bond", "task": "forecast", "frequency": "day", "score": 0.46804117647058824, "metrics": {"rmse": 1.5798195607998458, "mae": 1.3993607273653192, "mse": 2.623149388016842, "mape": 1.4956915168418903, "smape": 1.4808456641343974, "mase": 4.938900258699569, "directional_accuracy": 1.0, "return_rank_corr": -0.27857998848638416, "pearson": -0.25390486125571193, "score": 0.46804117647058824, "n_points": 17}, "rank": 42}, {"dataset": "btc_crypto", "model": "moving_average", "mode": "open", "domain": "crypto", "task": "forecast", "frequency": "day", "score": 0.467752380952381, "metrics": {"rmse": 2956.0140081444542, "mae": 2702.5438802083336, "mse": 13407650.385542171, "mape": 3.96814375556021, "smape": 3.889042139579857, "mase": 2.050229478119241, "directional_accuracy": 1.0, "return_rank_corr": 0.0, "pearson": -8.679757950198225e-16, "score": 0.467752380952381, "n_points": 21}, "rank": 43}, {"dataset": "nasdaq_daily", "model": "seasonal_naive", "mode": "open", "domain": "index", "task": "forecast", "frequency": "day", "score": 0.4618499999999999, "metrics": {"rmse": 862.9562282756823, "mae": 762.0104492187501, "mse": 982450.3840782166, "mape": 3.0569836514541495, "smape": 3.0941102105856264, "mase": 4.689250271083624, "directional_accuracy": 1.0, "return_rank_corr": -0.030772872744833184, "pearson": -0.03190899220722803, "score": 0.4618499999999999, "n_points": 12}, "rank": 44}, {"dataset": "sp500_daily", "model": "seasonal_naive", "mode": "open", "domain": "index", "task": "forecast", "frequency": "day", "score": 0.46012500000000006, "metrics": {"rmse": 170.87439316258215, "mae": 151.39173583984373, "mse": 38761.56241427859, "mape": 2.097568032383531, "smape": 2.116411604174937, "mase": 4.142093787101619, "directional_accuracy": 1.0, "return_rank_corr": -0.06564879518897744, "pearson": -0.05414188160359218, "score": 0.46012500000000006, "n_points": 12}, "rank": 45}, {"dataset": "us_treasury_7y", "model": "moving_average", "mode": "open", "domain": "bond", "task": "forecast", "frequency": "day", "score": 0.46001764705882353, "metrics": {"rmse": 0.5585477721805256, "mae": 0.49405389994132337, "mse": 0.36884734583867257, "mape": 0.5272891922772316, "smape": 0.5263479097392374, "mase": 1.7437126014146893, "directional_accuracy": 1.0, "return_rank_corr": 0.0, "pearson": 2.6969517563865448e-15, "score": 0.46001764705882353, "n_points": 17}, "rank": 46}, {"dataset": "gold_commodity", "model": "moving_average", "mode": "open", "domain": "commodity", "task": "forecast", "frequency": "day", "score": 0.4464000000000001, "metrics": {"rmse": 161.35534210040237, "mae": 145.38764258633148, "mse": 39658.18199933294, "mape": 3.2448088383980656, "smape": 3.1933042623840184, "mase": 5.174506425255324, "directional_accuracy": 1.0, "return_rank_corr": 0.0, "pearson": 9.600602796371053e-16, "score": 0.4464000000000001, "n_points": 17}, "rank": 47}, {"dataset": "sp500_daily", "model": "naive", "mode": "open", "domain": "index", "task": "forecast", "frequency": "day", "score": 0.44635833333333325, "metrics": {"rmse": 143.9619805902761, "mae": 130.40225830078126, "mse": 28563.541095095872, "mape": 1.8055279529454864, "smape": 1.8221239110089105, "mase": 3.567819477960773, "directional_accuracy": 1.0, "return_rank_corr": 0.0, "pearson": 0.0, "score": 0.44635833333333325, "n_points": 12}, "rank": 48}, {"dataset": "gold_commodity", "model": "naive", "mode": "open", "domain": "commodity", "task": "forecast", "frequency": "day", "score": 0.4461294117647059, "metrics": {"rmse": 134.36467496771942, "mae": 117.25298918395482, "mse": 27556.046733224593, "mape": 2.6257852498652903, "smape": 2.6070206949741874, "mase": 4.1731631046462, "directional_accuracy": 1.0, "return_rank_corr": 0.0, "pearson": 0.0, "score": 0.4461294117647059, "n_points": 17}, "rank": 49}, {"dataset": "russell2000_daily", "model": "naive", "mode": "open", "domain": "index", "task": "forecast", "frequency": "day", "score": 0.4453833333333334, "metrics": {"rmse": 69.94533115796703, "mae": 64.11941121419272, "mse": 7003.101484701535, "mape": 2.2784240859939273, "smape": 2.3108611624488806, "mase": 2.9399345885402735, "directional_accuracy": 1.0, "return_rank_corr": 0.0, "pearson": 0.0, "score": 0.4453833333333334, "n_points": 12}, "rank": 50}, {"dataset": "sp500_daily", "model": "moving_average", "mode": "open", "domain": "index", "task": "forecast", "frequency": "day", "score": 0.44522500000000004, "metrics": {"rmse": 182.13602419387323, "mae": 169.6840714518229, "mse": 44781.516490059286, "mape": 2.361000033058539, "smape": 2.3864502206839617, "mase": 4.642574009946223, "directional_accuracy": 1.0, "return_rank_corr": 0.0, "pearson": 5.135620865197311e-15, "score": 0.44522500000000004, "n_points": 12}, "rank": 51}, {"dataset": "nasdaq_daily", "model": "naive", "mode": "open", "domain": "index", "task": "forecast", "frequency": "day", "score": 0.444675, "metrics": {"rmse": 734.8683622372499, "mae": 656.2134440104168, "mse": 707413.3819695154, "mape": 2.629414676257478, "smape": 2.660139316742671, "mase": 4.038197997638231, "directional_accuracy": 1.0, "return_rank_corr": 0.0, "pearson": 0.0, "score": 0.444675, "n_points": 12}, "rank": 52}, {"dataset": "russell2000_daily", "model": "moving_average", "mode": "open", "domain": "index", "task": "forecast", "frequency": "day", "score": 0.44460833333333327, "metrics": {"rmse": 79.99544106042282, "mae": 74.13810017903641, "mse": 8656.357957866681, "mape": 2.669645993838183, "smape": 2.6986277720198366, "mase": 3.3993007876648718, "directional_accuracy": 1.0, "return_rank_corr": 0.0, "pearson": 1.7366950253589728e-15, "score": 0.44460833333333327, "n_points": 12}, "rank": 53}, {"dataset": "nasdaq_daily", "model": "moving_average", "mode": "open", "domain": "index", "task": "forecast", "frequency": "day", "score": 0.44459999999999994, "metrics": {"rmse": 889.7543603698259, "mae": 818.6743391927084, "mse": 1064672.504975618, "mape": 3.3009712591042635, "smape": 3.3517085398505966, "mase": 5.037947801010488, "directional_accuracy": 1.0, "return_rank_corr": 0.0, "pearson": 2.3809713381888537e-15, "score": 0.44459999999999994, "n_points": 12}, "rank": 54}, {"dataset": "priv_broker_order", "model": "naive (placeholder)", "mode": "private", "domain": "equity", "task": "anomaly", "frequency": "minute", "score": 0.21816666666666665, "metrics": {"f1": 0.030303030303030304, "precision": 0.016666666666666666, "recall": 0.16666666666666666, "auc": 0.5, "score": 0.21816666666666665, "n_points": 6}, "note": "PROPRIETARY placeholder — no real data; requires user data / model upload.", "rank": 55}]},
-  datasets:[{"name": "btc_crypto", "domain": "crypto", "task": "forecast", "frequency": "day", "n_features": 1, "feature_names": ["close"], "n_obs": 1097, "date_range": ["", ""], "split": {}, "license": "open", "source": "BTC-USD (real, yfinance)", "open": true, "requires_download": false, "target": "close", "lookback": 150, "horizon": 7, "rolling": true, "notes": "Open dataset. Real data when available; synthetic fallback otherwise."}, {"name": "ig_corp_bond", "domain": "bond", "task": "forecast", "frequency": "day", "n_features": 1, "feature_names": ["close"], "n_obs": 753, "date_range": ["", ""], "split": {}, "license": "open", "source": "iShares IG Corp Bond (real, yfinance)", "open": true, "requires_download": false, "target": "close", "lookback": 120, "horizon": 7, "rolling": true, "notes": "Open dataset. Real data when available; synthetic fallback otherwise."}, {"name": "sp500_daily", "domain": "index", "task": "forecast", "frequency": "day", "n_features": 1, "feature_names": ["close"], "n_obs": 753, "date_range": ["", ""], "split": {}, "license": "open", "source": "S&P 500 (real, yfinance)", "open": true, "requires_download": false, "target": "close", "lookback": 120, "horizon": 10, "rolling": true, "notes": "Open dataset. Real data when available; synthetic fallback otherwise."}, {"name": "eth_crypto", "domain": "crypto", "task": "forecast", "frequency": "day", "n_features": 1, "feature_names": ["close"], "n_obs": 1097, "date_range": ["", ""], "split": {}, "license": "open", "source": "ETH-USD (real, yfinance)", "open": true, "requires_download": false, "target": "close", "lookback": 150, "horizon": 7, "rolling": true, "notes": "Open dataset. Real data when available; synthetic fallback otherwise."}, {"name": "nasdaq_daily", "domain": "index", "task": "forecast", "frequency": "day", "n_features": 1, "feature_names": ["close"], "n_obs": 753, "date_range": ["", ""], "split": {}, "license": "open", "source": "Nasdaq 100 (real, yfinance)", "open": true, "requires_download": false, "target": "close", "lookback": 120, "horizon": 10, "rolling": true, "notes": "Open dataset. Real data when available; synthetic fallback otherwise."}, {"name": "crude_oil_commodity", "domain": "commodity", "task": "forecast", "frequency": "day", "n_features": 1, "feature_names": ["close"], "n_obs": 755, "date_range": ["", ""], "split": {}, "license": "open", "source": "Crude Oil (real, yfinance)", "open": true, "requires_download": false, "target": "close", "lookback": 120, "horizon": 7, "rolling": true, "notes": "Open dataset. Real data when available; synthetic fallback otherwise."}, {"name": "gold_commodity", "domain": "commodity", "task": "forecast", "frequency": "day", "n_features": 1, "feature_names": ["close"], "n_obs": 755, "date_range": ["", ""], "split": {}, "license": "open", "source": "Gold (real, yfinance)", "open": true, "requires_download": false, "target": "close", "lookback": 120, "horizon": 7, "rolling": true, "notes": "Open dataset. Real data when available; synthetic fallback otherwise."}, {"name": "return_classify", "domain": "equity", "task": "classify", "frequency": "day", "n_features": 1, "feature_names": ["close", "label"], "n_obs": 1000, "date_range": ["", ""], "split": {}, "license": "open", "source": "Synthetic return sign classifier (synthetic fallback)", "open": true, "requires_download": false, "target": "label", "lookback": 60, "horizon": 1, "rolling": true, "notes": "Open dataset. Real data when available; synthetic fallback otherwise."}, {"name": "equity_synthetic", "domain": "equity", "task": "forecast", "frequency": "day", "n_features": 1, "feature_names": ["close"], "n_obs": 1000, "date_range": ["", ""], "split": {}, "license": "open", "source": "Synthetic stock (fallback) (synthetic fallback)", "open": true, "requires_download": false, "target": "close", "lookback": 120, "horizon": 5, "rolling": true, "notes": "Open dataset. Real data when available; synthetic fallback otherwise."}, {"name": "russell2000_daily", "domain": "index", "task": "forecast", "frequency": "day", "n_features": 1, "feature_names": ["close"], "n_obs": 753, "date_range": ["", ""], "split": {}, "license": "open", "source": "Russell 2000 (real, yfinance)", "open": true, "requires_download": false, "target": "close", "lookback": 120, "horizon": 10, "rolling": true, "notes": "Open dataset. Real data when available; synthetic fallback otherwise."}, {"name": "dow_daily", "domain": "index", "task": "forecast", "frequency": "day", "n_features": 1, "feature_names": ["close"], "n_obs": 753, "date_range": ["", ""], "split": {}, "license": "open", "source": "Dow Jones (real, yfinance)", "open": true, "requires_download": false, "target": "close", "lookback": 120, "horizon": 10, "rolling": true, "notes": "Open dataset. Real data when available; synthetic fallback otherwise."}, {"name": "eur_usd_fx", "domain": "fx", "task": "forecast", "frequency": "day", "n_features": 1, "feature_names": ["close"], "n_obs": 780, "date_range": ["", ""], "split": {}, "license": "open", "source": "EUR/USD (real, yfinance)", "open": true, "requires_download": false, "target": "close", "lookback": 120, "horizon": 5, "rolling": true, "notes": "Open dataset. Real data when available; synthetic fallback otherwise."}, {"name": "fraud_anomaly", "domain": "fraud", "task": "anomaly", "frequency": "hour", "n_features": 1, "feature_names": ["flow", "label"], "n_obs": 1000, "date_range": ["", ""], "split": {}, "license": "open", "source": "Synthetic transaction/flow stream (synthetic fallback)", "open": true, "requires_download": false, "target": "flow", "lookback": 100, "horizon": 24, "rolling": true, "notes": "Open dataset. Real data when available; synthetic fallback otherwise."}, {"name": "gbp_usd_fx", "domain": "fx", "task": "forecast", "frequency": "day", "n_features": 1, "feature_names": ["close"], "n_obs": 780, "date_range": ["", ""], "split": {}, "license": "open", "source": "GBP/USD (real, yfinance)", "open": true, "requires_download": false, "target": "close", "lookback": 120, "horizon": 5, "rolling": true, "notes": "Open dataset. Real data when available; synthetic fallback otherwise."}, {"name": "us_treasury_7y", "domain": "bond", "task": "forecast", "frequency": "day", "n_features": 1, "feature_names": ["close"], "n_obs": 753, "date_range": ["", ""], "split": {}, "license": "open", "source": "iShares 3-7Y Treasury (real, yfinance)", "open": true, "requires_download": false, "target": "close", "lookback": 120, "horizon": 7, "rolling": true, "notes": "Open dataset. Real data when available; synthetic fallback otherwise."}, {"name": "priv_credit_risk", "domain": "bond", "task": "classify", "frequency": "day", "n_features": 1, "feature_names": ["close", "label"], "n_obs": 600, "date_range": ["", ""], "split": {}, "license": "proprietary", "source": "PROPRIETARY — requires user data / model upload", "open": false, "requires_download": true, "target": "label", "lookback": 60, "horizon": 1, "rolling": true, "notes": "CLOSED/proprietary placeholder. Contains NO real data. The user must provide the data or upload their own model to be evaluated; until then only the synthetic stub is present."}, {"name": "priv_crypto_tick", "domain": "crypto", "task": "forecast", "frequency": "minute", "n_features": 1, "feature_names": ["close"], "n_obs": 600, "date_range": ["", ""], "split": {}, "license": "proprietary", "source": "PROPRIETARY — requires user data / model upload", "open": false, "requires_download": true, "target": "close", "lookback": 60, "horizon": 10, "rolling": true, "notes": "CLOSED/proprietary placeholder. Contains NO real data. The user must provide the data or upload their own model to be evaluated; until then only the synthetic stub is present."}, {"name": "priv_broker_order", "domain": "equity", "task": "anomaly", "frequency": "minute", "n_features": 1, "feature_names": ["flow", "label"], "n_obs": 600, "date_range": ["", ""], "split": {}, "license": "proprietary", "source": "PROPRIETARY — requires user data / model upload", "open": false, "requires_download": true, "target": "flow", "lookback": 60, "horizon": 10, "rolling": true, "notes": "CLOSED/proprietary placeholder. Contains NO real data. The user must provide the data or upload their own model to be evaluated; until then only the synthetic stub is present."}, {"name": "priv_fund_flow", "domain": "equity", "task": "forecast", "frequency": "day", "n_features": 1, "feature_names": ["close"], "n_obs": 600, "date_range": ["", ""], "split": {}, "license": "proprietary", "source": "PROPRIETARY — requires user data / model upload", "open": false, "requires_download": true, "target": "close", "lookback": 120, "horizon": 5, "rolling": true, "notes": "CLOSED/proprietary placeholder. Contains NO real data. The user must provide the data or upload their own model to be evaluated; until then only the synthetic stub is present."}],
-  models:{"moving_average": {"name": "moving_average", "installed": true, "requires": null, "benchmark": true}, "seasonal_naive": {"name": "seasonal_naive", "installed": true, "requires": null, "benchmark": true}, "naive": {"name": "naive", "installed": true, "requires": null, "benchmark": true}, "random_walk": {"name": "random_walk", "installed": true, "requires": null, "benchmark": true}, "arima": {"name": "arima", "installed": true, "requires": "pmdarima", "benchmark": true}, "chronos": {"name": "chronos", "installed": true, "requires": "chronos", "benchmark": false}, "timesfm": {"name": "timesfm", "installed": true, "requires": "timesfm", "benchmark": false}}
-};
-let LIVE = null; // 后端是否可用
 async function api(path, opts){
   try{
     const r = await fetch(API+path, opts);
     if(!r.ok) throw new Error(r.status);
     const j = await r.json();
-    LIVE = true;
+    if(typeof j==='object' && j!==null && j.__baked) return j; // fallback marker
     return j;
-  } catch(e){
-    // 无后端 → 回落到 baked 数据（仅 GET）
+  }catch(e){
+    // no backend -> fall back to baked data (GET only)
     if(!opts || (opts.method||'GET')!=='POST'){
       if(path==='/api/leaderboard') return DATA.leaderboard;
       if(path==='/api/datasets') return DATA.datasets;
       if(path==='/api/models') return DATA.models;
+      if(path==='/api/config') return DATA.config;
       return null;
     }
     return null;
   }
 }
 
+// config: which datasets / models are supported (from admin backend or baked default)
+let CONFIG = {datasets:{}, models:{}};
+function supported(name){
+  const s = CONFIG.datasets[name];
+  return s===undefined ? true : !!s; // default: on
+}
+
 // ---- leaderboard ----
 async function loadLB(){
   const d = await api('/api/leaderboard');
   const body = document.getElementById('lbBody');
-  if(!d || !d.rows || !d.rows.length){ body.innerHTML='<tr><td colspan="7" class="muted" style="text-align:center;padding:30px">排行榜为空 —— 运行评测后会生成。</td></tr>'; return; }
+  const rows = (d && d.rows) ? d.rows.filter(r=>supported(r.dataset)) : [];
+  if(!rows.length){ body.innerHTML='<tr><td colspan="7" class="muted" style="text-align:center;padding:30px">'+I18N.t('lb_empty')+'</td></tr>'; return; }
   body.innerHTML='';
-  d.rows.forEach(r=>{
+  rows.forEach(r=>{
     const cls = r.rank===1?'g':r.rank===2?'s':r.rank===3?'b':'';
     const tr=document.createElement('tr');
     tr.innerHTML=`<td class="rk ${cls}">${r.rank}</td>
@@ -264,35 +334,42 @@ async function loadLB(){
 async function loadDatasets(){
   const d = await api('/api/datasets');
   const grid=document.getElementById('dsGrid');
-  if(!d){ grid.innerHTML='<div class="card muted" style="grid-column:1/-1">无法加载数据集（后端未启动？）</div>'; return; }
+  if(!d){ grid.innerHTML='<div class="card muted" style="grid-column:1/-1">'+I18N.t('ds_nofeed')+'</div>'; return; }
   grid.innerHTML='';
   d.forEach(m=>{
-    const c=document.createElement('div'); c.className='card';
-    c.innerHTML=`<h3>${m.name}</h3><div class="sub">${m.domain} · ${m.frequency} · ${m.n_features} 特征</div>
+    const on = supported(m.name);
+    const c=document.createElement('div'); c.className='card'+(on?'':' off');
+    c.innerHTML=`<h3>${m.name}</h3><div class="sub">${m.domain} · ${m.frequency} · ${m.n_features} features</div>
       <div class="rows">
-        <div class="row"><span>任务</span><b>${m.task}</b></div>
-        <div class="row"><span>类型</span><b><span class="tag ${m.open?'open':'closed'}">${m.open?'开源':'闭源'}</span></b></div>
+        <div class="row"><span>${I18N.t('k_task')}</span><b>${m.task}</b></div>
+        <div class="row"><span>${I18N.t('k_type')}</span><b><span class="tag ${m.open?'open':'closed'}">${m.open?I18N.t('v_open'):I18N.t('v_closed')}</span></b></div>
         <div class="row"><span>lookback</span><b>${m.lookback}</b></div>
         <div class="row"><span>horizon</span><b>${m.horizon}</b></div>
-        <div class="row"><span>来源</span><b style="font-size:11px">${m.source}</b></div>
-      </div>`;
+        <div class="row"><span>${I18N.t('k_source')}</span><b style="font-size:11px">${m.source}</b></div>
+      </div>
+      <div class="switch"><span class="dot ${on?'':'off'}"></span> ${on?I18N.t('v_supported'):I18N.t('v_unsupported')}</div>`;
     grid.appendChild(c);
   });
   // hero badges
   const hb=document.getElementById('heroBadges');
-  const open=d.filter(x=>x.open).length, closed=d.length-open;
-  hb.innerHTML=`<span class="badge"><b>${d.length}</b> 数据集</span>
-    <span class="badge"><b>${open}</b> 开源</span>
-    <span class="badge"><b>${closed}</b> 闭源</span>
-    <span class="badge">3 类任务</span>`;
+  const on = d.filter(m=>supported(m.name));
+  const open = on.filter(m=>m.open).length;
+  hb.innerHTML=`<span class="badge"><b>${on.length}</b> ${I18N.t('b_datasets')}</span>
+    <span class="badge"><b>${open}</b> ${I18N.t('b_open')}</span>
+    <span class="badge"><b>${on.length-open}</b> ${I18N.t('b_closed')}</span>
+    <span class="badge"><b>3</b> ${I18N.t('b_tasks')}</span>`;
 }
 
 // ---- populate form ----
 async function loadForm(){
   const ds=await api('/api/datasets'); const ms=await api('/api/models');
   const sEl=document.getElementById('fDataset'), mEl=document.getElementById('fModel');
-  if(ds) sEl.innerHTML=ds.map(m=>`<option value="${m.name}">${m.name} (${m.domain}/${m.task})</option>`).join('');
-  if(ms){ mEl.innerHTML=Object.entries(ms).map(([k,v])=>`<option value="${k}" ${v.installed?'':'disabled'}>${v.name}${v.installed?'':' (未安装)'}</option>`).join(''); }
+  if(ds){
+    const on = ds.filter(m=>supported(m.name));
+    sEl.innerHTML = on.map(m=>`<option value="${m.name}">${m.name} (${m.domain}/${m.task})</option>`).join('')
+      || `<option value="">— ${I18N.t('no_supported')} —</option>`;
+  }
+  if(ms){ mEl.innerHTML=Object.entries(ms).map(([k,v])=>`<option value="${k}" ${v.installed?'':'disabled'}>${v.name}${v.installed?'':' ('+I18N.t('not_installed')+')'}</option>`).join(''); }
 }
 
 // ---- mode toggle ----
@@ -307,32 +384,51 @@ document.getElementById('modeToggle').addEventListener('click',e=>{
 document.getElementById('runBtn').addEventListener('click',async()=>{
   const ds=document.getElementById('fDataset').value;
   const mdl=document.getElementById('fModel').value;
-  const btn=document.getElementById('runBtn'); btn.textContent='评测中…'; btn.disabled=true;
+  const btn=document.getElementById('runBtn'); btn.textContent=I18N.t('running'); btn.disabled=true;
   const res=await api('/api/evaluate',{method:'POST',headers:{'Content-Type':'application/json'},
     body:JSON.stringify({dataset:ds,model:mdl,mode})});
-  btn.textContent='运行评测'; btn.disabled=false;
+  btn.textContent=I18N.t('run_btn'); btn.disabled=false;
   const box=document.getElementById('result');
-  if(!res){ box.innerHTML='<div class="muted">当前为 <b>GitHub Pages 静态部署版</b>，无法实时评测（需后端）。已展示真实排行榜与数据集。本地评测运行 <code>./run.sh</code> 后访问 http://localhost:8000/</div>'; box.classList.add('show'); return; }
+  if(!res){ box.innerHTML='<div class="muted">'+I18N.t('eval_fail')+'</div>'; box.classList.add('show'); return; }
   const m=res.metrics||{};
-  const metricCards=[['MASE',m.mase,'x'],['方向准确率',m.directional_accuracy,''],['相关系数',m.pearson,''],
+  const metricCards=[['MASE',m.mase,'x'],['DIR',m.directional_accuracy,''],['ρ',m.pearson,''],
     ['MAPE',m.mape,'%'],['RMSE',m.rmse,'']].map(([k,v,u])=>
       `<div class="metric"><div class="v">${v==null||isNaN(v)?'—':v.toFixed(3)}${u||''}</div><div class="k">${k}</div></div>`).join('');
-  box.innerHTML=`<div class="big">综合评分 ${(res.score*100).toFixed(1)}</div>
-    <div class="muted" style="margin-top:6px">${res.dataset} · ${res.model} · 模式 ${res.mode} · ${m.n_points} 个滚动点</div>
+  box.innerHTML=`<div class="big">${(res.score*100).toFixed(1)}</div>
+    <div class="muted" style="margin-top:6px">${res.dataset} · ${res.model} · ${res.mode} · ${m.n_points} pts</div>
     <div class="metric-grid">${metricCards}</div>`;
   box.classList.add('show');
   loadLB();
 });
 
 // ---- nav active ----
-document.querySelectorAll('.nav .links a').forEach(a=>a.addEventListener('click',()=>{
-  document.querySelectorAll('.nav .links a').forEach(x=>x.classList.remove('active')); a.classList.add('active');
+document.querySelectorAll('.navlink').forEach(a=>a.addEventListener('click',()=>{
+  document.querySelectorAll('.navlink').forEach(x=>x.classList.remove('active')); a.classList.add('active');
 }));
 
+// ---- language switch ----
+function setLang(l){
+  document.documentElement.lang = (l==='ar') ? 'ar' : l;
+  document.documentElement.dir = (l==='ar') ? 'rtl' : 'ltr';
+  localStorage.setItem('arena_lang', l);
+  document.querySelectorAll('#langBar button').forEach(b=>b.classList.toggle('sel', b.dataset.lang===l));
+  I18N.apply();
+  // refresh dynamic content in the new language
+  CONFIG = Object.assign({}, CONFIG, await api('/api/config'));
+  loadLB(); loadDatasets(); loadForm();
+}
+document.getElementById('langBar').addEventListener('click',e=>{
+  const b=e.target.closest('button'); if(!b)return; setLang(b.dataset.lang);
+});
+
 // init
-loadLB(); loadDatasets(); loadForm();
+async function init(){
+  const l = localStorage.getItem('arena_lang') || 'en';
+  I18N.init(l);
+  CONFIG = Object.assign(CONFIG, await api('/api/config'));
+  loadLB(); loadDatasets(); loadForm();
+}
+init();
 </script>
-<div id="deployNote" style="display:none;position:fixed;bottom:14px;left:50%;transform:translateX(-50%);background:rgba(34,211,238,.15);border:1px solid var(--cyan);color:var(--cyan);padding:8px 16px;border-radius:10px;font-size:12px;z-index:50">🌐 GitHub Pages 静态版 · 展示真实数据 · 实时评测需本地后端</div>
-<script>setTimeout(function(){if(LIVE===null){document.getElementById('deployNote').style.display='block';}},1500);</script>
 </body>
 </html>

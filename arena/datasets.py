@@ -34,6 +34,7 @@ import pandas as pd
 from arena.schemas import DatasetMeta, Domain, TaskType, Frequency
 
 ROOT = Path(__file__).resolve().parent.parent / "data"
+RAW = ROOT / "raw"  # real data downloaded by arena/download_real.py
 
 
 # --------------------------------------------------------------------------- #
@@ -93,19 +94,41 @@ def _anomaly_series(n: int, seed: int, freq: str) -> pd.DataFrame:
 # --------------------------------------------------------------------------- #
 # Download (open, real) with synthetic fallback
 # --------------------------------------------------------------------------- #
+def _read_raw(raw_name: str | None) -> pd.DataFrame | None:
+    """Read a pre-downloaded real series from data/raw/<name>.csv (fast, no net)."""
+    if not raw_name:
+        return None
+    p = RAW / f"{raw_name}.csv"
+    if not p.exists():
+        return None
+    try:
+        df = pd.read_csv(p)
+        if "timestamp" not in df.columns or "close" not in df.columns:
+            return None
+        df["timestamp"] = pd.to_datetime(df["timestamp"])
+        df = df.dropna().reset_index(drop=True)
+        return df if len(df) >= 150 else None
+    except Exception:
+        return None
+
+
 def _download_yfinance(ticker: str, period: str = "2y") -> pd.DataFrame | None:
     try:
         import yfinance as yf
-        df = yf.download(ticker, period=period, progress=False, auto_adjust=True)
+        df = yf.download(ticker, period=period, interval="1d", progress=False,
+                         auto_adjust=True, threads=False)
         if df is None or len(df) < 150:
             return None
-        df = df.reset_index()
-        # yfinance may return a MultiIndex column; flatten it.
+        # yfinance 1.x: index=Date, columns=MultiIndex(Price, Ticker)
         if isinstance(df.columns, pd.MultiIndex):
-            df.columns = [c[0] if len(c) == 1 else c[1] for c in df.columns.values]
+            df.columns = df.columns.get_level_values(0)
+        if isinstance(df.index, pd.DatetimeIndex):
+            df = df.reset_index()
+            first = df.columns[0]
+            if "Date" not in df.columns and str(first).lower() in ("datetime", "date", ""):
+                df = df.rename(columns={first: "Date"})
         col = "Close" if "Close" in df.columns else None
         if col is None:
-            # pick the first price-like column
             price_cols = [c for c in df.columns if any(k in str(c).lower()
                              for k in ("close", "adj", "price"))]
             col = price_cols[0] if price_cols else df.columns[-1]
@@ -141,22 +164,66 @@ def _split(df: pd.DataFrame, target: str,
 # Dataset definitions
 # --------------------------------------------------------------------------- #
 OPEN_DEFS = [
+    # ---- index (real) ----
     dict(name="sp500_daily", domain=Domain.INDEX, task=TaskType.FORECAST,
-         ticker="^GSPC", freq=Frequency.DAY, lookback=120, horizon=10,
-         source="S&P 500 via yfinance", seed=1, synthetic_mu=0.0003,
-         synthetic_sigma=0.012),
+         ticker="^GSPC", raw="sp500", freq=Frequency.DAY, lookback=120,
+         horizon=10, source="S&P 500 (real, yfinance)", seed=1,
+         synthetic_mu=0.0003, synthetic_sigma=0.012),
+    dict(name="nasdaq_daily", domain=Domain.INDEX, task=TaskType.FORECAST,
+         ticker="^IXIC", raw="nasdaq", freq=Frequency.DAY, lookback=120,
+         horizon=10, source="Nasdaq 100 (real, yfinance)", seed=15,
+         synthetic_mu=0.0004, synthetic_sigma=0.015),
+    dict(name="dow_daily", domain=Domain.INDEX, task=TaskType.FORECAST,
+         ticker="^DJI", raw="dow", freq=Frequency.DAY, lookback=120,
+         horizon=10, source="Dow Jones (real, yfinance)", seed=16,
+         synthetic_mu=0.0002, synthetic_sigma=0.011),
+    dict(name="russell2000_daily", domain=Domain.INDEX, task=TaskType.FORECAST,
+         ticker="^RUT", raw="russell2000", freq=Frequency.DAY, lookback=120,
+         horizon=10, source="Russell 2000 (real, yfinance)", seed=17,
+         synthetic_mu=0.0003, synthetic_sigma=0.013),
+    # ---- equity (real) ----
     dict(name="equity_synthetic", domain=Domain.EQUITY, task=TaskType.FORECAST,
          ticker=None, freq=Frequency.DAY, lookback=120, horizon=5,
          source="Synthetic stock (fallback)", seed=2, synthetic_mu=0.0004,
          synthetic_sigma=0.015),
+    # ---- crypto (real) ----
     dict(name="btc_crypto", domain=Domain.CRYPTO, task=TaskType.FORECAST,
-         ticker="BTC-USD", freq=Frequency.DAY, lookback=150, horizon=7,
-         source="BTC-USD via yfinance", seed=3, synthetic_mu=0.0006,
-         synthetic_sigma=0.045),
+         ticker="BTC-USD", raw="btc", freq=Frequency.DAY, lookback=150,
+         horizon=7, source="BTC-USD (real, yfinance)", seed=3,
+         synthetic_mu=0.0006, synthetic_sigma=0.045),
+    dict(name="eth_crypto", domain=Domain.CRYPTO, task=TaskType.FORECAST,
+         ticker="ETH-USD", raw="eth", freq=Frequency.DAY, lookback=150,
+         horizon=7, source="ETH-USD (real, yfinance)", seed=18,
+         synthetic_mu=0.0006, synthetic_sigma=0.05),
+    # ---- fx (real) ----
     dict(name="eur_usd_fx", domain=Domain.FX, task=TaskType.FORECAST,
-         ticker="EURUSD=X", freq=Frequency.DAY, lookback=120, horizon=5,
-         source="EUR/USD via yfinance", seed=4, synthetic_mu=0.0,
-         synthetic_sigma=0.006),
+         ticker="EURUSD=X", raw="eurusd", freq=Frequency.DAY, lookback=120,
+         horizon=5, source="EUR/USD (real, yfinance)", seed=4,
+         synthetic_mu=0.0, synthetic_sigma=0.006),
+    dict(name="gbp_usd_fx", domain=Domain.FX, task=TaskType.FORECAST,
+         ticker="GBPUSD=X", raw="gbpusd", freq=Frequency.DAY, lookback=120,
+         horizon=5, source="GBP/USD (real, yfinance)", seed=19,
+         synthetic_mu=0.0, synthetic_sigma=0.006),
+    # ---- commodity (real) ----
+    dict(name="gold_commodity", domain=Domain.COMMODITY, task=TaskType.FORECAST,
+         ticker="GC=F", raw="gold", freq=Frequency.DAY, lookback=120,
+         horizon=7, source="Gold (real, yfinance)", seed=20,
+         synthetic_mu=0.0002, synthetic_sigma=0.01),
+    dict(name="crude_oil_commodity", domain=Domain.COMMODITY,
+         task=TaskType.FORECAST, ticker="CL=F", raw="crude_oil",
+         freq=Frequency.DAY, lookback=120, horizon=7,
+         source="Crude Oil (real, yfinance)", seed=21,
+         synthetic_mu=0.0001, synthetic_sigma=0.02),
+    # ---- bond (real) ----
+    dict(name="us_treasury_7y", domain=Domain.BOND, task=TaskType.FORECAST,
+         ticker="IEF", raw="bond_3_7y", freq=Frequency.DAY, lookback=120,
+         horizon=7, source="iShares 3-7Y Treasury (real, yfinance)", seed=22,
+         synthetic_mu=0.0001, synthetic_sigma=0.006),
+    dict(name="ig_corp_bond", domain=Domain.BOND, task=TaskType.FORECAST,
+         ticker="LQD", raw="bond_ig_corp", freq=Frequency.DAY, lookback=120,
+         horizon=7, source="iShares IG Corp Bond (real, yfinance)", seed=23,
+         synthetic_mu=0.0001, synthetic_sigma=0.005),
+    # ---- anomaly / classify (synthetic, no free real feed) ----
     dict(name="fraud_anomaly", domain=Domain.FRAUD, task=TaskType.ANOMALY,
          ticker=None, freq=Frequency.HOUR, lookback=100, horizon=24,
          source="Synthetic transaction/flow stream", seed=5),
@@ -188,13 +255,16 @@ def _build_open(defn: dict) -> DatasetMeta:
                 Frequency.DAY: "1D", Frequency.WEEK: "1W"}
     f = freq_map[defn["freq"]]
 
-    # 1. try to download real open data
-    df = None
-    if defn.get("ticker"):
+    # 1. prefer a pre-downloaded real series (fast, no network)
+    df = _read_raw(defn.get("raw"))
+    source = defn["source"]
+    if df is not None:
+        pass
+    # 2. else try yfinance directly
+    elif defn.get("ticker"):
         df = _download_yfinance(defn["ticker"], period="3y")
-
+    # 3. else synthetic fallback
     if df is None:
-        # synthetic fallback
         if defn["task"] == TaskType.ANOMALY:
             df = _anomaly_series(n=1000, seed=defn["seed"], freq=f)
             target = "flow"
@@ -216,7 +286,6 @@ def _build_open(defn: dict) -> DatasetMeta:
     else:
         target = "close"
         labels = ["close"]
-        source = defn["source"]
 
     # 2. chronological split
     train, val, test = _split(df, target, lookback=defn["lookback"],

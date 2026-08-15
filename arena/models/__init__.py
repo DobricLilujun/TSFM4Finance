@@ -192,26 +192,75 @@ class ChronosModel(BaseModel):
 
 
 class TimesFMModel(BaseModel):
-    """Google TimesFM foundation model (pip: timesfm)."""
+    """Google TimesFM foundation model.
+
+    Supports two APIs with graceful fallback:
+      * timesfm 2.5 (torch): TimesFM_2p5_200M_torch + ForecastConfig + compile()
+      * legacy timesfm 2.0: TimeSeriesModel.from_pretrained() + forecast()
+    The model is loaded once and cached on the instance (lazy, per-process).
+    """
+
+    _CACHE: dict = {}  # name -> (model, compiled)
 
     def __init__(self, name="timesfm"):
         super().__init__(name, {"forecast"})
+        self._model = None
+        self._compiled = False
 
-    def predict(self, context_df, meta, horizon=None):
-        horizon = horizon or meta.horizon
+    def _load(self):
+        """Return a ready (compiled) TimesFM model, caching across calls."""
+        try:
+            # ---- timesfm 2.5 (torch) API ----
+            from timesfm import TimesFM_2p5_200M_torch as M, ForecastConfig  # type: ignore
+        except Exception:
+            return self._load_legacy()
+        try:
+            if self._model is None:
+                self._model = M.from_pretrained(
+                    M.DEFAULT_REPO_ID, torch_compile=False
+                )
+            if not self._compiled:
+                self._model.compile(
+                    ForecastConfig(
+                        max_context=512,
+                        max_horizon=24,
+                        normalize_inputs=True,
+                        infer_is_positive=False,
+                        force_flip_invariance=True,
+                    )
+                )
+                self._compiled = True
+            return self._model
+        except Exception as e:
+            raise RuntimeError(
+                f"TimesFM 2.5 init failed: {e}. "
+                "Install via: uv pip install timesfm"
+            ) from e
+
+    def _load_legacy(self):
         try:
             from timesfm import TimeSeriesModel  # type: ignore
         except Exception as e:
             raise RuntimeError(
-                f"TimesFMModel requires timesfm: {e}. "
+                f"TimesFM not available: {e}. "
                 "Install via: uv pip install timesfm"
             ) from e
+        return TimeSeriesModel.from_pretrained("google/timeseries-tfm-2.0")
+
+    def predict(self, context_df, meta, horizon=None):
+        horizon = horizon or meta.horizon
+        model = self._load()
         series = _get_series(context_df, meta).to_numpy()
-        model = TimeSeriesModel.from_pretrained("google/timeseries-tfm-2.0")
+        # ---- 2.5 API: forecast returns (samples, backcast) ----
+        if hasattr(model, "forecast") and hasattr(model, "compile"):
+            out = model.forecast(horizon=int(horizon), inputs=[series])
+            samples = np.asarray(out[0])
+            med = np.median(samples, axis=0).ravel()
+            return PredictionResult(point=med[:int(horizon)].tolist())
+        # ---- legacy API ----
         samples = model.forecast(np.array([series]))
-        median = np.median(np.asarray(samples), axis=0).ravel()
-        out = median[:horizon].tolist()
-        return PredictionResult(point=out)
+        med = np.median(np.asarray(samples), axis=0).ravel()
+        return PredictionResult(point=med[:int(horizon)].tolist())
 
 
 # --------------------------------------------------------------------------- #

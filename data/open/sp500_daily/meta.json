@@ -7,14 +7,14 @@
   "feature_names": [
     "close"
   ],
-  "n_obs": 1000,
+  "n_obs": 753,
   "date_range": [
     "",
     ""
   ],
   "split": {},
   "license": "open",
-  "source": "S&P 500 via yfinance (synthetic fallback)",
+  "source": "S&P 500 (real, yfinance)",
   "open": true,
   "requires_download": false,
   "target": "close",

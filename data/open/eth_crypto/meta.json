@@ -1,5 +1,5 @@
 {
-  "name": "btc_crypto",
+  "name": "eth_crypto",
   "domain": "crypto",
   "task": "forecast",
   "frequency": "day",
@@ -14,7 +14,7 @@
   ],
   "split": {},
   "license": "open",
-  "source": "BTC-USD (real, yfinance)",
+  "source": "ETH-USD (real, yfinance)",
   "open": true,
   "requires_download": false,
   "target": "close",

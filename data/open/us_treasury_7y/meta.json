@@ -1,24 +1,24 @@
 {
-  "name": "btc_crypto",
-  "domain": "crypto",
+  "name": "us_treasury_7y",
+  "domain": "bond",
   "task": "forecast",
   "frequency": "day",
   "n_features": 1,
   "feature_names": [
     "close"
   ],
-  "n_obs": 1097,
+  "n_obs": 753,
   "date_range": [
     "",
     ""
   ],
   "split": {},
   "license": "open",
-  "source": "BTC-USD (real, yfinance)",
+  "source": "iShares 3-7Y Treasury (real, yfinance)",
   "open": true,
   "requires_download": false,
   "target": "close",
-  "lookback": 150,
+  "lookback": 120,
   "horizon": 7,
   "rolling": true,
   "notes": "Open dataset. Real data when available; synthetic fallback otherwise."

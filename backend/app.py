@@ -231,7 +231,12 @@ def _list_datasets() -> list[DatasetMeta]:
 
 @app.get("/api/datasets")
 def datasets():
-    return [m.model_dump() for m in _list_datasets()]
+    from backend.config import enabled_datasets
+    enabled = enabled_datasets()
+    metas = _list_datasets()
+    if enabled is not None:
+        metas = [m for m in metas if m.name in enabled]
+    return [m.model_dump() for m in metas]
 
 
 @app.get("/api/datasets/{name}")
@@ -248,8 +253,12 @@ def dataset_detail(name: str):
 @app.get("/api/models")
 def models():
     """Return the available model adapters as a list of {name, info}."""
+    from backend.config import enabled_models
+    enabled = enabled_models()
     out = []
     for name, info in available_models().items():
+        if enabled is not None and name not in enabled:
+            continue
         entry = {"name": name}
         entry.update(info) if isinstance(info, dict) else entry.update({"info": info})
         out.append(entry)

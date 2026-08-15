@@ -1,0 +1,32 @@
+{
+  "datasets": {
+    "btc_crypto": true,
+    "crude_oil_commodity": true,
+    "dow_daily": true,
+    "equity_synthetic": true,
+    "eth_crypto": true,
+    "eur_usd_fx": true,
+    "fraud_anomaly": true,
+    "gbp_usd_fx": true,
+    "gold_commodity": true,
+    "ig_corp_bond": true,
+    "nasdaq_daily": true,
+    "priv_broker_order": true,
+    "priv_credit_risk": true,
+    "priv_crypto_tick": true,
+    "priv_fund_flow": true,
+    "return_classify": true,
+    "russell2000_daily": true,
+    "sp500_daily": true,
+    "us_treasury_7y": true
+  },
+  "models": {
+    "arima": true,
+    "chronos": true,
+    "moving_average": true,
+    "naive": true,
+    "random_walk": true,
+    "seasonal_naive": true,
+    "timesfm": true
+  }
+}

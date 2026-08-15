@@ -13,6 +13,11 @@ dependencies = [
     "requests>=2.31",
     "scikit-learn>=1.4",
     "yfinance>=0.4",
+    "pyjwt>=2.13.0",
+    "cryptography>=50.0.0",
+    "passlib>=1.7.4",
+    "bcrypt>=5.0.0",
+    "itsdangerous>=2.2.0",
 ]
 
 [project.optional-dependencies]

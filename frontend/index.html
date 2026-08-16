@@ -135,7 +135,22 @@ footer{background:var(--ink);color:#9fb0bf;padding:40px 0 30px;margin-top:20px}
 .uni .name{font-family:'Fraunces',serif;font-size:12px;color:#c3d0dc}
 footer .fine{font-size:12px;color:#7d8f9e;text-align:center;border-top:1px solid #1a2c3c;padding-top:18px}
 .hidden{display:none}
-@media(max-width:640px){.hero h1{font-size:32px}.row2{grid-template-columns:1fr}.nav .links{display:none}}
+@media(max-width:860px){.home-stats{grid-template-columns:repeat(2,1fr)}.home-feats{grid-template-columns:1fr}}
+/* ---- mobile: nav stays visible (was hidden), lang bar scrolls, tables scroll ---- */
+@media(max-width:640px){
+  .nav{height:auto;padding:12px 16px;flex-wrap:wrap;gap:10px}
+  .nav .links{display:flex !important;flex-wrap:wrap;gap:4px;width:100%}
+  .nav .links a{font-size:12px;padding:6px 10px}
+  .nav .brand span.mark{width:28px;height:28px}
+  .lang{overflow-x:auto;max-width:100%;flex:0 0 auto}
+  .hero h1{font-size:26px;white-space:normal;line-height:1.1}
+  .hero p{font-size:15px}
+  .row2{grid-template-columns:1fr}
+  section{padding:28px 0}
+  .lb-wrap{overflow-x:auto}
+  table{min-width:560px}
+  .container{padding:0 16px}
+}
 [dir="rtl"] .brand{flex-direction:row-reverse}
 [dir="rtl"] .bar{direction:ltr}
 
@@ -190,7 +205,7 @@ section.viewable.view-anim{animation:fadeUp .4s ease both}
 <!-- HERO -->
 <section class="hero" id="top">
   <div class="container">
-    <h1 data-i18n="hero_title">Finance TSFMs Arena</h1>
+    <h1 data-i18n="hero_title">TSFM4FINANCE</h1>
     <p data-i18n="hero_sub">A unified benchmark and leaderboard for financial time-series forecasting. One interface, open + closed tracks, multiple domains and tasks — compare your models on a single fair stage.</p>
     <div class="badges" id="heroBadges"><span class="badge" data-i18n="loading">Loading…</span></div>
   </div>
@@ -398,7 +413,7 @@ const I18N = {
     home_f1_b:"Unified interface",home_f1:"Every model and dataset is cast into one “timestamp × feature” matrix with explicit context window and horizon — so a fair comparison is possible across models that were never designed to be compared.",
     home_f2_b:"Open + closed tracks",home_f2:"Open data is evaluated publicly into the leaderboard; closed / proprietary data runs in private mode (local only) so nothing unpublished is exposed.",
     home_f3_b:"Real, reproducible data",home_f3:"Scores are computed from real market data, not fabricated — and published-benchmark results are kept separate from the live arena and cited to their source papers.",
-    hero_title:"Finance TSFMs Arena",hero_sub:"A unified benchmark and leaderboard for financial time-series forecasting. One interface, open + closed tracks, multiple domains and tasks — compare your models on a single fair stage.",
+    hero_title:"TSFM4FINANCE",hero_sub:"A unified benchmark and leaderboard for financial time-series forecasting. One interface, open + closed tracks, multiple domains and tasks — compare your models on a single fair stage.",
     loading:"Loading…",eyebrow_leaderboard:"Leaderboard",lb_title:"Overall Leaderboard",lb_desc:"Composite score = 0.5×(1−MASE) + 0.3×directional accuracy + 0.2×correlation. Only supported datasets are shown.",
     th_model:"Model",th_dataset:"Dataset",th_domain:"Domain",th_task:"Task",th_freq:"Freq.",th_score:"Score",lb_empty:"No results yet.",
     all_all:"All",lb_all:"All",lb_f_dataset:"Dataset",lb_f_domain:"Domain",lb_f_model:"Model",lb_f_freq:"Frequency",lb_f_view:"Show",lb_reset:"Reset",
@@ -421,7 +436,7 @@ const I18N = {
     pb_model:"Model",pb_metric:"Reported Metric",pb_bench:"Benchmark / Scope",pb_source:"Source"},
 
   fr: {nav_leaderboard:"Classement",nav_datasets:"Données",nav_evaluate:"Évaluer",nav_about:"À propos",nav_partners:"Partenaires",
-    hero_title:"Finance TSFMs Arena",hero_sub:"Un benchmark et un classement unifiés pour la prévision de séries temporelles financières. Une interface, des voies ouvertes et fermées, plusieurs domaines et tâches — comparez vos modèles sur une seule scène équitable.",
+    hero_title:"TSFM4FINANCE",hero_sub:"Un benchmark et un classement unifiés pour la prévision de séries temporelles financières. Une interface, des voies ouvertes et fermées, plusieurs domaines et tâches — comparez vos modèles sur une seule scène équitable.",
     loading:"Chargement…",eyebrow_leaderboard:"Classement",lb_title:"Classement général",lb_desc:"Score composite = 0,5×(1−MASE) + 0,3×précision directionnelle + 0,2×corrélation. Seules les données prises en charge sont affichées.",
     th_model:"Modèle",th_dataset:"Données",th_domain:"Domaine",th_task:"Tâche",th_freq:"Fréq.",th_score:"Score",lb_empty:"Aucun résultat pour le moment.",
     eyebrow_datasets:"Données",ds_title:"Données",ds_desc:"Plusieurs sous-domaines financiers et types de tâches. Les données ouvertes sont évaluées publiquement ; les données fermées nécessitent l'upload d'un modèle ou la fourniture de données.",
@@ -439,7 +454,7 @@ const I18N = {
     p_quant:"Trading quantitatif et algorithmique",p_asset:"Gestion d'actifs et de portefeuille",p_advisory:"Conseil en finance"},
 
   de: {nav_leaderboard:"Bestenliste",nav_datasets:"Datensätze",nav_evaluate:"Bewerten",nav_about:"Über",nav_partners:"Partner",
-    hero_title:"Finance TSFMs Arena",hero_sub:"Ein einheitliches Benchmark und eine Bestenliste für die Vorhersage von Finanz-Zeitreihen. Eine Schnittstelle, offene und geschlosseneTracks, mehrere Domänen und Aufgaben — vergleichen Sie Ihre Modelle auf einer fairen Bühne.",
+    hero_title:"TSFM4FINANCE",hero_sub:"Ein einheitliches Benchmark und eine Bestenliste für die Vorhersage von Finanz-Zeitreihen. Eine Schnittstelle, offene und geschlosseneTracks, mehrere Domänen und Aufgaben — vergleichen Sie Ihre Modelle auf einer fairen Bühne.",
     loading:"Laden…",eyebrow_leaderboard:"Bestenliste",lb_title:"Gesamt-Bestenliste",lb_desc:"Kombinierter Score = 0,5×(1−MASE) + 0,3×Richtungsgenauigkeit + 0,2×Korrelation. Nur unterstützte Datensätze werden angezeigt.",
     th_model:"Modell",th_dataset:"Datensatz",th_domain:"Domäne",th_task:"Aufgabe",th_freq:"Freq.",th_score:"Score",lb_empty:"Noch keine Ergebnisse.",
     eyebrow_datasets:"Datensätze",ds_title:"Datensätze",ds_desc:"Mehrere Finanz-Unterdомänen und Aufgabentypen. Offene Daten werden öffentlich bewertet; geschlossene Daten erfordern einen Modell-Upload oder die Bereitstellung von Daten.",
@@ -457,7 +472,7 @@ const I18N = {
     p_quant:"Quantitative & algorithmische Handel",p_asset:"Asset- & Portfoliomanagement",p_advisory:"Finanzberatung & Advisory"},
 
   es: {nav_leaderboard:"Clasificación",nav_datasets:"Datos",nav_evaluate:"Evaluar",nav_about:"Acerca de",nav_partners:"Socios",
-    hero_title:"Finance TSFMs Arena",hero_sub:"Un benchmark y una clasificación unificados para la predicción de series de tiempo financieras. Una interfaz, pistas abiertas y cerradas, múltiples dominios y tareas — compare sus modelos en una sola plataforma justa.",
+    hero_title:"TSFM4FINANCE",hero_sub:"Un benchmark y una clasificación unificados para la predicción de series de tiempo financieras. Una interfaz, pistas abiertas y cerradas, múltiples dominios y tareas — compare sus modelos en una sola plataforma justa.",
     loading:"Cargando…",eyebrow_leaderboard:"Clasificación",lb_title:"Clasificación general",lb_desc:"Puntuación compuesta = 0,5×(1−MASE) + 0,3×precisión direccional + 0,2×correlación. Solo se muestran los datos admitidos.",
     th_model:"Modelo",th_dataset:"Datos",th_domain:"Dominio",th_task:"Tarea",th_freq:"Frec.",th_score:"Puntaje",lb_empty:"Sin resultados aún.",
     eyebrow_datasets:"Datos",ds_title:"Datos",ds_desc:"Varios subdominios financieros y tipos de tareas. Los datos abiertos se evalúan públicamente; los cerrados requieren la carga de un modelo o la provisión de datos.",
@@ -475,7 +490,7 @@ const I18N = {
     p_quant:"Trading cuantitativo y algorítmico",p_asset:"Gestión de activos y cartera",p_advisory:"Consultoría y asesoría financiera"},
 
   lb: {nav_leaderboard:"Classement",nav_datasets:"Données",nav_evaluate:"Evaluéieren",nav_about:"Iwwer",nav_partners:"Partenaire",
-    hero_title:"Finance TSFMs Arena",hero_sub:"Ee vereent benchmark an e Ranking fir Finanz-Zäitreihen-Virausso. Eng Sproch, offen + geschoss Tracken, méi Domänen a Aufgaben — vergläich dyn Modeller op enger fairen Plaze.",
+    hero_title:"TSFM4FINANCE",hero_sub:"Ee vereent benchmark an e Ranking fir Finanz-Zäitreihen-Virausso. Eng Sproch, offen + geschoss Tracken, méi Domänen a Aufgaben — vergläich dyn Modeller op enger fairen Plaze.",
     loading:"Lade…",eyebrow_leaderboard:"Classement",lb_title:"Gesamt-Ranking",lb_desc:"Kombinéierten Score = 0,5×(1−MASE) + 0,3×Richtungs-Genuegkeet + 0,2×Korrelatioun. Nëmmen ënnerstëtzt Daten ginn gewisen.",
     th_model:"Modell",th_dataset:"Données",th_domain:"Domän",th_task:"Aufgab",th_freq:"Frequenz",th_score:"Score",lb_empty:"Nach keng Resultater.",
     eyebrow_datasets:"Données",ds_title:"Données",ds_desc:"Méi Finanz-Ënnerdomänen a Aufgaben. Offen Daten ginn publizesch evaluéiert; geschoss Daten brauchen e Modell-Upload oder Daten-Ënnerstëtzung.",
@@ -493,7 +508,7 @@ const I18N = {
     p_quant:"Quantitative & Algorithmeschen Handel",p_asset:"Asset & Portfolio-Verwaltung",p_advisory:"Finanz-Consulting & Advisory"},
 
   ar: {nav_leaderboard:"الترتيب",nav_datasets:"البيانات",nav_evaluate:"تقييم",nav_about:"حول",nav_partners:"الشركاء",
-    hero_title:"Finance TSFMs Arena",hero_sub:"معايير وشاشة ترتيب موحدة للتنبؤ بالسلاسل الزمنية المالية. واجهة واحدة، مسارات مفتوحة ومغلقة، عدة مجالات ومهام — قارن نماذجك على مسرح عادل واحد.",
+    hero_title:"TSFM4FINANCE",hero_sub:"معايير وشاشة ترتيب موحدة للتنبؤ بالسلاسل الزمنية المالية. واجهة واحدة، مسارات مفتوحة ومغلقة، عدة مجالات ومهام — قارن نماذجك على مسرح عادل واحد.",
     loading:"جارٍ التحميل…",eyebrow_leaderboard:"الترتيب",lb_title:"الترتيب العام",lb_desc:"الرقم المركّب = 0.5×(1−MASE) + 0.3×الدقة الاتجاهية + 0.2×الارتباط. يتم عرض البيانات المدعومة فقط.",
     th_model:"النموذج",th_dataset:"البيانات",th_domain:"المجال",th_task:"المهمة",th_freq:"التكرار",th_score:"الرقم",lb_empty:"لا نتائج بعد.",
     eyebrow_datasets:"البيانات",ds_title:"البيانات",ds_desc:"عدة مجالات مالية فرعية وأنواع مهام. يتم تقييم البيانات المفتوحة علنًا؛ البيانات المغلقة تتطلب رفع نموذج أو توفير بيانات.",
@@ -511,7 +526,7 @@ const I18N = {
     p_quant:"تداول كمي وخوارزمي",p_asset:"إدارة الأصول والمحافظ",p_advisory:"الاستشارات المالية"},
 
   zh: {nav_leaderboard:"排行榜",nav_datasets:"数据集",nav_evaluate:"评估",nav_about:"关于",nav_partners:"合作伙伴",
-    hero_title:"Finance TSFMs Arena",hero_sub:"面向金融时间序列预测的统一基准与排行榜。一个接口、开放+封闭赛道、多个领域与任务——在同一公平的舞台上比较你的模型。",
+    hero_title:"TSFM4FINANCE",hero_sub:"面向金融时间序列预测的统一基准与排行榜。一个接口、开放+封闭赛道、多个领域与任务——在同一公平的舞台上比较你的模型。",
     loading:"加载中…",eyebrow_leaderboard:"排行榜",lb_title:"综合排行榜",lb_desc:"综合得分 = 0.5×(1−MASE) + 0.3×方向准确率 + 0.2×相关性。仅展示受支持的数据集。",
     th_model:"模型",th_dataset:"数据集",th_domain:"领域",th_task:"任务",th_freq:"频率",th_score:"得分",lb_empty:"暂无结果。",
     eyebrow_datasets:"数据集",ds_title:"数据集",ds_desc:"多个金融子领域与任务类型。开放数据公开评估；封闭数据需上传模型或提供数据。",

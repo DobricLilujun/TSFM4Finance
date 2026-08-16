@@ -30,6 +30,7 @@ from pydantic import BaseModel as _BM
 from arena.schemas import DatasetMeta, TaskType
 from arena.models import _build, available_models
 from arena.metrics import evaluate as run_eval
+import backend.registry as registry
 
 DATA = Path(__file__).resolve().parent.parent / "data"
 
@@ -82,6 +83,27 @@ class SubmitReq(_BM):
     model_name: str
     mode: str = "open"          # 'private' for closed/user's-own model
     model_ref: Optional[str] = None   # placeholder for uploaded model artifact
+
+
+class RegisterModelReq(_BM):
+    """Register a user model (feature 1: upload model -> score)."""
+    name: str
+    type: str = "constant"      # constant | linear | arima
+    params: dict = {}
+    task: str = "forecast"
+
+
+class UploadAnswerReq(_BM):
+    """Upload raw predictions for a dataset (feature 2: upload answer -> score).
+
+    `predictions` is the model's output over the dataset's held-out horizon
+    (a flat list of floats, or a nested list for multi-horizon). It is scored
+    against the real test truth and optionally published to the leaderboard.
+    """
+    dataset: str
+    model_name: str = "user-answer"
+    predictions: list[float]
+    mode: str = "open"
 
 
 # --------------------------------------------------------------------------- #
@@ -143,7 +165,10 @@ def _evaluate_dataset(meta: DatasetMeta, model_name: str,
     horizon = horizon or meta.horizon
     lookback = lookback or meta.lookback
 
-    model = _build(model_name)
+    model = _resolve_model(model_name)
+    if model is None:
+        raise HTTPException(404, f"unknown model '{model_name}' "
+                                 f"(available: {sorted(available_models())})")
 
     # For classify/anomaly we evaluate on the tail directly; for forecast we
     # roll. Keep it robust: fall back to a single window if rolling fails.
@@ -174,6 +199,19 @@ def _evaluate_dataset(meta: DatasetMeta, model_name: str,
     avg = {k: float(np.nanmean([m[k] for m in per_point])) for k in keys}
     avg["n_points"] = len(per_point)
     return avg
+
+
+def _resolve_model(name: str):
+    """Resolve a model by name: built-in first, else a registered user model.
+
+    Returns a BaseModel adapter, or None if it is neither.
+    """
+    if name in available_models():
+        return _build(name)
+    spec = registry.get_model(name)
+    if spec is not None:
+        return registry.make_registered(spec)
+    return None
 
 
 # --------------------------------------------------------------------------- #
@@ -268,8 +306,9 @@ def models():
 @app.post("/api/evaluate")
 def evaluate(req: EvaluateReq):
     meta = _load_dataset(req.dataset)
-    if req.model not in available_models():
-        raise HTTPException(404, f"unknown model '{req.model}' (available: {sorted(available_models())})")
+    if _resolve_model(req.model) is None:
+        raise HTTPException(404, f"unknown model '{req.model}' "
+                                 f"(available: {sorted(available_models()) + registry.list_models()})")
     try:
         metrics = _evaluate_dataset(meta, req.model, req.horizon, req.lookback)
     except HTTPException:
@@ -292,15 +331,17 @@ def evaluate(req: EvaluateReq):
 
 @app.post("/api/submit")
 def submit(req: SubmitReq):
-    """Local mock of 'upload your model and let the arena evaluate it'.
+    """Upload a model (by name/registered) and let the arena score it.
 
     In a real deployment this endpoint would receive a model artifact /
-    inference service (req.model_ref) and run it here. Locally we resolve the
-    named model from the registry and evaluate it, exactly like /evaluate.
+    inference service (req.model_ref) and run it here. It resolves the named
+    model from the built-in registry OR a user-registered model and evaluates
+    it, exactly like /evaluate.
     """
     meta = _load_dataset(req.dataset)
-    if req.model_name not in available_models():
-        raise HTTPException(404, f"unknown model '{req.model_name}' (available: {sorted(available_models())})")
+    if _resolve_model(req.model_name) is None:
+        raise HTTPException(404, f"unknown model '{req.model_name}' "
+                                 f"(available: {sorted(available_models()) + registry.list_models()})")
     try:
         metrics = _evaluate_dataset(meta, req.model_name, None, None)
     except Exception as e:
@@ -317,6 +358,139 @@ def submit(req: SubmitReq):
     if req.mode != "private":
         LB.add(record)
     return _to_native(record)
+
+
+# --------------------------------------------------------------------------- #
+# Feature 1: upload/register a model, then score it
+# --------------------------------------------------------------------------- #
+@app.post("/api/models/register")
+def register_model(req: RegisterModelReq):
+    """Register a user model; it becomes runnable + scoreable like a built-in."""
+    try:
+        rec = registry.register_model(req.model_dump())
+    except ValueError as e:
+        raise HTTPException(400, str(e))
+    return _to_native(rec)
+
+
+@app.get("/api/models/registered")
+def list_registered():
+    return _to_native(registry.list_models())
+
+
+# --------------------------------------------------------------------------- #
+# Feature 2: upload answers (raw predictions) -> score against truth
+# --------------------------------------------------------------------------- #
+@app.post("/api/upload-answer")
+def upload_answer(req: UploadAnswerReq):
+    """Score a set of raw predictions against the dataset's held-out truth.
+
+    The predictions are matched to the last N points of the test split (where
+    N = len(predictions)) and scored with the same metrics as /evaluate. The
+    result is stored as a submission and, unless mode='private', published to
+    the leaderboard.
+    """
+    meta = _load_dataset(req.dataset)
+    pred = np.asarray(_flatten(req.predictions), dtype=float)
+    if len(pred) == 0:
+        raise HTTPException(400, "predictions must be a non-empty list")
+
+    _, _, test = _load_splits(req.dataset)
+    truth = _extract_truth(test, meta)
+    n = min(len(pred), len(truth))
+    if n == 0:
+        raise HTTPException(400, "cannot align predictions to dataset truth")
+    truth = truth[:n]
+    pred = pred[:n]
+
+    from arena.schemas import PredictOutput
+    metrics = run_eval(PredictOutput(point=pred.tolist()), truth_df_from(truth),
+                        meta, train_df=_train_df(req.dataset))
+    record = {
+        "dataset": meta.name, "model_name": req.model_name, "mode": req.mode,
+        "domain": meta.domain.value, "task": meta.task.value,
+        "frequency": meta.frequency.value,
+        "kind": "answer",
+        "n_predictions": int(n),
+        "score": metrics.get("score", 0.0),
+        "metrics": metrics,
+    }
+    sid = registry.store_submission(record)
+    record["id"] = sid
+    if req.mode != "private":
+        lb_row = {
+            "dataset": meta.name, "model": req.model_name, "mode": req.mode,
+            "domain": meta.domain.value, "task": meta.task.value,
+            "frequency": meta.frequency.value,
+            "score": record["score"], "metrics": record["metrics"],
+        }
+        LB.add(lb_row)
+    return _to_native(record)
+
+
+def _extract_truth(test: pd.DataFrame, meta: DatasetMeta) -> np.ndarray:
+    from arena.metrics import _extract_forecast_truth, _extract_labels
+    if meta.task == TaskType.FORECAST:
+        return _extract_forecast_truth(test, meta)
+    return _extract_labels(test, meta)
+
+
+def _train_df(name: str) -> Optional[pd.DataFrame]:
+    try:
+        return _load_splits(name)[0]
+    except Exception:
+        return None
+
+
+def truth_df_from(arr: np.ndarray) -> pd.DataFrame:
+    """Wrap a 1-D truth array back into a single-row-per-step frame."""
+    return pd.DataFrame({"y": arr})
+
+
+def _flatten(x) -> list[float]:
+    out: list[float] = []
+    for v in (x or []):
+        if isinstance(v, (list, tuple, np.ndarray)):
+            out.extend(float(z) for z in v)
+        else:
+            out.append(float(v))
+    return out
+
+
+# --------------------------------------------------------------------------- #
+# Feature 3: manage / store models, datasets, results (submissions)
+# --------------------------------------------------------------------------- #
+@app.get("/api/submissions")
+def list_submissions():
+    return _to_native(registry.list_submissions())
+
+
+@app.get("/api/submissions/{sid}")
+def get_submission(sid: str):
+    rec = registry.get_submission(sid)
+    if rec is None:
+        raise HTTPException(404, f"submission '{sid}' not found")
+    return _to_native(rec)
+
+
+@app.delete("/api/submissions/{sid}")
+def delete_submission(sid: str):
+    ok = registry.delete_submission(sid)
+    return {"ok": ok, "id": sid}
+
+
+@app.get("/api/management/summary")
+def management_summary():
+    """Aggregate view for managing models / datasets / results."""
+    return _to_native({
+        "models": {
+            "builtin": sorted(available_models()),
+            "registered": registry.list_models(),
+        },
+        "datasets": [m.name for m in _list_datasets()],
+        "submissions": registry.list_submissions(),
+        "leaderboard_total": len(LB.records),
+    })
 
 
 @app.get("/api/leaderboard")

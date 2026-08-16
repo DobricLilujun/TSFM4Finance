@@ -20,6 +20,14 @@ def main():
     ds = json.load(open(Path("/tmp/ds.json")))
     md = json.load(open(Path("/tmp/md.json")))
 
+    # Public "Overall Leaderboard" must NOT include private/proprietary rows
+    # (mode=="private") or "(placeholder)" rows — those have no real data and
+    # are documented as private in the seed. Drop them so the public board is
+    # honest (only real, public evaluations).
+    lb = [r for r in lb
+          if r.get("mode") != "private"
+          and "placeholder" not in str(r.get("model", "")).lower()]
+
     payload = json.dumps({"leaderboard": lb, "datasets": ds, "models": md},
                          ensure_ascii=False)
     out = src.replace("__BUNDLE__", payload)

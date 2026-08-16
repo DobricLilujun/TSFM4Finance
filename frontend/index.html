@@ -69,6 +69,16 @@ tbody tr:hover{background:#faf7f1}
 .bar{height:6px;border-radius:3px;background:linear-gradient(90deg,var(--navy),var(--gold));margin-top:7px}
 .muted{color:var(--muted);font-size:13px}
 
+/* ---- leaderboard filters + view ---- */
+.lb-filters{display:flex;flex-wrap:wrap;align-items:flex-end;gap:12px;margin-bottom:16px}
+.fb{display:flex;flex-direction:column;gap:5px;flex:1;min-width:140px}
+.fb label{font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--dim);margin:0}
+.fb select{width:100%;padding:9px 12px}
+.lb-reset{align-self:flex-end;background:var(--card);border:1px solid var(--line);color:var(--dim);font-weight:600;font-size:13px;padding:9px 16px;border-radius:9px;cursor:pointer;transition:.15s;font-family:inherit;height:38px}
+.lb-reset:hover{border-color:var(--gold);color:var(--gold)}
+.lb-meta{color:var(--dim);font-size:12px;margin-top:12px;text-align:right}
+.lb-meta b{color:var(--navy)}
+
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(248px,1fr));gap:18px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:20px;transition:.16s;box-shadow:var(--shadow)}
 .card:hover{transform:translateY(-3px);border-color:var(--gold)}
@@ -174,6 +184,14 @@ footer .fine{font-size:12px;color:#7d8f9e;text-align:center;border-top:1px solid
       <h2 data-i18n="lb_title">Overall Leaderboard</h2>
       <p data-i18n="lb_desc">Composite score = 0.5×(1−MASE) + 0.3×directional accuracy + 0.2×correlation. Only supported datasets are shown.</p>
     </div>
+    <div class="lb-filters">
+      <div class="fb"><label data-i18n="lb_f_dataset">Dataset</label><select id="fLbDataset"></select></div>
+      <div class="fb"><label data-i18n="lb_f_domain">Domain</label><select id="fLbDomain"></select></div>
+      <div class="fb"><label data-i18n="lb_f_model">Model</label><select id="fLbModel"></select></div>
+      <div class="fb"><label data-i18n="lb_f_freq">Frequency</label><select id="fLbFreq"></select></div>
+      <div class="fb"><label data-i18n="lb_f_view">Show</label><select id="fLbLimit"></select></div>
+      <button id="lbReset" class="lb-reset" data-i18n="lb_reset">Reset</button>
+    </div>
     <div class="lb-wrap">
       <table id="lbTable">
         <thead><tr>
@@ -188,6 +206,7 @@ footer .fine{font-size:12px;color:#7d8f9e;text-align:center;border-top:1px solid
         <tbody id="lbBody"><tr><td colspan="7" class="muted" style="text-align:center;padding:30px" data-i18n="loading">Loading…</td></tr></tbody>
       </table>
     </div>
+    <div id="lbMeta" class="lb-meta"></div>
   </div>
 </section>
 
@@ -334,6 +353,8 @@ const I18N = {
     hero_title:"Finance TSFMs Arena",hero_sub:"A unified benchmark and leaderboard for financial time-series forecasting. One interface, open + closed tracks, multiple domains and tasks — compare your models on a single fair stage.",
     loading:"Loading…",eyebrow_leaderboard:"Leaderboard",lb_title:"Overall Leaderboard",lb_desc:"Composite score = 0.5×(1−MASE) + 0.3×directional accuracy + 0.2×correlation. Only supported datasets are shown.",
     th_model:"Model",th_dataset:"Dataset",th_domain:"Domain",th_task:"Task",th_freq:"Freq.",th_score:"Score",lb_empty:"No results yet.",
+    all_all:"All",lb_all:"All",lb_f_dataset:"Dataset",lb_f_domain:"Domain",lb_f_model:"Model",lb_f_freq:"Frequency",lb_f_view:"Show",lb_reset:"Reset",
+    lb_shown:"shown",lb_total:"total",lb_more:"more",lb_change_view:"change the view above",
     eyebrow_datasets:"Datasets",ds_title:"Datasets",ds_desc:"Multiple financial sub-domains and task types. Open data is evaluated publicly; closed data requires a model upload or data provisioning.",
     ds_nofeed:"No data feed available.",k_task:"Task",k_type:"Type",k_source:"Source",v_open:"Open",v_closed:"Closed",v_supported:"Supported",v_unsupported:"Unsupported",
     b_datasets:"datasets",b_open:"open",b_closed:"closed",b_tasks:"tasks",
@@ -502,13 +523,76 @@ function supported(name){ const s = CONFIG.datasets[name]; return s===undefined 
 async function loadLB(){
   const d = await api('/api/leaderboard');
   const body = document.getElementById('lbBody');
-  const rows = (d && d.rows) ? d.rows.filter(r=>supported(r.dataset)) : [];
-  if(!rows.length){ body.innerHTML='<tr><td colspan="7" class="muted" style="text-align:center;padding:30px">'+I18N.t('lb_empty')+'</td></tr>'; return; }
+  // normalize: DATA.leaderboard may be a list OR {rows:[...]}; also support {records}
+  const raw = Array.isArray(d) ? d : (d && (d.rows || d.records || []));
+  // keep the full, supported set; sort by composite score (descending)
+  _lbAll = (raw || []).filter(r=>supported(r.dataset))
+    .slice().sort((a,b)=>(b.score||0)-(a.score||0));
+  // populate filter options once (then apply current filters)
+  buildLbFilters();
+  renderLb();
+}
+
+// ---- leaderboard filters + Top-N view ----
+let _lbAll = [];
+const _lbState = {dataset:'all', domain:'all', model:'all', freq:'all', limit:10};
+
+function _opts(id, values, allLabel){
+  const s=document.getElementById(id); if(!s) return;
+  const cur=s.value;
+  s.innerHTML='';
+  const o0=document.createElement('option'); o0.value='all'; o0.textContent=allLabel; s.appendChild(o0);
+  values.forEach(v=>{ const o=document.createElement('option'); o.value=v; o.textContent=v; s.appendChild(o); });
+  s.value = cur || 'all';
+}
+
+function buildLbFilters(){
+  const set = (id, vals, allLabel) => {
+    _opts(id, [...new Set(vals)].sort(), allLabel);
+  };
+  set('fLbDataset', _lbAll.map(r=>r.dataset), I18N.t('all_all'));
+  set('fLbDomain', _lbAll.map(r=>r.domain), I18N.t('all_all'));
+  set('fLbModel', _lbAll.map(r=>r.model), I18N.t('all_all'));
+  set('fLbFreq', _lbAll.map(r=>r.frequency), I18N.t('all_all'));
+  // view-limit selector
+  const lim=document.getElementById('fLbLimit');
+  if(lim){
+    const opts=[10,25,50,_lbAll.length].filter((v,i,a)=>a.indexOf(v)===i).sort((a,b)=>a-b);
+    lim.innerHTML='';
+    opts.forEach(v=>{ const o=document.createElement('option'); o.value=v; o.textContent = (v>=_lbAll.length) ? I18N.t('lb_all') : ('Top '+v); lim.appendChild(o); });
+    const cur = +_lbState.limit || 10;
+    lim.value = (opts.includes(cur) ? cur : Math.min(cur, opts[opts.length-1]));
+  }
+  // re-read current filter values into state
+  _lbState.dataset = document.getElementById('fLbDataset').value || 'all';
+  _lbState.domain = document.getElementById('fLbDomain').value || 'all';
+  _lbState.model = document.getElementById('fLbModel').value || 'all';
+  _lbState.freq = document.getElementById('fLbFreq').value || 'all';
+  _lbState.limit = +document.getElementById('fLbLimit').value || 10;
+}
+
+function _applyFilters(rows){
+  const st=_lbState;
+  return rows.filter(r=>
+    (st.dataset==='all' || r.dataset===st.dataset) &&
+    (st.domain==='all'  || r.domain===st.domain)  &&
+    (st.model==='all'   || r.model===st.model)    &&
+    (st.freq==='all'    || r.frequency===st.freq));
+}
+
+function renderLb(){
+  const body = document.getElementById('lbBody');
+  const meta = document.getElementById('lbMeta');
+  const filtered = _applyFilters(_lbAll);
+  filtered.forEach((r,i)=>{ r._rank = i+1; });
+  const limit = _lbState.limit || 10;
+  const shown = filtered.slice(0, limit);
+  if(!filtered.length){ body.innerHTML='<tr><td colspan="7" class="muted" style="text-align:center;padding:30px">'+I18N.t('lb_empty')+'</td></tr>'; if(meta) meta.textContent=''; return; }
   body.innerHTML='';
-  rows.forEach(r=>{
-    const cls = r.rank===1?'g':r.rank===2?'s':r.rank===3?'b':'';
+  shown.forEach(r=>{
+    const cls = r._rank===1?'g':r._rank===2?'s':r._rank===3?'b':'';
     const tr=document.createElement('tr');
-    tr.innerHTML=`<td class="rk ${cls}">${r.rank}</td>
+    tr.innerHTML=`<td class="rk ${cls}">${r._rank}</td>
       <td class="model">${r.model}</td>
       <td>${r.dataset}</td>
       <td><span class="tag">${r.domain}</span></td>
@@ -516,6 +600,30 @@ async function loadLB(){
       <td>${r.frequency}</td>
       <td><span class="score">${(r.score*100).toFixed(1)}</span><div class="bar" style="width:${Math.max(6,r.score*100)}%"></div></td>`;
     body.appendChild(tr);
+  });
+  if(meta){
+    const more = filtered.length - shown.length;
+    meta.innerHTML = `<b>${shown.length}</b> / ${filtered.length} ${I18N.t('lb_shown')} · ${I18N.t('lb_total')} ${_lbAll.length}` +
+      (more>0 ? ` · <b>${more}</b> ${I18N.t('lb_more')} — ${I18N.t('lb_change_view')}` : '');
+  }
+}
+
+function wireLbFilters(){
+  const map = {fLbDataset:'dataset', fLbDomain:'domain', fLbModel:'model', fLbFreq:'freq'};
+  Object.keys(map).forEach(id=>{
+    const el=document.getElementById(id); if(!el) return;
+    el.addEventListener('change', ()=>{ _lbState[map[id]] = el.value || 'all'; renderLb(); });
+  });
+  const lim=document.getElementById('fLbLimit');
+  if(lim) lim.addEventListener('change', ()=>{ _lbState.limit = +lim.value || 10; renderLb(); });
+  const reset=document.getElementById('lbReset');
+  if(reset) reset.addEventListener('click', ()=>{
+    _lbState.dataset=_lbState.domain=_lbState.model=_lbState.freq='all';
+    _lbState.limit = 10;
+    ['fLbDataset','fLbDomain','fLbModel','fLbFreq'].forEach(id=>{ const e=document.getElementById(id); if(e) e.value='all'; });
+    const l=document.getElementById('fLbLimit'); if(l) l.value = (Array.from(l.options).some(o=>o.value==='10')?'10':l.options[0].value);
+    _lbState.limit = +l.value || 10;
+    renderLb();
   });
 }
 
@@ -634,6 +742,7 @@ async function init(){
   document.documentElement.dir = (l==='ar') ? 'rtl' : 'ltr';
   I18N.init(l);
   CONFIG = Object.assign(CONFIG, await api('/api/config'));
+  wireLbFilters();
   loadLB(); loadDatasets(); loadForm(); loadPB();
 }
 init();

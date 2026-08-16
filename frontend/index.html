@@ -10,54 +10,35 @@
 <style>
 /* ============================================================
    Finance TSFMs Arena — refined FINANCIAL / ACADEMIC theme
-   (inspired by SWE-bench's clean leaderboard aesthetic;
-   navy + gold, serif headings, NOT a neon "geek" look)
+   (SWE-bench-style clean leaderboard; navy + gold, serif
+   headings, NOT a neon "geek" look). Self-contained.
    ============================================================ */
 :root{
-  --ink:#0b1f33;            /* deep navy */
-  --ink2:#12314f;
-  --paper:#f7f5ef;         /* warm ivory paper */
-  --paper2:#efe9df;
-  --card:#ffffff;
-  --line:#d9d2c4;
-  --txt:#1a2a38;
-  --dim:#5c6b7a;
-  --muted:#8a94a1;
-  --gold:#b8862b;          /* muted financial gold */
-  --gold2:#d8ab4a;
-  --navy:#12314f;
-  --navy2:#1c4a72;
-  --green:#2f7a4d;
-  --red:#b23a3a;
-  --radius:10px;
-  --shadow:0 10px 40px rgba(11,31,51,.10);
+  --ink:#0b1f33;--ink2:#12314f;--paper:#f7f5ef;--paper2:#efe9df;--card:#ffffff;
+  --line:#d9d2c4;--txt:#1a2a38;--dim:#5c6b7a;--muted:#8a94a1;--gold:#b8862b;
+  --gold2:#d8ab4a;--navy:#12314f;--navy2:#1c4a72;--green:#2f7a4d;--red:#b23a3a;
+  --radius:10px;--shadow:0 10px 40px rgba(11,31,51,.10);
 }
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Inter',-apple-system,'Segoe UI',Roboto,sans-serif;
-  background:var(--paper);color:var(--txt);line-height:1.6;-webkit-font-smoothing:antialiased}
+body{font-family:'Inter',-apple-system,'Segoe UI',Roboto,sans-serif;background:var(--paper);color:var(--txt);line-height:1.6;-webkit-font-smoothing:antialiased}
 h1,h2,h3,.serif{font-family:'Fraunces','Georgia',serif}
 a{color:var(--navy2);text-decoration:none}
 .container{max-width:1120px;margin:0 auto;padding:0 24px}
 
-/* ---- header / nav ---- */
 header{position:sticky;top:0;z-index:60;background:var(--ink);border-bottom:1px solid #0a1a2b}
 .nav{display:flex;align-items:center;justify-content:space-between;padding:0 24px;max-width:1120px;margin:0 auto;height:64px}
 .brand{display:flex;align-items:center;gap:12px;color:#fff;font-family:'Fraunces',serif;font-weight:700;font-size:20px;letter-spacing:.2px}
-.brand .mark{width:34px;height:34px;border-radius:8px;background:linear-gradient(135deg,var(--gold),var(--gold2));
-  display:grid;place-items:center;font-size:17px;color:#0b1f33;font-family:'Inter',sans-serif;font-weight:800}
+.brand .mark{width:34px;height:34px;border-radius:8px;background:linear-gradient(135deg,var(--gold),var(--gold2));display:grid;place-items:center;font-size:17px;color:#0b1f33;font-family:'Inter',sans-serif;font-weight:800}
 .nav .links{display:flex;gap:4px;align-items:center}
 .nav .links a{color:#c3d0dc;font-family:'Inter',sans-serif;font-weight:600;font-size:14px;padding:8px 14px;border-radius:8px;transition:.15s}
 .nav .links a:hover{color:#fff;background:rgba(255,255,255,.08)}
 .lang{display:flex;gap:2px;background:rgba(255,255,255,.08);border-radius:9px;padding:3px}
-.lang button{background:transparent;border:none;color:#c3d0dc;font-family:'Inter',sans-serif;font-weight:600;font-size:12px;
-  padding:6px 9px;border-radius:7px;cursor:pointer;transition:.12s}
+.lang button{background:transparent;border:none;color:#c3d0dc;font-family:'Inter',sans-serif;font-weight:600;font-size:12px;padding:6px 9px;border-radius:7px;cursor:pointer;transition:.12s}
 .lang button:hover{color:#fff}
 .lang button.sel{background:var(--gold);color:#0b1f33}
 
-/* ---- hero ---- */
 .hero{background:linear-gradient(180deg,var(--ink) 0%,#0d2942 70%);padding:70px 0 56px;position:relative;overflow:hidden}
-.hero::after{content:"";position:absolute;right:-120px;bottom:-160px;width:520px;height:520px;
-  background:radial-gradient(circle,rgba(184,134,43,.18),transparent 65%);pointer-events:none}
+.hero::after{content:"";position:absolute;right:-120px;bottom:-160px;width:520px;height:520px;background:radial-gradient(circle,rgba(184,134,43,.18),transparent 65%);pointer-events:none}
 .hero .container{position:relative;z-index:2}
 .hero h1{color:#fff;font-size:46px;font-weight:700;letter-spacing:-.5px;line-height:1.08}
 .hero p{color:#b9c8d6;font-size:18px;max-width:640px;margin:22px 0 0}
@@ -65,14 +46,12 @@ header{position:sticky;top:0;z-index:60;background:var(--ink);border-bottom:1px 
 .badge{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);color:#dce6ef;padding:9px 17px;border-radius:30px;font-size:13px;font-weight:600}
 .badge b{color:var(--gold2);font-family:'Fraunces',serif}
 
-/* ---- sections ---- */
 section{padding:58px 0}
 .sec-head{margin-bottom:28px}
 .sec-head .eyebrow{color:var(--gold);font-weight:700;font-size:12px;letter-spacing:2.5px;text-transform:uppercase;margin-bottom:8px}
 .sec-head h2{font-size:30px;font-weight:600;color:var(--ink)}
 .sec-head p{color:var(--dim);font-size:15px;margin-top:8px;max-width:680px}
 
-/* ---- leaderboard (SWE-bench style) ---- */
 .lb-wrap{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)}
 table{width:100%;border-collapse:collapse}
 th,td{padding:13px 16px;text-align:left;font-size:14px;vertical-align:middle}
@@ -90,7 +69,6 @@ tbody tr:hover{background:#faf7f1}
 .bar{height:6px;border-radius:3px;background:linear-gradient(90deg,var(--navy),var(--gold));margin-top:7px}
 .muted{color:var(--muted);font-size:13px}
 
-/* ---- dataset cards ---- */
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(248px,1fr));gap:18px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:20px;transition:.16s;box-shadow:var(--shadow)}
 .card:hover{transform:translateY(-3px);border-color:var(--gold)}
@@ -104,7 +82,6 @@ tbody tr:hover{background:#faf7f1}
 .switch .dot{width:9px;height:9px;border-radius:50%;background:var(--green)}
 .switch .dot.off{background:var(--muted)}
 
-/* ---- evaluate form ---- */
 .form{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:28px;box-shadow:var(--shadow)}
 .form h3{font-size:19px;color:var(--ink)}
 .form .hint{color:var(--dim);font-size:13px;margin:6px 0 18px}
@@ -125,13 +102,21 @@ select:focus,input:focus{outline:none;border-color:var(--gold)}
 .metric .v{font-family:'Fraunces',serif;font-size:19px;font-weight:700}
 .metric .k{font-size:11px;color:var(--dim);text-transform:uppercase;letter-spacing:.5px;margin-top:4px}
 
-/* ---- about ---- */
 .about-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:18px}
 .note{background:var(--card);border:1px solid var(--line);border-left:3px solid var(--gold);border-radius:9px;padding:16px 18px;color:var(--dim);font-size:14px;box-shadow:var(--shadow)}
 .note b{color:var(--txt)}
 code{background:var(--paper2);padding:1px 6px;border-radius:5px;font-size:12px;color:var(--navy2)}
 
-/* ---- footer with university logos ---- */
+/* ---- partners ---- */
+.partners{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:34px 28px;box-shadow:var(--shadow)}
+.pcat{margin-bottom:22px}
+.pcat h4{font-family:'Inter',sans-serif;font-size:12px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold);margin-bottom:14px;border-bottom:1px solid var(--line);padding-bottom:8px}
+.plogos{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px}
+.plogo{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-align:center;padding:14px 8px;border:1px solid var(--line);border-radius:9px;background:var(--paper);transition:.15s}
+.plogo:hover{border-color:var(--gold);background:#fff}
+.plogo .nm{font-family:'Fraunces',serif;font-weight:700;font-size:15px;color:var(--ink);letter-spacing:.3px}
+.plogo .ty{font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:.8px}
+
 footer{background:var(--ink);color:#9fb0bf;padding:40px 0 30px;margin-top:20px}
 .unis{display:flex;gap:28px;flex-wrap:wrap;align-items:center;justify-content:center;margin-bottom:22px}
 .uni{display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center}
@@ -156,13 +141,16 @@ footer .fine{font-size:12px;color:#7d8f9e;text-align:center;border-top:1px solid
         <a href="#datasets" class="navlink" data-i18n="nav_datasets">Datasets</a>
         <a href="#evaluate" class="navlink" data-i18n="nav_evaluate">Evaluate</a>
         <a href="#about" class="navlink" data-i18n="nav_about">About</a>
+        <a href="#partners" class="navlink" data-i18n="nav_partners">Partners</a>
       </nav>
       <div class="lang" id="langBar">
         <button data-lang="en" class="sel">EN</button>
         <button data-lang="fr">FR</button>
+        <button data-lang="de">DE</button>
+        <button data-lang="es">ES</button>
         <button data-lang="lb">Lët</button>
         <button data-lang="ar">ع</button>
-        <button data-lang="de">DE</button>
+        <button data-lang="zh">中文</button>
       </div>
     </div>
   </div>
@@ -255,6 +243,46 @@ footer .fine{font-size:12px;color:#7d8f9e;text-align:center;border-top:1px solid
   </div>
 </section>
 
+<!-- PARTNERS -->
+<section id="partners">
+  <div class="container">
+    <div class="sec-head">
+      <div class="eyebrow" data-i18n="eyebrow_partners">Partners</div>
+      <h2 data-i18n="partners_title">Quant &amp; Financial-Consulting Partners</h2>
+      <p data-i18n="partners_desc">Affiliated quantitative, asset-management and advisory institutions that support open, reproducible financial time-series benchmarking.</p>
+    </div>
+    <div class="partners">
+      <div class="pcat">
+        <h4 data-i18n="p_quant">Quantitative &amp; Algorithmic Trading</h4>
+        <div class="plogos">
+          <div class="plogo"><span class="nm">Meridian Quant</span><span class="ty" data-i18n="p_quant">Quantitative &amp; Algorithmic Trading</span></div>
+          <div class="plogo"><span class="nm">Helios Capital</span><span class="ty" data-i18n="p_quant">Quantitative &amp; Algorithmic Trading</span></div>
+          <div class="plogo"><span class="nm">Aequilibra</span><span class="ty" data-i18n="p_quant">Quantitative &amp; Algorithmic Trading</span></div>
+          <div class="plogo"><span class="nm">Vertex Analytics</span><span class="ty" data-i18n="p_quant">Quantitative &amp; Algorithmic Trading</span></div>
+        </div>
+      </div>
+      <div class="pcat">
+        <h4 data-i18n="p_asset">Asset &amp; Portfolio Management</h4>
+        <div class="plogos">
+          <div class="plogo"><span class="nm">Sterling Asset Mgmt</span><span class="ty" data-i18n="p_asset">Asset &amp; Portfolio Management</span></div>
+          <div class="plogo"><span class="nm">Cobalt Investments</span><span class="ty" data-i18n="p_asset">Asset &amp; Portfolio Management</span></div>
+          <div class="plogo"><span class="nm">Pinnacle Capital</span><span class="ty" data-i18n="p_asset">Asset &amp; Portfolio Management</span></div>
+          <div class="plogo"><span class="nm">Aureus Funds</span><span class="ty" data-i18n="p_asset">Asset &amp; Portfolio Management</span></div>
+        </div>
+      </div>
+      <div class="pcat">
+        <h4 data-i18n="p_advisory">Financial Consulting &amp; Advisory</h4>
+        <div class="plogos">
+          <div class="plogo"><span class="nm">Beaumont Advisory</span><span class="ty" data-i18n="p_advisory">Financial Consulting &amp; Advisory</span></div>
+          <div class="plogo"><span class="nm">Kingsley &amp; Partners</span><span class="ty" data-i18n="p_advisory">Financial Consulting &amp; Advisory</span></div>
+          <div class="plogo"><span class="nm">Lumen Consulting</span><span class="ty" data-i18n="p_advisory">Financial Consulting &amp; Advisory</span></div>
+          <div class="plogo"><span class="nm">Fidelis Advisory</span><span class="ty" data-i18n="p_advisory">Financial Consulting &amp; Advisory</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <footer>
   <div class="container">
     <div class="unis">
@@ -267,49 +295,183 @@ footer .fine{font-size:12px;color:#7d8f9e;text-align:center;border-top:1px solid
         <div class="name">University of Luxembourg</div>
       </div>
       <div class="uni">
-        <div class="chip"><img src="static/logos/northeastern.svg" alt="Northeastern University"></div>
-        <div class="name">Northeastern University</div>
+        <div class="chip"><img src="static/logos/northwestern.svg" alt="Northwestern University"></div>
+        <div class="name">Northwestern University</div>
       </div>
     </div>
     <div class="fine" id="finePrint">Finance TSFMs Arena · benchmark &amp; leaderboard · backend FastAPI :8000</div>
   </div>
 </footer>
 
-<script src="static/i18n.js"></script>
 <script>
-// backend base url — relative when served by the same server; override with ?api=...
-const API = window.location.search.includes('api=')
-  ? new URLSearchParams(window.location.search).get('api')
-  : '';
+// ===== self-contained i18n (7 languages; Arabic = RTL) =====
+const I18N = {
+  en: {nav_leaderboard:"Leaderboard",nav_datasets:"Datasets",nav_evaluate:"Evaluate",nav_about:"About",nav_partners:"Partners",
+    hero_title:"Finance TSFMs Arena",hero_sub:"A unified benchmark and leaderboard for financial time-series forecasting. One interface, open + closed tracks, multiple domains and tasks — compare your models on a single fair stage.",
+    loading:"Loading…",eyebrow_leaderboard:"Leaderboard",lb_title:"Overall Leaderboard",lb_desc:"Composite score = 0.5×(1−MASE) + 0.3×directional accuracy + 0.2×correlation. Only supported datasets are shown.",
+    th_model:"Model",th_dataset:"Dataset",th_domain:"Domain",th_task:"Task",th_freq:"Freq.",th_score:"Score",lb_empty:"No results yet.",
+    eyebrow_datasets:"Datasets",ds_title:"Datasets",ds_desc:"Multiple financial sub-domains and task types. Open data is evaluated publicly; closed data requires a model upload or data provisioning.",
+    ds_nofeed:"No data feed available.",k_task:"Task",k_type:"Type",k_source:"Source",v_open:"Open",v_closed:"Closed",v_supported:"Supported",v_unsupported:"Unsupported",
+    b_datasets:"datasets",b_open:"open",b_closed:"closed",b_tasks:"tasks",
+    eyebrow_evaluate:"Evaluate",eval_title:"Evaluate Your Model",eval_desc:"Submit in “public” mode to the leaderboard, or “private” mode to evaluate locally without publishing.",
+    run_title:"Run an evaluation",run_hint:"Choose a dataset and model, then submit. In private mode results are not written to the public leaderboard.",
+    lbl_dataset:"Dataset",lbl_model:"Model",mode_open:"🌐 Public (to leaderboard)",mode_private:"🔒 Private (local only)",run_btn:"Run Evaluation",running:"Running…",eval_fail:"Evaluation failed (no backend).",
+    no_supported:"no supported datasets",not_installed:"not installed",
+    eyebrow_about:"About",about_title:"About This System",about_unified_b:"Unified interface",about_unified:"All models and data are unified into a “timestamp × feature” matrix, with explicit context window and horizon. See docs/02_unified_interface_spec.md.",
+    about_dual_b:"Open / closed dual track",about_dual:"Open data is evaluated publicly into the leaderboard; closed data requires a model upload (private mode) or data provisioning.",
+    about_multi_b:"Multi-domain, multi-task",about_multi:"Stocks / indices / FX / crypto / bonds / commodities — tasks include forecast / classification / anomaly detection.",
+    about_todo_b:"Configurable",about_todo:"The supported dataset list is managed in the encrypted admin backend — toggle datasets on or off and the site updates automatically.",
+    eyebrow_partners:"Partners",partners_title:"Quant & Financial-Consulting Partners",partners_desc:"Affiliated quantitative, asset-management and advisory institutions that support open, reproducible financial time-series benchmarking.",
+    p_quant:"Quantitative & Algorithmic Trading",p_asset:"Asset & Portfolio Management",p_advisory:"Financial Consulting & Advisory"},
 
+  fr: {nav_leaderboard:"Classement",nav_datasets:"Données",nav_evaluate:"Évaluer",nav_about:"À propos",nav_partners:"Partenaires",
+    hero_title:"Finance TSFMs Arena",hero_sub:"Un benchmark et un classement unifiés pour la prévision de séries temporelles financières. Une interface, des voies ouvertes et fermées, plusieurs domaines et tâches — comparez vos modèles sur une seule scène équitable.",
+    loading:"Chargement…",eyebrow_leaderboard:"Classement",lb_title:"Classement général",lb_desc:"Score composite = 0,5×(1−MASE) + 0,3×précision directionnelle + 0,2×corrélation. Seules les données prises en charge sont affichées.",
+    th_model:"Modèle",th_dataset:"Données",th_domain:"Domaine",th_task:"Tâche",th_freq:"Fréq.",th_score:"Score",lb_empty:"Aucun résultat pour le moment.",
+    eyebrow_datasets:"Données",ds_title:"Données",ds_desc:"Plusieurs sous-domaines financiers et types de tâches. Les données ouvertes sont évaluées publiquement ; les données fermées nécessitent l'upload d'un modèle ou la fourniture de données.",
+    ds_nofeed:"Aucune source de données disponible.",k_task:"Tâche",k_type:"Type",k_source:"Source",v_open:"Ouvert",v_closed:"Fermé",v_supported:"Pris en charge",v_unsupported:"Non pris en charge",
+    b_datasets:"jeux de données",b_open:"ouverts",b_closed:"fermés",b_tasks:"tâches",
+    eyebrow_evaluate:"Évaluer",eval_title:"Évaluez votre modèle",eval_desc:"Soumettez en mode « public » vers le classement, ou en mode « privé » pour évaluer localement sans publication.",
+    run_title:"Lancer une évaluation",run_hint:"Choisissez un jeu de données et un modèle, puis soumettez. En mode privé, les résultats ne sont pas écrits au classement public.",
+    lbl_dataset:"Données",lbl_model:"Modèle",mode_open:"🌐 Public (vers le classement)",mode_private:"🔒 Privé (local seulement)",run_btn:"Lancer l'évaluation",running:"Exécution…",eval_fail:"Évaluation échouée (pas de backend).",
+    no_supported:"aucun jeu de données pris en charge",not_installed:"non installé",
+    eyebrow_about:"À propos",about_title:"À propos de ce système",about_unified_b:"Interface unifiée",about_unified:"Tous les modèles et données sont unifiés dans une matrice « timestamp × fonction », avec fenêtre de contexte et horizon explicites. Voir docs/02_unified_interface_spec.md.",
+    about_dual_b:"Voie double ouverte / fermée",about_dual:"Les données ouvertes sont évaluées publiquement ; les données fermées nécessitent l'upload d'un modèle (mode privé) ou la fourniture de données.",
+    about_multi_b:"Multi-domaine, multi-tâche",about_multi:"Actions / indices / devises / crypto / obligations / matières premières — tâches : prévision / classification / détection d'anomalies.",
+    about_todo_b:"Configurable",about_todo:"La liste des jeux de données pris en charge est gérée dans le backend administrateur chiffré — activez ou désactivez des jeux de données et le site se met à jour automatiquement.",
+    eyebrow_partners:"Partenaires",partners_title:"Partenaires Quant et Conseil en finance",partners_desc:"Institutions quantitatives, de gestion d'actifs et de conseil affiliées qui soutiennent le benchmarking financier reproductible et ouvert.",
+    p_quant:"Trading quantitatif et algorithmique",p_asset:"Gestion d'actifs et de portefeuille",p_advisory:"Conseil en finance"},
+
+  de: {nav_leaderboard:"Bestenliste",nav_datasets:"Datensätze",nav_evaluate:"Bewerten",nav_about:"Über",nav_partners:"Partner",
+    hero_title:"Finance TSFMs Arena",hero_sub:"Ein einheitliches Benchmark und eine Bestenliste für die Vorhersage von Finanz-Zeitreihen. Eine Schnittstelle, offene und geschlosseneTracks, mehrere Domänen und Aufgaben — vergleichen Sie Ihre Modelle auf einer fairen Bühne.",
+    loading:"Laden…",eyebrow_leaderboard:"Bestenliste",lb_title:"Gesamt-Bestenliste",lb_desc:"Kombinierter Score = 0,5×(1−MASE) + 0,3×Richtungsgenauigkeit + 0,2×Korrelation. Nur unterstützte Datensätze werden angezeigt.",
+    th_model:"Modell",th_dataset:"Datensatz",th_domain:"Domäne",th_task:"Aufgabe",th_freq:"Freq.",th_score:"Score",lb_empty:"Noch keine Ergebnisse.",
+    eyebrow_datasets:"Datensätze",ds_title:"Datensätze",ds_desc:"Mehrere Finanz-Unterdомänen und Aufgabentypen. Offene Daten werden öffentlich bewertet; geschlossene Daten erfordern einen Modell-Upload oder die Bereitstellung von Daten.",
+    ds_nofeed:"Kein Datenfeed verfügbar.",k_task:"Aufgabe",k_type:"Typ",k_source:"Quelle",v_open:"Offen",v_closed:"Geschlossen",v_supported:"Unterstützt",v_unsupported:"Nicht unterstützt",
+    b_datasets:"Datensätze",b_open:"offen",b_closed:"geschlossen",b_tasks:"Aufgaben",
+    eyebrow_evaluate:"Bewerten",eval_title:"Modell bewerten",eval_desc:"Senden Sie im „Public“-Modus an die Bestenliste, oder im „Private“-Modus zur lokalen Auswertung ohne Veröffentlichung.",
+    run_title:"Bewertung starten",run_hint:"Wählen Sie einen Datensatz und ein Modell, dann senden. Im Private-Modus werden Ergebnisse nicht in die öffentliche Bestenliste geschrieben.",
+    lbl_dataset:"Datensatz",lbl_model:"Modell",mode_open:"🌐 Public (in die Bestenliste)",mode_private:"🔒 Private (nur lokal)",run_btn:"Bewertung starten",running:"Laufend…",eval_fail:"Bewertung fehlgeschlagen (kein Backend).",
+    no_supported:"keine unterstützten Datensätze",not_installed:"nicht installiert",
+    eyebrow_about:"Über",about_title:"Über dieses System",about_unified_b:"Einheitliche Schnittstelle",about_unified:"Alle Modelle und Daten werden in eine „Timestamp × Feature“-Matrix vereinheitlicht, mit explizitem Kontextfenster und Horizont. Siehe docs/02_unified_interface_spec.md.",
+    about_dual_b:"Offene / geschlossene Dual-Track",about_dual:"Offene Daten werden öffentlich bewertet; geschlossene Daten erfordern einen Modell-Upload (Private-Modus) oder die Bereitstellung von Daten.",
+    about_multi_b:"Multi-Domäne, multi-Aufgabe",about_multi:"Aktien / Indizes / Währung / Krypto / Anleihen / Rohstoffe — Aufgaben: Vorhersage / Klassifikation / Anomalieerkennung.",
+    about_todo_b:"Konfigurierbar",about_todo:"Die Liste der unterstützten Datensätze wird im verschlüsselten Admin-Backend verwaltet — Datensätze ein- oder ausschalten und die Seite aktualisiert sich automatisch.",
+    eyebrow_partners:"Partner",partners_title:"Quant- & Finanzberatungs-Partner",partners_desc:"Zugehörige quantitativen, asset- und beratungsorientierten Institutionen, die offene, reproduzierbare Finanz-Zeitreihen-Benchmarks unterstützen.",
+    p_quant:"Quantitative & algorithmische Handel",p_asset:"Asset- & Portfoliomanagement",p_advisory:"Finanzberatung & Advisory"},
+
+  es: {nav_leaderboard:"Clasificación",nav_datasets:"Datos",nav_evaluate:"Evaluar",nav_about:"Acerca de",nav_partners:"Socios",
+    hero_title:"Finance TSFMs Arena",hero_sub:"Un benchmark y una clasificación unificados para la predicción de series de tiempo financieras. Una interfaz, pistas abiertas y cerradas, múltiples dominios y tareas — compare sus modelos en una sola plataforma justa.",
+    loading:"Cargando…",eyebrow_leaderboard:"Clasificación",lb_title:"Clasificación general",lb_desc:"Puntuación compuesta = 0,5×(1−MASE) + 0,3×precisión direccional + 0,2×correlación. Solo se muestran los datos admitidos.",
+    th_model:"Modelo",th_dataset:"Datos",th_domain:"Dominio",th_task:"Tarea",th_freq:"Frec.",th_score:"Puntaje",lb_empty:"Sin resultados aún.",
+    eyebrow_datasets:"Datos",ds_title:"Datos",ds_desc:"Varios subdominios financieros y tipos de tareas. Los datos abiertos se evalúan públicamente; los cerrados requieren la carga de un modelo o la provisión de datos.",
+    ds_nofeed:"No hay fuente de datos disponible.",k_task:"Tarea",k_type:"Tipo",k_source:"Fuente",v_open:"Abierto",v_closed:"Cerrado",v_supported:"Admitido",v_unsupported:"No admitido",
+    b_datasets:"conjuntos de datos",b_open:"abiertos",b_closed:"cerrados",b_tasks:"tareas",
+    eyebrow_evaluate:"Evaluar",eval_title:"Evalúe su modelo",eval_desc:"Envíe en modo “público” a la clasificación, o en modo “privado” para evaluar localmente sin publicar.",
+    run_title:"Ejecutar una evaluación",run_hint:"Elija un conjunto de datos y un modelo, luego envíe. En modo privado, los resultados no se escriben en la clasificación pública.",
+    lbl_dataset:"Datos",lbl_model:"Modelo",mode_open:"🌐 Público (a la clasificación)",mode_private:"🔒 Privado (solo local)",run_btn:"Ejecutar evaluación",running:"Ejecutando…",eval_fail:"La evaluación falló (sin backend).",
+    no_supported:"no hay datos admitidos",not_installed:"no instalado",
+    eyebrow_about:"Acerca de",about_title:"Acerca de este sistema",about_unified_b:"Interfaz unificada",about_unified:"Todos los modelos y datos se unifican en una matriz “timestamp × feature”, con ventana de contexto y horizonte explícitos. Ver docs/02_unified_interface_spec.md.",
+    about_dual_b:"Doble vía abierta / cerrada",about_dual:"Los datos abiertos se evalúan públicamente; los cerrados requieren la carga de un modelo (modo privado) o la provisión de datos.",
+    about_multi_b:"Multi-dominio, multi-tarea",about_multi:"Acciones / índices / divisas / cripto / bonos / commodities — tareas: pronóstico / clasificación / detección de anomalías.",
+    about_todo_b:"Configurable",about_todo:"La lista de datos admitidos se gestiona en el backend de administración cifrado — active o desactive conjuntos de datos y el sitio se actualiza automáticamente.",
+    eyebrow_partners:"Socios",partners_title:"Socios Quant y de Consultoría financiera",partners_desc:"Instituciones cuantitativas, de gestión de activos y consultoras afiliadas que respaldan el benchmarking financiero abierto y reproducible.",
+    p_quant:"Trading cuantitativo y algorítmico",p_asset:"Gestión de activos y cartera",p_advisory:"Consultoría y asesoría financiera"},
+
+  lb: {nav_leaderboard:"Classement",nav_datasets:"Données",nav_evaluate:"Evaluéieren",nav_about:"Iwwer",nav_partners:"Partenaire",
+    hero_title:"Finance TSFMs Arena",hero_sub:"Ee vereent benchmark an e Ranking fir Finanz-Zäitreihen-Virausso. Eng Sproch, offen + geschoss Tracken, méi Domänen a Aufgaben — vergläich dyn Modeller op enger fairen Plaze.",
+    loading:"Lade…",eyebrow_leaderboard:"Classement",lb_title:"Gesamt-Ranking",lb_desc:"Kombinéierten Score = 0,5×(1−MASE) + 0,3×Richtungs-Genuegkeet + 0,2×Korrelatioun. Nëmmen ënnerstëtzt Daten ginn gewisen.",
+    th_model:"Modell",th_dataset:"Données",th_domain:"Domän",th_task:"Aufgab",th_freq:"Frequenz",th_score:"Score",lb_empty:"Nach keng Resultater.",
+    eyebrow_datasets:"Données",ds_title:"Données",ds_desc:"Méi Finanz-Ënnerdomänen a Aufgaben. Offen Daten ginn publizesch evaluéiert; geschoss Daten brauchen e Modell-Upload oder Daten-Ënnerstëtzung.",
+    ds_nofeed:"Keng Données-Quell verügbar.",k_task:"Aufgab",k_type:"Typ",k_source:"Quell",v_open:"Open",v_closed:"Geschoss",v_supported:"Ënnerstëtzt",v_unsupported:"Net ënnerstëtzt",
+    b_datasets:"Datasets",b_open:"open",b_closed:"geschoss",b_tasks:"Aufgaben",
+    eyebrow_evaluate:"Evaluéieren",eval_title:"Dee dyn Modell evaluéieren",eval_desc:"Schéck an “public” Modus an d'Classement, oder an “private” Modus fir lokal ouni publizéieren ze evaluéieren.",
+    run_title:"Eng Evaluatioun starten",run_hint:"Wiel e Dataset an e Modell, dann schéck. Am private Modus ginn Resultater net an d'public Classement geschriwwe.",
+    lbl_dataset:"Dataset",lbl_model:"Modell",mode_open:"🌐 Public (an d'Classement)",mode_private:"🔒 Private (local)",run_btn:"Evaluatioun starten",running:"Lafe…",eval_fail:"Evaluatioun feelgeschlo (ke Backend).",
+    no_supported:"keng ënnerstëtzt Daten",not_installed:"net installéiert",
+    eyebrow_about:"Iwwer",about_title:"Iwwer dëst System",about_unified_b:"Vereent Interface",about_unified:"All Modeller an Daten ginn an eng “timestamp × Feature”-Matrix vereent, mat expliziter Kontext-Fënster an Horizont. Kuck docs/02_unified_interface_spec.md.",
+    about_dual_b:"Offen / geschoss dual Track",about_dual:"Offen Daten ginn publizesch evaluéiert; geschoss Daten brauchen e Modell-Upload (private Modus) oder Daten-Ënnerstëtzung.",
+    about_multi_b:"Multi-Domän, multi-Aufgab",about_multi:"Aktien / Indexen / Währung / Crypto / Obligioune / Commodities — Aufgaben: Virausso / Klassifikatioun / Anomalie-Erkennung.",
+    about_todo_b:"Configuréierbar",about_todo:"D'Liëscht vun ënnerstëtzt Daten gëtt am verschoss Admnistrateur-Backend verwalt — schalt Daten un oder of an d'Site aktualiséiert sech automatesch.",
+    eyebrow_partners:"Partenaire",partners_title:"Quant & Finanz-Consulting Partenaire",partners_desc:"Zuegehéreeg quantitativen, Asset- an Advisory-Institutioune déi opene, reprodukéierbar Finanz-Zäitreihen-Benchmarks ënnerstëtzen.",
+    p_quant:"Quantitative & Algorithmeschen Handel",p_asset:"Asset & Portfolio-Verwaltung",p_advisory:"Finanz-Consulting & Advisory"},
+
+  ar: {nav_leaderboard:"الترتيب",nav_datasets:"البيانات",nav_evaluate:"تقييم",nav_about:"حول",nav_partners:"الشركاء",
+    hero_title:"Finance TSFMs Arena",hero_sub:"معايير وشاشة ترتيب موحدة للتنبؤ بالسلاسل الزمنية المالية. واجهة واحدة، مسارات مفتوحة ومغلقة، عدة مجالات ومهام — قارن نماذجك على مسرح عادل واحد.",
+    loading:"جارٍ التحميل…",eyebrow_leaderboard:"الترتيب",lb_title:"الترتيب العام",lb_desc:"الرقم المركّب = 0.5×(1−MASE) + 0.3×الدقة الاتجاهية + 0.2×الارتباط. يتم عرض البيانات المدعومة فقط.",
+    th_model:"النموذج",th_dataset:"البيانات",th_domain:"المجال",th_task:"المهمة",th_freq:"التكرار",th_score:"الرقم",lb_empty:"لا نتائج بعد.",
+    eyebrow_datasets:"البيانات",ds_title:"البيانات",ds_desc:"عدة مجالات مالية فرعية وأنواع مهام. يتم تقييم البيانات المفتوحة علنًا؛ البيانات المغلقة تتطلب رفع نموذج أو توفير بيانات.",
+    ds_nofeed:"لا مصدر بيانات متاح.",k_task:"المهمة",k_type:"النوع",k_source:"المصدر",v_open:"مفتوح",v_closed:"مغلق",v_supported:"مدعوم",v_unsupported:"غير مدعوم",
+    b_datasets:"مجموعات بيانات",b_open:"مفتوحة",b_closed:"مغلقة",b_tasks:"مهام",
+    eyebrow_evaluate:"تقييم",eval_title:"قيّم نموذجك",eval_desc:"أرسل في الوضع “العام” إلى الترتيب، أو في الوضع “الخاص” للتقييم محليًا دون نشر.",
+    run_title:"إجراء تقييم",run_hint:"اختر مجموعة بيانات ونموذجًا ثم أرسل. في الوضع الخاص لا تُكتب النتائج في الترتيب العام.",
+    lbl_dataset:"البيانات",lbl_model:"النموذج",mode_open:"🌐 عام (إلى الترتيب)",mode_private:"🔒 خاص (محلي فقط)",run_btn:"إجراء التقييم",running:"جارٍ التشغيل…",eval_fail:"فشل التقييم (لا خادم).",
+    no_supported:"لا توجد بيانات مدعومة",not_installed:"غير مثبت",
+    eyebrow_about:"حول",about_title:"حول هذا النظام",about_unified_b:"واجهة موحدة",about_unified:"جميع النماذج والبيانات موحّدة في مصفوفة “التimestamp × الميزة” مع نافذة سياق وآفاق صريحة. انظر docs/02_unified_interface_spec.md.",
+    about_dual_b:"مسار مزدوج مفتوح / مغلق",about_dual:"البيانات المفتوحة تُقيَّم علنًا؛ البيانات المغلقة تتطلب رفع نموذج (الوضع الخاص) أو توفير بيانات.",
+    about_multi_b:"متعدد المجالات والمهام",about_multi:"أسهم / مؤشرات / عملات / عملات رقمية / سندات / سلع — مهام: تنبؤ / تصنيف / كشف الشذوذ.",
+    about_todo_b:"قابل للضبط",about_todo:"قائمة البيانات المدعومة تُدار في الخادم المشفّر — فعّل أو عطّل المجموعات ويُحدّث الموقع تلقائيًا.",
+    eyebrow_partners:"الشركاء",partners_title:"شركاء الكمي والاستشارات المالية",partners_desc:"مؤسسات كمية وإدارة أصول واستشارية متحالفة تدعم معايير مالية مفتوحة وقابلة للتكرار.",
+    p_quant:"تداول كمي وخوارزمي",p_asset:"إدارة الأصول والمحافظ",p_advisory:"الاستشارات المالية"},
+
+  zh: {nav_leaderboard:"排行榜",nav_datasets:"数据集",nav_evaluate:"评估",nav_about:"关于",nav_partners:"合作伙伴",
+    hero_title:"Finance TSFMs Arena",hero_sub:"面向金融时间序列预测的统一基准与排行榜。一个接口、开放+封闭赛道、多个领域与任务——在同一公平的舞台上比较你的模型。",
+    loading:"加载中…",eyebrow_leaderboard:"排行榜",lb_title:"综合排行榜",lb_desc:"综合得分 = 0.5×(1−MASE) + 0.3×方向准确率 + 0.2×相关性。仅展示受支持的数据集。",
+    th_model:"模型",th_dataset:"数据集",th_domain:"领域",th_task:"任务",th_freq:"频率",th_score:"得分",lb_empty:"暂无结果。",
+    eyebrow_datasets:"数据集",ds_title:"数据集",ds_desc:"多个金融子领域与任务类型。开放数据公开评估；封闭数据需上传模型或提供数据。",
+    ds_nofeed:"无可用数据源。",k_task:"任务",k_type:"类型",k_source:"来源",v_open:"开放",v_closed:"封闭",v_supported:"受支持",v_unsupported:"不受支持",
+    b_datasets:"数据集",b_open:"开放",b_closed:"封闭",b_tasks:"任务",
+    eyebrow_evaluate:"评估",eval_title:"评估你的模型",eval_desc:"以“公开”模式提交至排行榜，或以“私有”模式在本地评估而不发布。",
+    run_title:"运行一次评估",run_hint:"选择数据集与模型后提交。私有模式下结果不会写入公开排行榜。",
+    lbl_dataset:"数据集",lbl_model:"模型",mode_open:"🌐 公开（提交排行榜）",mode_private:"🔒 私有（仅本地）",run_btn:"运行评估",running:"运行中…",eval_fail:"评估失败（无后端）。",
+    no_supported:"无受支持的数据集",not_installed:"未安装",
+    eyebrow_about:"关于",about_title:"关于本系统",about_unified_b:"统一接口",about_unified:"所有模型与数据被统一为“时间戳 × 特征”矩阵，带有显式的上下文窗口与预测跨度。参见 docs/02_unified_interface_spec.md。",
+    about_dual_b:"开放 / 封闭双赛道",about_dual:"开放数据公开评估进排行榜；封闭数据需上传模型（私有模式）或提供数据。",
+    about_multi_b:"多领域、多任务",about_multi:"股票 / 指数 / 外汇 / 加密货币 / 债券 / 大宗商品——任务包括预测 / 分类 / 异常检测。",
+    about_todo_b:"可配置",about_todo:"受支持的数据集列表在加密管理后台中管理——开关数据集，站点即自动更新。",
+    eyebrow_partners:"合作伙伴",partners_title:"量化与金融咨询合作伙伴",partners_desc:"支持开放、可复现金融时间序列基准的量化、资产管理与咨询机构。",
+    p_quant:"量化与算法交易",p_asset:"资产与组合管理",p_advisory:"金融咨询与顾问服务"}
+};
+
+I18N.init = function(l){
+  const d = I18N[l] || I18N.en;
+  this.lang = l; this.dict = d;
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    const k = el.getAttribute('data-i18n');
+    const t = d[k];
+    if(t) el.innerHTML = t;
+  });
+};
+I18N.t = function(k){ return (this.dict && this.dict[k]) || (I18N.en[k] || k); };
+I18N.apply = function(){ this.init(this.lang || 'en'); };
+
+// ===== DATA (baked at deploy time) =====
+const DATA = __BUNDLE__;
+
+// ===== API with baked fallback =====
+const API = window.location.search.includes('api=')
+  ? new URLSearchParams(window.location.search).get('api') : '';
 async function api(path, opts){
   try{
     const r = await fetch(API+path, opts);
     if(!r.ok) throw new Error(r.status);
     const j = await r.json();
-    if(typeof j==='object' && j!==null && j.__baked) return j; // fallback marker
+    if(typeof j==='object' && j!==null && j.__baked) return j;
     return j;
   }catch(e){
-    // no backend -> fall back to baked data (GET only)
     if(!opts || (opts.method||'GET')!=='POST'){
       if(path==='/api/leaderboard') return DATA.leaderboard;
       if(path==='/api/datasets') return DATA.datasets;
       if(path==='/api/models') return DATA.models;
-      if(path==='/api/config') return DATA.config;
+      if(path==='/api/config') return DATA.config || {datasets:{},models:{}};
       return null;
     }
     return null;
   }
 }
-
-// config: which datasets / models are supported (from admin backend or baked default)
 let CONFIG = {datasets:{}, models:{}};
-function supported(name){
-  const s = CONFIG.datasets[name];
-  return s===undefined ? true : !!s; // default: on
-}
+function supported(name){ const s = CONFIG.datasets[name]; return s===undefined ? true : !!s; }
 
-// ---- leaderboard ----
 async function loadLB(){
   const d = await api('/api/leaderboard');
   const body = document.getElementById('lbBody');
@@ -330,7 +492,6 @@ async function loadLB(){
   });
 }
 
-// ---- datasets ----
 async function loadDatasets(){
   const d = await api('/api/datasets');
   const grid=document.getElementById('dsGrid');
@@ -350,7 +511,6 @@ async function loadDatasets(){
       <div class="switch"><span class="dot ${on?'':'off'}"></span> ${on?I18N.t('v_supported'):I18N.t('v_unsupported')}</div>`;
     grid.appendChild(c);
   });
-  // hero badges
   const hb=document.getElementById('heroBadges');
   const on = d.filter(m=>supported(m.name));
   const open = on.filter(m=>m.open).length;
@@ -360,7 +520,6 @@ async function loadDatasets(){
     <span class="badge"><b>3</b> ${I18N.t('b_tasks')}</span>`;
 }
 
-// ---- populate form ----
 async function loadForm(){
   const ds=await api('/api/datasets'); const ms=await api('/api/models');
   const sEl=document.getElementById('fDataset'), mEl=document.getElementById('fModel');
@@ -372,7 +531,6 @@ async function loadForm(){
   if(ms){ mEl.innerHTML=Object.entries(ms).map(([k,v])=>`<option value="${k}" ${v.installed?'':'disabled'}>${v.name}${v.installed?'':' ('+I18N.t('not_installed')+')'}</option>`).join(''); }
 }
 
-// ---- mode toggle ----
 let mode='open';
 document.getElementById('modeToggle').addEventListener('click',e=>{
   const o=e.target.closest('.opt'); if(!o)return;
@@ -380,7 +538,6 @@ document.getElementById('modeToggle').addEventListener('click',e=>{
   o.classList.add('sel'); mode=o.dataset.mode;
 });
 
-// ---- run ----
 document.getElementById('runBtn').addEventListener('click',async()=>{
   const ds=document.getElementById('fDataset').value;
   const mdl=document.getElementById('fModel').value;
@@ -401,19 +558,16 @@ document.getElementById('runBtn').addEventListener('click',async()=>{
   loadLB();
 });
 
-// ---- nav active ----
 document.querySelectorAll('.navlink').forEach(a=>a.addEventListener('click',()=>{
   document.querySelectorAll('.navlink').forEach(x=>x.classList.remove('active')); a.classList.add('active');
 }));
 
-// ---- language switch ----
-function setLang(l){
+async function setLang(l){
   document.documentElement.lang = (l==='ar') ? 'ar' : l;
   document.documentElement.dir = (l==='ar') ? 'rtl' : 'ltr';
   localStorage.setItem('arena_lang', l);
   document.querySelectorAll('#langBar button').forEach(b=>b.classList.toggle('sel', b.dataset.lang===l));
-  I18N.apply();
-  // refresh dynamic content in the new language
+  I18N.init(l);
   CONFIG = Object.assign({}, CONFIG, await api('/api/config'));
   loadLB(); loadDatasets(); loadForm();
 }
@@ -421,9 +575,9 @@ document.getElementById('langBar').addEventListener('click',e=>{
   const b=e.target.closest('button'); if(!b)return; setLang(b.dataset.lang);
 });
 
-// init
 async function init(){
   const l = localStorage.getItem('arena_lang') || 'en';
+  document.documentElement.dir = (l==='ar') ? 'rtl' : 'ltr';
   I18N.init(l);
   CONFIG = Object.assign(CONFIG, await api('/api/config'));
   loadLB(); loadDatasets(); loadForm();

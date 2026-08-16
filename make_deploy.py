@@ -26,7 +26,7 @@ def main():
 
     # Inline the university logos as base64 data URIs so the single-file deploy
     # has no external asset dependencies.
-    for name in ("princeton", "luxembourg", "northeastern"):
+    for name in ("princeton", "luxembourg", "northwestern"):
         p = LOGOS / f"{name}.png"
         if not p.exists():
             p = LOGOS / f"{name}.svg"

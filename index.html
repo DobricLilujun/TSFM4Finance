@@ -562,7 +562,7 @@ document.querySelectorAll('.navlink').forEach(a=>a.addEventListener('click',()=>
   document.querySelectorAll('.navlink').forEach(x=>x.classList.remove('active')); a.classList.add('active');
 }));
 
-function setLang(l){
+async function setLang(l){
   document.documentElement.lang = (l==='ar') ? 'ar' : l;
   document.documentElement.dir = (l==='ar') ? 'rtl' : 'ltr';
   localStorage.setItem('arena_lang', l);

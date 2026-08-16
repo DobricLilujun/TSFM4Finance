@@ -502,7 +502,12 @@ function supported(name){ const s = CONFIG.datasets[name]; return s===undefined 
 async function loadLB(){
   const d = await api('/api/leaderboard');
   const body = document.getElementById('lbBody');
-  const rows = (d && d.rows) ? d.rows.filter(r=>supported(r.dataset)) : [];
+  // normalize: DATA.leaderboard may be a list OR {rows:[...]}; also support {records}
+  const raw = Array.isArray(d) ? d : (d && (d.rows || d.records || []));
+  let rows = (raw || []).filter(r=>supported(r.dataset));
+  // sort by composite score (descending) and assign 1-based rank
+  rows = rows.slice().sort((a,b)=>(b.score||0)-(a.score||0));
+  rows.forEach((r,i)=>{ r.rank = i+1; });
   if(!rows.length){ body.innerHTML='<tr><td colspan="7" class="muted" style="text-align:center;padding:30px">'+I18N.t('lb_empty')+'</td></tr>'; return; }
   body.innerHTML='';
   rows.forEach(r=>{

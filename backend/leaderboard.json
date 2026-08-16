@@ -176,6 +176,94 @@
     }
   },
   {
+    "dataset": "gbp_usd_fx",
+    "model": "naive",
+    "mode": "open",
+    "domain": "fx",
+    "task": "forecast",
+    "frequency": "day",
+    "score": 0.48599166666666666,
+    "metrics": {
+      "rmse": 0.006927495146409113,
+      "mae": 0.0059417565663655485,
+      "mse": 5.821009097483438e-05,
+      "mape": 0.4436527421612553,
+      "smape": 0.4435734624060457,
+      "mase": 1.3745991555546908,
+      "directional_accuracy": 1.0,
+      "return_rank_corr": 0.0,
+      "pearson": 0.0,
+      "score": 0.48599166666666666,
+      "n_points": 24
+    }
+  },
+  {
+    "dataset": "crude_oil_commodity",
+    "model": "naive",
+    "mode": "open",
+    "domain": "commodity",
+    "task": "forecast",
+    "frequency": "day",
+    "score": 0.4351470588235294,
+    "metrics": {
+      "rmse": 7.476595427644087,
+      "mae": 6.565713577911634,
+      "mse": 68.4281560443371,
+      "mape": 7.407189880091059,
+      "smape": 7.42858057655124,
+      "mase": 5.789066651557279,
+      "directional_accuracy": 1.0,
+      "return_rank_corr": 0.0,
+      "pearson": 0.0,
+      "score": 0.4351470588235294,
+      "n_points": 17
+    }
+  },
+  {
+    "dataset": "ig_corp_bond",
+    "model": "naive",
+    "mode": "open",
+    "domain": "bond",
+    "task": "forecast",
+    "frequency": "day",
+    "score": 0.4799058823529412,
+    "metrics": {
+      "rmse": 0.6294772764762298,
+      "mae": 0.5415796231822823,
+      "mse": 0.5146368568633033,
+      "mape": 0.5057787352640796,
+      "smape": 0.5047210372062817,
+      "mase": 1.5472937688058062,
+      "directional_accuracy": 1.0,
+      "return_rank_corr": 0.0,
+      "pearson": 0.0,
+      "score": 0.4799058823529412,
+      "n_points": 17
+    }
+  },
+  {
+    "dataset": "dow_daily",
+    "model": "naive",
+    "mode": "open",
+    "domain": "index",
+    "task": "forecast",
+    "frequency": "day",
+    "score": 0.4516166666666666,
+    "metrics": {
+      "rmse": 844.5629139938713,
+      "mae": 761.2655598958332,
+      "mse": 998324.9485331218,
+      "mape": 1.5252515862899008,
+      "smape": 1.536369261518321,
+      "mase": 3.0353023447084895,
+      "directional_accuracy": 1.0,
+      "return_rank_corr": 0.0,
+      "pearson": 0.0,
+      "score": 0.4516166666666666,
+      "n_points": 12
+    }
+  },
+  {
     "dataset": "sp500_daily",
     "model": "moving_average",
     "mode": "open",
@@ -348,6 +436,94 @@
       "return_rank_corr": 0.0,
       "pearson": 1.7366950253589728e-15,
       "score": 0.44460833333333327,
+      "n_points": 12
+    }
+  },
+  {
+    "dataset": "gbp_usd_fx",
+    "model": "moving_average",
+    "mode": "open",
+    "domain": "fx",
+    "task": "forecast",
+    "frequency": "day",
+    "score": 0.469975,
+    "metrics": {
+      "rmse": 0.009668588468583959,
+      "mae": 0.008870382905006434,
+      "mse": 0.00011867159073551931,
+      "mape": 0.6624536374526405,
+      "smape": 0.6624069734851693,
+      "mase": 2.052123932456384,
+      "directional_accuracy": 1.0,
+      "return_rank_corr": 0.0,
+      "pearson": 0.0,
+      "score": 0.469975,
+      "n_points": 24
+    }
+  },
+  {
+    "dataset": "crude_oil_commodity",
+    "model": "moving_average",
+    "mode": "open",
+    "domain": "commodity",
+    "task": "forecast",
+    "frequency": "day",
+    "score": 0.4312235294117647,
+    "metrics": {
+      "rmse": 8.945432427393213,
+      "mae": 8.06908380524451,
+      "mse": 103.06916538151705,
+      "mape": 9.25796834726273,
+      "smape": 9.391900800939744,
+      "mase": 7.114605809597289,
+      "directional_accuracy": 1.0,
+      "return_rank_corr": 0.0,
+      "pearson": 5.565620663720921e-16,
+      "score": 0.4312235294117647,
+      "n_points": 17
+    }
+  },
+  {
+    "dataset": "ig_corp_bond",
+    "model": "moving_average",
+    "mode": "open",
+    "domain": "bond",
+    "task": "forecast",
+    "frequency": "day",
+    "score": 0.466935294117647,
+    "metrics": {
+      "rmse": 0.7901676996678998,
+      "mae": 0.7158818477342104,
+      "mse": 0.8205410025352728,
+      "mape": 0.6682822069797162,
+      "smape": 0.666792614846598,
+      "mase": 2.045275477115788,
+      "directional_accuracy": 1.0,
+      "return_rank_corr": 0.0,
+      "pearson": 2.7920333653144454e-15,
+      "score": 0.466935294117647,
+      "n_points": 17
+    }
+  },
+  {
+    "dataset": "dow_daily",
+    "model": "moving_average",
+    "mode": "open",
+    "domain": "index",
+    "task": "forecast",
+    "frequency": "day",
+    "score": 0.4458583333333334,
+    "metrics": {
+      "rmse": 1115.8454613398148,
+      "mae": 1026.0274609375,
+      "mse": 1643970.8202622102,
+      "mape": 2.0640470950020178,
+      "smape": 2.0729755236829503,
+      "mase": 4.090955537703601,
+      "directional_accuracy": 1.0,
+      "return_rank_corr": 0.0,
+      "pearson": -3.1077579140687093e-15,
+      "score": 0.4458583333333334,
       "n_points": 12
     }
   },
@@ -528,6 +704,94 @@
     }
   },
   {
+    "dataset": "gbp_usd_fx",
+    "model": "seasonal_naive",
+    "mode": "open",
+    "domain": "fx",
+    "task": "forecast",
+    "frequency": "day",
+    "score": 0.5265208333333333,
+    "metrics": {
+      "rmse": 0.009925924129709789,
+      "mae": 0.008801769216855366,
+      "mse": 0.00012176320136430749,
+      "mape": 0.6573845533919346,
+      "smape": 0.657536051457394,
+      "mase": 2.0362504585537597,
+      "directional_accuracy": 1.0,
+      "return_rank_corr": 0.23749999999999996,
+      "pearson": 0.15162071662435092,
+      "score": 0.5265208333333333,
+      "n_points": 24
+    }
+  },
+  {
+    "dataset": "crude_oil_commodity",
+    "model": "seasonal_naive",
+    "mode": "open",
+    "domain": "commodity",
+    "task": "forecast",
+    "frequency": "day",
+    "score": 0.4514352941176471,
+    "metrics": {
+      "rmse": 8.654920326426563,
+      "mae": 7.281596656606978,
+      "mse": 88.51936607143864,
+      "mape": 8.28153699601164,
+      "smape": 8.378377869452295,
+      "mase": 6.420269156526674,
+      "directional_accuracy": 1.0,
+      "return_rank_corr": -0.11338772727948626,
+      "pearson": -0.104461481082036,
+      "score": 0.4514352941176471,
+      "n_points": 17
+    }
+  },
+  {
+    "dataset": "ig_corp_bond",
+    "model": "seasonal_naive",
+    "mode": "open",
+    "domain": "bond",
+    "task": "forecast",
+    "frequency": "day",
+    "score": 0.4879941176470588,
+    "metrics": {
+      "rmse": 0.7965918342687774,
+      "mae": 0.6604928409352042,
+      "mse": 0.7934259293843545,
+      "mape": 0.6166613122677309,
+      "smape": 0.6155107640306575,
+      "mase": 1.8870290043684192,
+      "directional_accuracy": 1.0,
+      "return_rank_corr": -0.16525032742463133,
+      "pearson": -0.21144100697120555,
+      "score": 0.4879941176470588,
+      "n_points": 17
+    }
+  },
+  {
+    "dataset": "dow_daily",
+    "model": "seasonal_naive",
+    "mode": "open",
+    "domain": "index",
+    "task": "forecast",
+    "frequency": "day",
+    "score": 0.46785833333333327,
+    "metrics": {
+      "rmse": 995.9975529542979,
+      "mae": 861.32265625,
+      "mse": 1295357.4617973326,
+      "mape": 1.7327859864730382,
+      "smape": 1.7408626855107727,
+      "mase": 3.434247936323171,
+      "directional_accuracy": 1.0,
+      "return_rank_corr": -0.03897897214345535,
+      "pearson": -0.04753060554261543,
+      "score": 0.46785833333333327,
+      "n_points": 12
+    }
+  },
+  {
     "dataset": "sp500_daily",
     "model": "random_walk",
     "mode": "open",
@@ -700,6 +964,94 @@
       "return_rank_corr": 0.06464646464646462,
       "pearson": 0.0525992324365565,
       "score": 0.49252500000000005,
+      "n_points": 12
+    }
+  },
+  {
+    "dataset": "gbp_usd_fx",
+    "model": "random_walk",
+    "mode": "open",
+    "domain": "fx",
+    "task": "forecast",
+    "frequency": "day",
+    "score": 0.5106833333333333,
+    "metrics": {
+      "rmse": 0.026794328443950535,
+      "mae": 0.023610893366736423,
+      "mse": 0.0007539877084322098,
+      "mape": 1.7632368823318718,
+      "smape": 1.7424782898813413,
+      "mase": 5.462275965247112,
+      "directional_accuracy": 1.0,
+      "return_rank_corr": 0.06249999999999998,
+      "pearson": 0.05667326904108305,
+      "score": 0.5106833333333333,
+      "n_points": 24
+    }
+  },
+  {
+    "dataset": "crude_oil_commodity",
+    "model": "random_walk",
+    "mode": "open",
+    "domain": "commodity",
+    "task": "forecast",
+    "frequency": "day",
+    "score": 0.4858882352941176,
+    "metrics": {
+      "rmse": 18.59834395791839,
+      "mae": 16.955242821579063,
+      "mse": 408.4496047886348,
+      "mape": 19.683415877786757,
+      "smape": 17.34678382816667,
+      "mase": 14.949636413880793,
+      "directional_accuracy": 1.0,
+      "return_rank_corr": 0.14285714285714288,
+      "pearson": 0.14102912921701527,
+      "score": 0.4858882352941176,
+      "n_points": 17
+    }
+  },
+  {
+    "dataset": "ig_corp_bond",
+    "model": "random_walk",
+    "mode": "open",
+    "domain": "bond",
+    "task": "forecast",
+    "frequency": "day",
+    "score": 0.47035294117647064,
+    "metrics": {
+      "rmse": 2.1027862164990268,
+      "mae": 1.8780309100429542,
+      "mse": 4.763639121980338,
+      "mape": 1.7522436031399644,
+      "smape": 1.7317479205349864,
+      "mase": 5.365537033427342,
+      "directional_accuracy": 1.0,
+      "return_rank_corr": -0.26754821086248326,
+      "pearson": -0.2501370469108085,
+      "score": 0.47035294117647064,
+      "n_points": 17
+    }
+  },
+  {
+    "dataset": "dow_daily",
+    "model": "random_walk",
+    "mode": "open",
+    "domain": "index",
+    "task": "forecast",
+    "frequency": "day",
+    "score": 0.493525,
+    "metrics": {
+      "rmse": 2081.405029154017,
+      "mae": 1881.9293154789082,
+      "mse": 4887744.119263866,
+      "mape": 3.786574025697694,
+      "smape": 3.6895400806191034,
+      "mase": 7.503589765219899,
+      "directional_accuracy": 1.0,
+      "return_rank_corr": 0.07878787878787878,
+      "pearson": 0.03032214165799336,
+      "score": 0.493525,
       "n_points": 12
     }
   },
@@ -880,6 +1232,94 @@
     }
   },
   {
+    "dataset": "gbp_usd_fx",
+    "model": "arima",
+    "mode": "open",
+    "domain": "fx",
+    "task": "forecast",
+    "frequency": "day",
+    "score": 0.5232666666666667,
+    "metrics": {
+      "rmse": 0.007003914004485256,
+      "mae": 0.005943760514255239,
+      "mse": 5.8581298212241997e-05,
+      "mape": 0.44385621817613474,
+      "smape": 0.44382621122512894,
+      "mase": 1.3750627600538283,
+      "directional_accuracy": 1.0,
+      "return_rank_corr": -0.17083333333333328,
+      "pearson": -0.1791420790980225,
+      "score": 0.5232666666666667,
+      "n_points": 24
+    }
+  },
+  {
+    "dataset": "crude_oil_commodity",
+    "model": "arima",
+    "mode": "open",
+    "domain": "commodity",
+    "task": "forecast",
+    "frequency": "day",
+    "score": 0.48618823529411764,
+    "metrics": {
+      "rmse": 7.993711956516152,
+      "mae": 7.0685717755462845,
+      "mse": 78.6283239207208,
+      "mape": 8.028017236211902,
+      "smape": 7.95839170146015,
+      "mase": 6.23244262095418,
+      "directional_accuracy": 1.0,
+      "return_rank_corr": 0.002100840336134453,
+      "pearson": -0.047117051876547245,
+      "score": 0.48618823529411764,
+      "n_points": 17
+    }
+  },
+  {
+    "dataset": "ig_corp_bond",
+    "model": "arima",
+    "mode": "open",
+    "domain": "bond",
+    "task": "forecast",
+    "frequency": "day",
+    "score": 0.5257529411764705,
+    "metrics": {
+      "rmse": 0.6311849109802408,
+      "mae": 0.544806955650196,
+      "mse": 0.5111476561747492,
+      "mape": 0.5087632859563689,
+      "smape": 0.5078559723823156,
+      "mase": 1.5565142623467658,
+      "directional_accuracy": 1.0,
+      "return_rank_corr": 0.004410818362204364,
+      "pearson": -0.013103488571986462,
+      "score": 0.5257529411764705,
+      "n_points": 17
+    }
+  },
+  {
+    "dataset": "dow_daily",
+    "model": "arima",
+    "mode": "open",
+    "domain": "index",
+    "task": "forecast",
+    "frequency": "day",
+    "score": 0.50875,
+    "metrics": {
+      "rmse": 842.8428585740604,
+      "mae": 750.6448164704096,
+      "mse": 991152.9469831683,
+      "mape": 1.5102947845663788,
+      "smape": 1.5167252900401396,
+      "mase": 2.99295553550022,
+      "directional_accuracy": 1.0,
+      "return_rank_corr": -0.02727272727272727,
+      "pearson": -0.006968638007594066,
+      "score": 0.50875,
+      "n_points": 12
+    }
+  },
+  {
     "dataset": "sp500_daily",
     "model": "chronos",
     "mode": "open",
@@ -1012,6 +1452,94 @@
     }
   },
   {
+    "dataset": "gbp_usd_fx",
+    "model": "chronos",
+    "mode": "open",
+    "domain": "fx",
+    "task": "forecast",
+    "frequency": "day",
+    "score": 0.5401333333333334,
+    "metrics": {
+      "rmse": 0.006959907696570326,
+      "mae": 0.006044891476631171,
+      "mse": 5.94961805896099e-05,
+      "mape": 0.4516412171840882,
+      "smape": 0.45138590416434443,
+      "mase": 1.398458961821721,
+      "directional_accuracy": 1.0,
+      "return_rank_corr": -1.3877787807814457e-17,
+      "pearson": 0.05954953734912197,
+      "score": 0.5401333333333334,
+      "n_points": 24
+    }
+  },
+  {
+    "dataset": "crude_oil_commodity",
+    "model": "chronos",
+    "mode": "open",
+    "domain": "commodity",
+    "task": "forecast",
+    "frequency": "day",
+    "score": 0.5000058823529412,
+    "metrics": {
+      "rmse": 7.1675283304676585,
+      "mae": 6.313689993209197,
+      "mse": 66.82805816679185,
+      "mape": 7.1349601459596625,
+      "smape": 7.138944029346553,
+      "mase": 5.566854501682953,
+      "directional_accuracy": 1.0,
+      "return_rank_corr": 0.05882352941176473,
+      "pearson": 0.052877204584654315,
+      "score": 0.5000058823529412,
+      "n_points": 17
+    }
+  },
+  {
+    "dataset": "ig_corp_bond",
+    "model": "chronos",
+    "mode": "open",
+    "domain": "bond",
+    "task": "forecast",
+    "frequency": "day",
+    "score": 0.5470235294117647,
+    "metrics": {
+      "rmse": 0.6359373622040039,
+      "mae": 0.5488142766872387,
+      "mse": 0.522674720153262,
+      "mape": 0.5126579340624002,
+      "smape": 0.5113353377681401,
+      "mase": 1.5679631843608306,
+      "directional_accuracy": 1.0,
+      "return_rank_corr": 0.09796475713062158,
+      "pearson": 0.07358739417573669,
+      "score": 0.5470235294117647,
+      "n_points": 17
+    }
+  },
+  {
+    "dataset": "dow_daily",
+    "model": "chronos",
+    "mode": "open",
+    "domain": "index",
+    "task": "forecast",
+    "frequency": "day",
+    "score": 0.49138333333333334,
+    "metrics": {
+      "rmse": 876.4124398194059,
+      "mae": 794.1279947916668,
+      "mse": 1096865.5510993956,
+      "mape": 1.6026445568785326,
+      "smape": 1.6088329344057815,
+      "mase": 3.166330767570285,
+      "directional_accuracy": 1.0,
+      "return_rank_corr": -0.08383838383838386,
+      "pearson": -0.028798363624369685,
+      "score": 0.49138333333333334,
+      "n_points": 12
+    }
+  },
+  {
     "dataset": "sp500_daily",
     "model": "timesfm",
     "mode": "open",
@@ -1119,6 +1647,94 @@
       "pearson": -0.022925509743647144,
       "score": 0.49736470588235304,
       "n_points": 17
+    }
+  },
+  {
+    "dataset": "us_treasury_7y",
+    "model": "timesfm",
+    "mode": "open",
+    "domain": "bond",
+    "task": "forecast",
+    "frequency": "day",
+    "score": 0.530164705882353,
+    "metrics": {
+      "rmse": 0.42859565185815285,
+      "mae": 0.37787628173828036,
+      "mse": 0.2206508463640891,
+      "mape": 0.4037764633594217,
+      "smape": 0.4031051726096225,
+      "mase": 1.3336756056799117,
+      "directional_accuracy": 1.0,
+      "return_rank_corr": 0.08266948674240769,
+      "pearson": 0.014142442262412323,
+      "score": 0.530164705882353,
+      "n_points": 17
+    }
+  },
+  {
+    "dataset": "crude_oil_commodity",
+    "model": "timesfm",
+    "mode": "open",
+    "domain": "commodity",
+    "task": "forecast",
+    "frequency": "day",
+    "score": 0.5018571428571429,
+    "metrics": {
+      "rmse": 7.243838431473699,
+      "mae": 6.565551913514429,
+      "mse": 60.341932102554345,
+      "mape": 8.152693579027124,
+      "smape": 8.070281279799127,
+      "mase": 5.78892411016258,
+      "directional_accuracy": 1.0,
+      "return_rank_corr": -0.10204081632653063,
+      "pearson": -0.12033829582384424,
+      "score": 0.5018571428571429,
+      "n_points": 7
+    }
+  },
+  {
+    "dataset": "ig_corp_bond",
+    "model": "timesfm",
+    "mode": "open",
+    "domain": "bond",
+    "task": "forecast",
+    "frequency": "day",
+    "score": 0.5618058823529413,
+    "metrics": {
+      "rmse": 0.6203111212055783,
+      "mae": 0.5430103590508477,
+      "mse": 0.5056472516803582,
+      "mape": 0.5073847376978631,
+      "smape": 0.506047052944391,
+      "mase": 1.5513813832570855,
+      "directional_accuracy": 1.0,
+      "return_rank_corr": 0.2234876013554603,
+      "pearson": 0.20933205678819536,
+      "score": 0.5618058823529413,
+      "n_points": 17
+    }
+  },
+  {
+    "dataset": "dow_daily",
+    "model": "timesfm",
+    "mode": "open",
+    "domain": "index",
+    "task": "forecast",
+    "frequency": "day",
+    "score": 0.4991083333333333,
+    "metrics": {
+      "rmse": 921.7902563051339,
+      "mae": 824.3253580729169,
+      "mse": 1247183.9725950877,
+      "mape": 1.6645262956627616,
+      "smape": 1.6666572904095094,
+      "mase": 3.2867330718386323,
+      "directional_accuracy": 1.0,
+      "return_rank_corr": -0.017171717171717168,
+      "pearson": -0.013679432614257067,
+      "score": 0.4991083333333333,
+      "n_points": 12
     }
   },
   {

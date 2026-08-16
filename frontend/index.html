@@ -142,6 +142,7 @@ footer .fine{font-size:12px;color:#7d8f9e;text-align:center;border-top:1px solid
         <a href="#evaluate" class="navlink" data-i18n="nav_evaluate">Evaluate</a>
         <a href="#about" class="navlink" data-i18n="nav_about">About</a>
         <a href="#partners" class="navlink" data-i18n="nav_partners">Partners</a>
+        <a href="#published" class="navlink" data-i18n="nav_published">Published</a>
       </nav>
       <div class="lang" id="langBar">
         <button data-lang="en" class="sel">EN</button>
@@ -283,6 +284,29 @@ footer .fine{font-size:12px;color:#7d8f9e;text-align:center;border-top:1px solid
   </div>
 </section>
 
+<!-- PUBLISHED BENCHMARKS -->
+<section id="published">
+  <div class="container">
+    <div class="sec-head">
+      <div class="eyebrow" data-i18n="eyebrow_published">Published Benchmarks</div>
+      <h2 data-i18n="published_title">Published Benchmarks</h2>
+      <p data-i18n="published_desc">Reported metrics from the peer-reviewed literature on time-series foundation models, cited from the original papers. These are external reference results — separate from the live Arena leaderboard above, which is computed locally on real financial data.</p>
+    </div>
+    <div class="lb-wrap">
+      <table id="pbTable">
+        <thead><tr>
+          <th class="rk">#</th>
+          <th data-i18n="pb_model">Model</th>
+          <th data-i18n="pb_metric">Reported Metric</th>
+          <th data-i18n="pb_bench">Benchmark / Scope</th>
+          <th data-i18n="pb_source">Source</th>
+        </tr></thead>
+        <tbody id="pbBody"></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
 <footer>
   <div class="container">
     <div class="unis">
@@ -322,7 +346,10 @@ const I18N = {
     about_multi_b:"Multi-domain, multi-task",about_multi:"Stocks / indices / FX / crypto / bonds / commodities — tasks include forecast / classification / anomaly detection.",
     about_todo_b:"Configurable",about_todo:"The supported dataset list is managed in the encrypted admin backend — toggle datasets on or off and the site updates automatically.",
     eyebrow_partners:"Partners",partners_title:"Quant & Financial-Consulting Partners",partners_desc:"Major quantitative, asset-management and advisory firms in the financial industry. This is an illustrative showcase of the categories the benchmark serves — not an endorsement.",
-    p_quant:"Quantitative & Algorithmic Trading",p_asset:"Asset & Portfolio Management",p_advisory:"Financial Consulting & Advisory"},
+    p_quant:"Quantitative & Algorithmic Trading",p_asset:"Asset & Portfolio Management",p_advisory:"Financial Consulting & Advisory",
+    nav_published:"Published",eyebrow_published:"Published Benchmarks",published_title:"Published Benchmarks",
+    published_desc:"Reported metrics from the peer-reviewed literature on time-series foundation models, cited from the original papers. These are external reference results — separate from the live Arena leaderboard above, which is computed locally on real financial data.",
+    pb_model:"Model",pb_metric:"Reported Metric",pb_bench:"Benchmark / Scope",pb_source:"Source"},
 
   fr: {nav_leaderboard:"Classement",nav_datasets:"Données",nav_evaluate:"Évaluer",nav_about:"À propos",nav_partners:"Partenaires",
     hero_title:"Finance TSFMs Arena",hero_sub:"Un benchmark et un classement unifiés pour la prévision de séries temporelles financières. Une interface, des voies ouvertes et fermées, plusieurs domaines et tâches — comparez vos modèles sur une seule scène équitable.",
@@ -538,6 +565,33 @@ document.getElementById('modeToggle').addEventListener('click',e=>{
   o.classList.add('sel'); mode=o.dataset.mode;
 });
 
+// ---- Published Benchmarks (external, cited literature — NOT live Arena data) ----
+const PUB = [
+  {model:"Chronos", metric:"Decoder-only model that maps time series to a token space; reports strong zero-shot performance across many benchmark datasets, at ≈2× smaller scale than prior SOTA.",
+   bench:"53 time-series datasets", source:"Chronos: Learning the Language of Time Series — arXiv:2403.07815 (2024)", url:"https://arxiv.org/abs/2403.07815"},
+  {model:"TimesFM", metric:"Decoder-only foundation model (≈200M params) for zero-shot forecasting across frequencies and domains; later released in a 2.0 / 500M checkpoint.",
+   bench:"ICML 2024 (Google)", source:"A decoder-only foundation model for time-series forecasting — arXiv:2310.10688", url:"https://arxiv.org/abs/2310.10688"},
+  {model:"Lag-Llama", metric:"Foundation model for univariate probabilistic time-series forecasting on a decoder-only transformer (≈1.5B / 3.5B params).",
+   bench:"ICLR 2024 (Salesforce AI Research)", source:"Lag-Llama: Towards Foundation Models for Probabilistic Time Series Forecasting — arXiv:2310.08278", url:"https://arxiv.org/abs/2310.08278"},
+  {model:"Moirai 2.0", metric:"Efficiency-focused update of the Moirai family: “when less is more” — smaller footprint while retaining cross-frequency forecasting.",
+   bench:"Salesforce AI Research", source:"Moirai 2.0: When Less Is More for Time Series Forecasting — arXiv:2511.11698", url:"https://arxiv.org/abs/2511.11698"},
+  {model:"Moirai-MoE", metric:"Extends Moirai with a sparse Mixture-of-Experts backbone for time-series foundation models.",
+   bench:"Salesforce AI Research", source:"Moirai-MoE: Empowering Time Series Foundation Models with Sparse Mixture of Experts — arXiv:2410.10469", url:"https://arxiv.org/abs/2410.10469"}
+];
+function loadPB(){
+  const body=document.getElementById('pbBody'); if(!body) return;
+  body.innerHTML='';
+  PUB.forEach((r,i)=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td class="rk">${i+1}</td>
+      <td class="model">${r.model}</td>
+      <td>${r.metric}</td>
+      <td>${r.bench}</td>
+      <td><a href="${r.url}" target="_blank" rel="noopener">${r.source}</a></td>`;
+    body.appendChild(tr);
+  });
+}
+
 document.getElementById('runBtn').addEventListener('click',async()=>{
   const ds=document.getElementById('fDataset').value;
   const mdl=document.getElementById('fModel').value;
@@ -569,7 +623,7 @@ async function setLang(l){
   document.querySelectorAll('#langBar button').forEach(b=>b.classList.toggle('sel', b.dataset.lang===l));
   I18N.init(l);
   CONFIG = Object.assign({}, CONFIG, await api('/api/config'));
-  loadLB(); loadDatasets(); loadForm();
+  loadLB(); loadDatasets(); loadForm(); loadPB();
 }
 document.getElementById('langBar').addEventListener('click',e=>{
   const b=e.target.closest('button'); if(!b)return; setLang(b.dataset.lang);
@@ -580,7 +634,7 @@ async function init(){
   document.documentElement.dir = (l==='ar') ? 'rtl' : 'ltr';
   I18N.init(l);
   CONFIG = Object.assign(CONFIG, await api('/api/config'));
-  loadLB(); loadDatasets(); loadForm();
+  loadLB(); loadDatasets(); loadForm(); loadPB();
 }
 init();
 </script>

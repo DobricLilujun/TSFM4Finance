@@ -29,10 +29,13 @@ SLOW = ["chronos", "timesfm"]
 FAST_DATASETS = [
     "sp500_daily", "nasdaq_daily", "btc_crypto", "eur_usd_fx",
     "gold_commodity", "us_treasury_7y", "eth_crypto", "russell2000_daily",
+    "gbp_usd_fx", "crude_oil_commodity", "ig_corp_bond", "dow_daily",
 ]
 SLOW_DATASETS = [
     "sp500_daily", "nasdaq_daily", "btc_crypto", "eur_usd_fx",
     "gold_commodity", "us_treasury_7y",
+    # expanded real spread: more FX / bonds / commodities / index
+    "gbp_usd_fx", "crude_oil_commodity", "ig_corp_bond", "dow_daily",
 ]
 # Closed/proprietary: private-mode placeholder (no real data) — still listed.
 CLOSED_DATASETS = ["priv_fund_flow", "priv_broker_order",

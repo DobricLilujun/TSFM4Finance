@@ -138,6 +138,25 @@ footer .fine{font-size:12px;color:#7d8f9e;text-align:center;border-top:1px solid
 @media(max-width:640px){.hero h1{font-size:32px}.row2{grid-template-columns:1fr}.nav .links{display:none}}
 [dir="rtl"] .brand{flex-direction:row-reverse}
 [dir="rtl"] .bar{direction:ltr}
+
+/* ---- single-section view + animation ---- */
+.navlink.active{color:var(--gold);border-bottom-color:var(--gold)}
+section.viewable{transition:opacity .35s ease, transform .35s ease}
+section.viewable.view-anim{animation:fadeUp .4s ease both}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+@media(prefers-reduced-motion:reduce){section.viewable.view-anim{animation:none}}
+
+/* ---- HOME intro ---- */
+.home-intro{padding:8px 0 4px}
+.home-intro h2{font-size:34px;margin-bottom:14px}
+.home-lede{font-size:18px;color:var(--dim);max-width:760px;line-height:1.6}
+.home-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin:30px 0 8px}
+.hstat{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:22px 18px;text-align:center;box-shadow:var(--shadow)}
+.hstat .n{font-family:'Fraunces',serif;font-weight:700;font-size:34px;color:var(--navy)}
+.hstat .k{font-size:11px;color:var(--dim);text-transform:uppercase;letter-spacing:.6px;margin-top:6px}
+.home-feats{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:26px}
+.home-feats .note{margin:0}
+@media(max-width:860px){.home-stats{grid-template-columns:repeat(2,1fr)}.home-feats{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -147,12 +166,13 @@ footer .fine{font-size:12px;color:#7d8f9e;text-align:center;border-top:1px solid
     <div class="brand"><span class="mark">₮</span> Finance TSFMs Arena</div>
     <div class="links" style="display:flex;align-items:center;gap:6px">
       <nav class="links" style="gap:4px">
-        <a href="#leaderboard" class="navlink" data-i18n="nav_leaderboard">Leaderboard</a>
-        <a href="#datasets" class="navlink" data-i18n="nav_datasets">Datasets</a>
-        <a href="#evaluate" class="navlink" data-i18n="nav_evaluate">Evaluate</a>
-        <a href="#about" class="navlink" data-i18n="nav_about">About</a>
-        <a href="#partners" class="navlink" data-i18n="nav_partners">Partners</a>
-        <a href="#published" class="navlink" data-i18n="nav_published">Published</a>
+        <a href="#" class="navlink" data-nav="home" data-i18n="nav_home">Home</a>
+        <a href="#leaderboard" class="navlink" data-nav="leaderboard" data-i18n="nav_leaderboard">Leaderboard</a>
+        <a href="#datasets" class="navlink" data-nav="datasets" data-i18n="nav_datasets">Datasets</a>
+        <a href="#evaluate" class="navlink" data-nav="evaluate" data-i18n="nav_evaluate">Evaluate</a>
+        <a href="#about" class="navlink" data-nav="about" data-i18n="nav_about">About</a>
+        <a href="#partners" class="navlink" data-nav="partners" data-i18n="nav_partners">Partners</a>
+        <a href="#published" class="navlink" data-nav="published" data-i18n="nav_published">Published</a>
       </nav>
       <div class="lang" id="langBar">
         <button data-lang="en" class="sel">EN</button>
@@ -176,8 +196,30 @@ footer .fine{font-size:12px;color:#7d8f9e;text-align:center;border-top:1px solid
   </div>
 </section>
 
+<!-- HOME INTRO (default view, shown above the leaderboard) -->
+<section id="home" class="home-intro viewable">
+  <div class="container">
+    <div class="sec-head">
+      <div class="eyebrow" data-i18n="eyebrow_home">Home</div>
+      <h2 data-i18n="home_title">One fair stage for financial time-series models</h2>
+    </div>
+    <p class="home-lede" data-i18n="home_lede">Finance TSFMs Arena is an open, reproducible benchmark and leaderboard for financial time-series forecasting. It unifies models and data into a single “timestamp × feature” interface, supports open + closed tracks across stocks, indices, FX, crypto, bonds and commodities, and ranks them on one composite score — computed locally on real data.</p>
+    <div class="home-stats" id="homeStats">
+      <div class="hstat"><div class="n" id="stDsets">—</div><div class="k" data-i18n="b_datasets">datasets</div></div>
+      <div class="hstat"><div class="n" id="stModels">—</div><div class="k" data-i18n="b_models">models</div></div>
+      <div class="hstat"><div class="n" id="stRows">—</div><div class="k" data-i18n="home_evals">evaluations</div></div>
+      <div class="hstat"><div class="n" id="stDomains">—</div><div class="k" data-i18n="home_domains">domains</div></div>
+    </div>
+    <div class="home-feats">
+      <div class="note"><b data-i18n="home_f1_b">Unified interface</b><br><span data-i18n="home_f1">Every model and dataset is cast into one “timestamp × feature” matrix with explicit context window and horizon — so a fair comparison is possible across models that were never designed to be compared.</span></div>
+      <div class="note"><b data-i18n="home_f2_b">Open + closed tracks</b><br><span data-i18n="home_f2">Open data is evaluated publicly into the leaderboard; closed / proprietary data runs in private mode (local only) so nothing unpublished is exposed.</span></div>
+      <div class="note"><b data-i18n="home_f3_b">Real, reproducible data</b><br><span data-i18n="home_f3">Scores are computed from real market data, not fabricated — and published-benchmark results are kept separate from the live arena and cited to their source papers.</span></div>
+    </div>
+  </div>
+</section>
+
 <!-- LEADERBOARD -->
-<section id="leaderboard">
+<section id="leaderboard" class="viewable">
   <div class="container">
     <div class="sec-head">
       <div class="eyebrow" data-i18n="eyebrow_leaderboard">Leaderboard</div>
@@ -211,7 +253,7 @@ footer .fine{font-size:12px;color:#7d8f9e;text-align:center;border-top:1px solid
 </section>
 
 <!-- DATASETS -->
-<section id="datasets">
+<section id="datasets" class="viewable hidden">
   <div class="container">
     <div class="sec-head">
       <div class="eyebrow" data-i18n="eyebrow_datasets">Datasets</div>
@@ -223,7 +265,7 @@ footer .fine{font-size:12px;color:#7d8f9e;text-align:center;border-top:1px solid
 </section>
 
 <!-- EVALUATE -->
-<section id="evaluate">
+<section id="evaluate" class="viewable hidden">
   <div class="container">
     <div class="sec-head">
       <div class="eyebrow" data-i18n="eyebrow_evaluate">Evaluate</div>
@@ -248,7 +290,7 @@ footer .fine{font-size:12px;color:#7d8f9e;text-align:center;border-top:1px solid
 </section>
 
 <!-- ABOUT -->
-<section id="about">
+<section id="about" class="viewable hidden">
   <div class="container">
     <div class="sec-head">
       <div class="eyebrow" data-i18n="eyebrow_about">About</div>
@@ -264,7 +306,7 @@ footer .fine{font-size:12px;color:#7d8f9e;text-align:center;border-top:1px solid
 </section>
 
 <!-- PARTNERS -->
-<section id="partners">
+<section id="partners" class="viewable hidden">
   <div class="container">
     <div class="sec-head">
       <div class="eyebrow" data-i18n="eyebrow_partners">Partners</div>
@@ -304,7 +346,7 @@ footer .fine{font-size:12px;color:#7d8f9e;text-align:center;border-top:1px solid
 </section>
 
 <!-- PUBLISHED BENCHMARKS -->
-<section id="published">
+<section id="published" class="viewable hidden">
   <div class="container">
     <div class="sec-head">
       <div class="eyebrow" data-i18n="eyebrow_published">Published Benchmarks</div>
@@ -349,7 +391,13 @@ footer .fine{font-size:12px;color:#7d8f9e;text-align:center;border-top:1px solid
 <script>
 // ===== self-contained i18n (7 languages; Arabic = RTL) =====
 const I18N = {
-  en: {nav_leaderboard:"Leaderboard",nav_datasets:"Datasets",nav_evaluate:"Evaluate",nav_about:"About",nav_partners:"Partners",
+  en: {nav_home:"Home",nav_leaderboard:"Leaderboard",nav_datasets:"Datasets",nav_evaluate:"Evaluate",nav_about:"About",nav_partners:"Partners",
+    eyebrow_home:"Home",home_title:"One fair stage for financial time-series models",
+    home_lede:"Finance TSFMs Arena is an open, reproducible benchmark and leaderboard for financial time-series forecasting. It unifies models and data into a single “timestamp × feature” interface, supports open + closed tracks across stocks, indices, FX, crypto, bonds and commodities, and ranks them on one composite score — computed locally on real data.",
+    home_evals:"evaluations",home_domains:"domains",
+    home_f1_b:"Unified interface",home_f1:"Every model and dataset is cast into one “timestamp × feature” matrix with explicit context window and horizon — so a fair comparison is possible across models that were never designed to be compared.",
+    home_f2_b:"Open + closed tracks",home_f2:"Open data is evaluated publicly into the leaderboard; closed / proprietary data runs in private mode (local only) so nothing unpublished is exposed.",
+    home_f3_b:"Real, reproducible data",home_f3:"Scores are computed from real market data, not fabricated — and published-benchmark results are kept separate from the live arena and cited to their source papers.",
     hero_title:"Finance TSFMs Arena",hero_sub:"A unified benchmark and leaderboard for financial time-series forecasting. One interface, open + closed tracks, multiple domains and tasks — compare your models on a single fair stage.",
     loading:"Loading…",eyebrow_leaderboard:"Leaderboard",lb_title:"Overall Leaderboard",lb_desc:"Composite score = 0.5×(1−MASE) + 0.3×directional accuracy + 0.2×correlation. Only supported datasets are shown.",
     th_model:"Model",th_dataset:"Dataset",th_domain:"Domain",th_task:"Task",th_freq:"Freq.",th_score:"Score",lb_empty:"No results yet.",
@@ -720,9 +768,52 @@ document.getElementById('runBtn').addEventListener('click',async()=>{
   loadLB();
 });
 
-document.querySelectorAll('.navlink').forEach(a=>a.addEventListener('click',()=>{
-  document.querySelectorAll('.navlink').forEach(x=>x.classList.remove('active')); a.classList.add('active');
+document.querySelectorAll('.navlink').forEach(a=>a.addEventListener('click',e=>{
+  e.preventDefault();
+  const v = a.dataset.nav || a.getAttribute('href')?.slice(1);
+  if(v) showView(v);
 }));
+
+// ===== single-section view switching (with animation) =====
+const VIEW_SETS = {
+  home: ['home', 'leaderboard'],      // HOME default = intro + leaderboard
+  leaderboard: ['leaderboard'],
+  datasets: ['datasets'],
+  evaluate: ['evaluate'],
+  about: ['about'],
+  partners: ['partners'],
+  published: ['published'],
+};
+let _curView = 'home';
+function showView(name){
+  const set = VIEW_SETS[name] || [name];
+  // hide every viewable section, then show only this view's set
+  document.querySelectorAll('section.viewable').forEach(s=>{
+    s.classList.toggle('hidden', !set.includes(s.id));
+  });
+  // (re)play the entrance animation on the shown sections
+  set.forEach(id=>{
+    const s = document.getElementById(id); if(!s) return;
+    s.classList.remove('view-anim'); void s.offsetWidth; s.classList.add('view-anim');
+  });
+  // active nav
+  document.querySelectorAll('.navlink').forEach(x=>x.classList.toggle('active', (x.dataset.nav||x.getAttribute('href')?.slice(1))===name));
+  _curView = name;
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+function populateHomeStats(){
+  const lb = Array.isArray(DATA.leaderboard) ? DATA.leaderboard : [];
+  const ds = Array.isArray(DATA.datasets) ? DATA.datasets : [];
+  const md = DATA.models || {};
+  const nModels = (md.count!=null) ? md.count
+    : (md.models ? md.models.length
+      : (Array.isArray(md) ? md.length : (md.models_count!=null?md.models_count:Object.keys(md).length)));
+  const set = (id,v)=>{ const el=document.getElementById(id); if(el) el.textContent = v; };
+  set('stDsets', ds.length);
+  set('stModels', nModels);
+  set('stRows', lb.length);
+  set('stDomains', new Set(lb.map(r=>r.domain)).size);
+}
 
 async function setLang(l){
   document.documentElement.lang = (l==='ar') ? 'ar' : l;
@@ -732,6 +823,8 @@ async function setLang(l){
   I18N.init(l);
   CONFIG = Object.assign({}, CONFIG, await api('/api/config'));
   loadLB(); loadDatasets(); loadForm(); loadPB();
+  populateHomeStats();
+  showView(_curView);   // keep the same single-section view after a language change
 }
 document.getElementById('langBar').addEventListener('click',e=>{
   const b=e.target.closest('button'); if(!b)return; setLang(b.dataset.lang);
@@ -744,6 +837,8 @@ async function init(){
   CONFIG = Object.assign(CONFIG, await api('/api/config'));
   wireLbFilters();
   loadLB(); loadDatasets(); loadForm(); loadPB();
+  populateHomeStats();
+  showView('home');     // default view: HOME intro + leaderboard
 }
 init();
 </script>

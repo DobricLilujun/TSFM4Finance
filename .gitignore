@@ -8,3 +8,10 @@ __pycache__/
 data/bis_raw/*.csv
 data/bis_raw/*.zip
 data/bis_raw/*.xml
+
+# large model checkpoints / weights (do not push to GitHub)
+chronos-2-finetuned/
+data/bis/ckpts/
+**/model.safetensors
+data/bis_raw/
+*.safetensors

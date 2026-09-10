@@ -1819,5 +1819,77 @@
       "n_points": 6
     },
     "note": "PROPRIETARY placeholder — no real data; requires user data / model upload."
+  },
+  {
+    "dataset": "bis_xru",
+    "model": "Chronos-2",
+    "mode": "open",
+    "domain": "fx",
+    "task": "forecast",
+    "frequency": "day",
+    "lookback": "365,730",
+    "horizon": "5,10,20,30,60,90",
+    "split": "82/18 chronological",
+    "n_instances": 50632,
+    "score": null,
+    "metrics": {
+      "mse": 77.7773,
+      "mae": 1.9826,
+      "rmse": 2.2872,
+      "mape": 1.5984,
+      "mape_s": 1.6006,
+      "smape": 0.7992,
+      "directional_accuracy": 0.5301,
+      "n_points": 50632
+    },
+    "note": "Real BIS daily FX, 26 currencies, 1991-2026, 50632 rolling-origin instances. zero-shot. MAPE-s is the primary scale-invariant metric (raw MAE/MSE are scale-confounded across currencies); SMAPE derived from MAPE (SMAPE approx MAPE/2). score=null: the app composite needs MASE (a seasonal baseline) which is undefined for this rolling benchmark, so it is excluded from the composite ranking."
+  },
+  {
+    "dataset": "bis_xru",
+    "model": "TimesFM-3",
+    "mode": "open",
+    "domain": "fx",
+    "task": "forecast",
+    "frequency": "day",
+    "lookback": "365,730",
+    "horizon": "5,10,20,30,60,90",
+    "split": "82/18 chronological",
+    "n_instances": 50632,
+    "score": null,
+    "metrics": {
+      "mse": 86.1045,
+      "mae": 2.0693,
+      "rmse": 2.3804,
+      "mape": 1.638,
+      "mape_s": 1.6404,
+      "smape": 0.819,
+      "directional_accuracy": 0.5315,
+      "n_points": 50632
+    },
+    "note": "Real BIS daily FX, 26 currencies, 1991-2026, 50632 rolling-origin instances. zero-shot. MAPE-s is the primary scale-invariant metric (raw MAE/MSE are scale-confounded across currencies); SMAPE derived from MAPE (SMAPE approx MAPE/2). score=null: the app composite needs MASE (a seasonal baseline) which is undefined for this rolling benchmark, so it is excluded from the composite ranking."
+  },
+  {
+    "dataset": "bis_xru",
+    "model": "Chronos-2 (fine-tuned)",
+    "mode": "open",
+    "domain": "fx",
+    "task": "forecast",
+    "frequency": "day",
+    "lookback": "365,730",
+    "horizon": "5,10,20,30,60,90",
+    "split": "82/18 chronological",
+    "n_instances": 50632,
+    "score": null,
+    "metrics": {
+      "mse": 78.5416,
+      "mae": 1.998,
+      "rmse": 2.2987,
+      "mape": 1.5718,
+      "mape_s": 1.5738,
+      "smape": 0.7859,
+      "directional_accuracy": 0.5276,
+      "n_points": 50632
+    },
+    "note": "Real BIS daily FX, 26 currencies, 1991-2026. Fine-tuned on train split (400 steps, validated on val split), re-evaluated. MAPE-s primary; score=null (see zero-shot note)."
   }
 ]

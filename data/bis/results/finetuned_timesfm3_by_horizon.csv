@@ -1,0 +1,1 @@
+NOTE: TimesFM3 (google/timesfm-3.0-pytorch) exposes no public training API. Fine-tuning was not performed; zero-shot results are the official TimesFM3 numbers.

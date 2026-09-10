@@ -1,0 +1,302 @@
+{
+  "source": "BIS bilateral exchange rates (data.bis.org, dataflow BIS,WS_XRU,1.0)",
+  "description": "Curated major-currency daily FX benchmark for evaluating time-series foundation models (Chronos, Google TimesFM) in both zero-shot and fine-tuning settings.",
+  "frequency": "daily (BIS FREQ=D)",
+  "universe": [
+    {
+      "series": "AUD",
+      "n": 9120,
+      "train": 7478,
+      "val": 1642,
+      "start": "1991-01-02",
+      "end": "2026-09-08",
+      "split_date": "2020-04-14",
+      "label": "Australia"
+    },
+    {
+      "series": "BRL",
+      "n": 9085,
+      "train": 7449,
+      "val": 1636,
+      "start": "1991-01-02",
+      "end": "2026-09-08",
+      "split_date": "2020-04-22",
+      "label": "Brazil"
+    },
+    {
+      "series": "CAD",
+      "n": 9120,
+      "train": 7478,
+      "val": 1642,
+      "start": "1991-01-02",
+      "end": "2026-09-08",
+      "split_date": "2020-04-14",
+      "label": "Canada"
+    },
+    {
+      "series": "CHF",
+      "n": 9120,
+      "train": 7478,
+      "val": 1642,
+      "start": "1991-01-02",
+      "end": "2026-09-08",
+      "split_date": "2020-04-14",
+      "label": "Switzerland"
+    },
+    {
+      "series": "CLP",
+      "n": 8899,
+      "train": 7297,
+      "val": 1602,
+      "start": "1991-01-02",
+      "end": "2026-09-08",
+      "split_date": "2020-04-02",
+      "label": "Chile"
+    },
+    {
+      "series": "CNY",
+      "n": 9033,
+      "train": 7407,
+      "val": 1626,
+      "start": "1991-01-02",
+      "end": "2026-09-08",
+      "split_date": "2020-05-07",
+      "label": "China"
+    },
+    {
+      "series": "EUR",
+      "n": 9120,
+      "train": 7478,
+      "val": 1642,
+      "start": "1991-01-02",
+      "end": "2026-09-08",
+      "split_date": "2020-04-14",
+      "label": "Euro area"
+    },
+    {
+      "series": "GBP",
+      "n": 9120,
+      "train": 7478,
+      "val": 1642,
+      "start": "1991-01-02",
+      "end": "2026-09-08",
+      "split_date": "2020-04-14",
+      "label": "United Kingdom"
+    },
+    {
+      "series": "HKD",
+      "n": 9100,
+      "train": 7462,
+      "val": 1638,
+      "start": "1991-01-02",
+      "end": "2026-09-08",
+      "split_date": "2020-04-20",
+      "label": "Hong Kong"
+    },
+    {
+      "series": "ILS",
+      "n": 9132,
+      "train": 7488,
+      "val": 1644,
+      "start": "1991-01-02",
+      "end": "2026-09-08",
+      "split_date": "2020-04-08",
+      "label": "Israel"
+    },
+    {
+      "series": "INR",
+      "n": 9089,
+      "train": 7452,
+      "val": 1637,
+      "start": "1991-01-02",
+      "end": "2026-09-08",
+      "split_date": "2020-04-21",
+      "label": "India"
+    },
+    {
+      "series": "JPY",
+      "n": 9120,
+      "train": 7478,
+      "val": 1642,
+      "start": "1991-01-02",
+      "end": "2026-09-08",
+      "split_date": "2020-04-14",
+      "label": "Japan"
+    },
+    {
+      "series": "KRW",
+      "n": 9081,
+      "train": 7446,
+      "val": 1635,
+      "start": "1991-01-03",
+      "end": "2026-09-08",
+      "split_date": "2020-04-23",
+      "label": "South Korea"
+    },
+    {
+      "series": "MXN",
+      "n": 9079,
+      "train": 7444,
+      "val": 1635,
+      "start": "1991-01-02",
+      "end": "2026-09-08",
+      "split_date": "2020-04-23",
+      "label": "Mexico"
+    },
+    {
+      "series": "NOK",
+      "n": 9120,
+      "train": 7478,
+      "val": 1642,
+      "start": "1991-01-02",
+      "end": "2026-09-08",
+      "split_date": "2020-04-14",
+      "label": "Norway"
+    },
+    {
+      "series": "NZD",
+      "n": 9120,
+      "train": 7478,
+      "val": 1642,
+      "start": "1991-01-02",
+      "end": "2026-09-08",
+      "split_date": "2020-04-14",
+      "label": "New Zealand"
+    },
+    {
+      "series": "PLN",
+      "n": 9084,
+      "train": 7448,
+      "val": 1636,
+      "start": "1991-01-02",
+      "end": "2026-09-08",
+      "split_date": "2020-04-22",
+      "label": "Poland"
+    },
+    {
+      "series": "RUB",
+      "n": 8737,
+      "train": 7164,
+      "val": 1573,
+      "start": "1992-07-01",
+      "end": "2026-09-08",
+      "split_date": "2020-05-29",
+      "label": "Russia"
+    },
+    {
+      "series": "SEK",
+      "n": 9120,
+      "train": 7478,
+      "val": 1642,
+      "start": "1991-01-02",
+      "end": "2026-09-08",
+      "split_date": "2020-04-14",
+      "label": "Sweden"
+    },
+    {
+      "series": "SGD",
+      "n": 9100,
+      "train": 7462,
+      "val": 1638,
+      "start": "1991-01-02",
+      "end": "2026-09-08",
+      "split_date": "2020-04-20",
+      "label": "Singapore"
+    },
+    {
+      "series": "THB",
+      "n": 9052,
+      "train": 7422,
+      "val": 1630,
+      "start": "1991-01-02",
+      "end": "2026-09-08",
+      "split_date": "2020-04-30",
+      "label": "Thailand"
+    },
+    {
+      "series": "TRY",
+      "n": 9105,
+      "train": 7466,
+      "val": 1639,
+      "start": "1991-01-02",
+      "end": "2026-09-08",
+      "split_date": "2020-04-17",
+      "label": "Turkiye"
+    },
+    {
+      "series": "TWD",
+      "n": 8957,
+      "train": 7344,
+      "val": 1613,
+      "start": "1991-01-03",
+      "end": "2026-09-08",
+      "split_date": "2020-03-26",
+      "label": "Taiwan"
+    },
+    {
+      "series": "USD",
+      "n": 11976,
+      "train": 9820,
+      "val": 2156,
+      "start": "1991-01-01",
+      "end": "2026-09-08",
+      "split_date": "2018-04-09",
+      "label": "United States"
+    },
+    {
+      "series": "XDR",
+      "n": 9059,
+      "train": 7428,
+      "val": 1631,
+      "start": "1991-01-02",
+      "end": "2026-09-08",
+      "split_date": "2020-01-30",
+      "label": "SDR"
+    },
+    {
+      "series": "ZAR",
+      "n": 9094,
+      "train": 7457,
+      "val": 1637,
+      "start": "1991-01-02",
+      "end": "2026-09-08",
+      "split_date": "2020-04-21",
+      "label": "South Africa"
+    }
+  ],
+  "time_span": {
+    "start": "1991-01-01",
+    "end": "2026-09-08"
+  },
+  "split": {
+    "method": "chronological (82/18)",
+    "train_pct": 0.82,
+    "val_pct": 0.18,
+    "train_use": "fine-tuning + expanding context",
+    "val_use": "fine-tuning validation + rolling-origin test"
+  },
+  "lookbacks": [
+    365,
+    730
+  ],
+  "horizons": [
+    5,
+    10,
+    20,
+    30,
+    60,
+    90
+  ],
+  "test_cadence": "every 10 trading days in val region",
+  "metrics": [
+    "MSE",
+    "MAE",
+    "RMSE",
+    "MAPE",
+    "MAPE-s",
+    "directional_accuracy"
+  ],
+  "instances": 50632,
+  "n_series": 26,
+  "generated": "2026-09-08"
+}

@@ -11,12 +11,12 @@ import json
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+pass
 
 import pandas as pd
 
-from arena.datasets import _read_raw  # noqa: F401 (keeps import graph warm)
-from backend.app import _evaluate_dataset, _load_dataset, _to_native
+from tsfm4finance.core.datasets import _read_raw  # noqa: F401 (keeps import graph warm)
+from tsfm4finance.backend.app import _evaluate_dataset, _load_dataset, _to_native
 
 LB_PATH = Path(__file__).resolve().parent.parent / "backend" / "leaderboard.json"
 

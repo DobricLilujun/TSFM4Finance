@@ -31,7 +31,7 @@ models = [
 package = false
 
 [tool.setuptools]
-packages = ["arena", "backend"]
+packages = ["tsfm4finance"]
 
 [tool.setuptools.package-data]
-arena = ["datasets/*.json"]
+tsfm4finance.web = ["static/**/*"]

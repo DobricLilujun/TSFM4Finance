@@ -21,8 +21,9 @@ from cryptography.fernet import Fernet, InvalidToken
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 
+from tsfm4finance.paths import DATA
 HERE = Path(__file__).resolve().parent
-DATA_DIR = HERE.parent / "data"
+DATA_DIR = DATA
 CONFIG_DIR = DATA_DIR / "config"
 CONFIG_FILE = CONFIG_DIR / "config.enc"      # encrypted blob (source of truth)
 MIRROR_FILE = CONFIG_DIR / "config.json"     # plaintext read-mirror for the arena

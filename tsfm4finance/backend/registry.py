@@ -24,13 +24,14 @@ from typing import Optional
 import numpy as np
 import pandas as pd
 
-from arena.schemas import DatasetMeta, PredictOutput
-from arena.model_base import BaseModel, PredictionResult
+from tsfm4finance.core.schemas import DatasetMeta, PredictOutput
+from tsfm4finance.core.model_base import BaseModel, PredictionResult
 
+from tsfm4finance.paths import DATA
 HERE = Path(__file__).resolve().parent
-DATA = HERE.parent / "data"
+DATA_ = DATA
 REGISTRY = HERE / "models_registry.json"
-SUB_DIR = DATA / "submissions"
+SUB_DIR = DATA_ / "submissions"
 SUB_INDEX = SUB_DIR / "index.json"
 
 
@@ -175,7 +176,7 @@ class RegisteredModel(BaseModel):
         series = self._target_series(context_df, meta)
 
         if self.mtype == "arima":
-            from arena.models import _build
+            from tsfm4finance.core.models import _build
             try:
                 return _build("arima").predict(context_df, meta, horizon=horizon)
             except Exception:

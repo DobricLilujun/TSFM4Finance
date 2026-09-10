@@ -18,8 +18,8 @@ from typing import Optional
 import numpy as np
 import pandas as pd
 
-from ..model_base import BaseModel, PredictionResult
-from ..schemas import DatasetMeta, TaskType
+from tsfm4finance.core.model_base import BaseModel, PredictionResult
+from tsfm4finance.core.schemas import DatasetMeta, TaskType
 
 
 def _get_series(context_df: pd.DataFrame, meta: DatasetMeta) -> pd.Series:

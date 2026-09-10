@@ -8,9 +8,9 @@ import shutil
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-SRC = HERE / "frontend" / "index.html"
-LOGOS = HERE / "frontend" / "static" / "logos"
-LB = HERE / "backend" / "leaderboard.json"
+SRC = HERE.parent / "tsfm4finance" / "web" / "index.html"
+LOGOS = HERE.parent / "tsfm4finance" / "web" / "static" / "logos"
+LB = HERE.parent / "tsfm4finance" / "backend" / "leaderboard.json"
 OUT = HERE / ".deploy" / "index.html"
 
 

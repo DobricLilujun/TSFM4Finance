@@ -18,8 +18,8 @@ import sys
 from pathlib import Path
 from typing import Optional
 
-# Make the project root importable so `import arena` works.
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+# Make the project root importable so `from tsfm4finance import core as arena` works.
+
 
 import numpy as np
 import pandas as pd
@@ -27,12 +27,12 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel as _BM
 
-from arena.schemas import DatasetMeta, TaskType
-from arena.models import _build, available_models
-from arena.metrics import evaluate as run_eval
-import backend.registry as registry
+from tsfm4finance.core.schemas import DatasetMeta, TaskType
+from tsfm4finance.core.models import _build, available_models
+from tsfm4finance.core.metrics import evaluate as run_eval
+from tsfm4finance.backend import registry
 
-DATA = Path(__file__).resolve().parent.parent / "data"
+from tsfm4finance.paths import DATA
 
 
 def _to_native(obj):
@@ -158,8 +158,8 @@ def _rolling_windows(train, val, test, lookback: int,
 def _evaluate_dataset(meta: DatasetMeta, model_name: str,
                       horizon: Optional[int], lookback: Optional[int]) -> dict:
     """Run a model over rolling test windows; average the metrics."""
-    from arena.schemas import PredictOutput
-    from arena.model_base import PredictionResult
+    from tsfm4finance.core.schemas import PredictOutput
+    from tsfm4finance.core.model_base import PredictionResult
 
     train, val, test = _load_splits(meta.name)
     horizon = horizon or meta.horizon
@@ -269,7 +269,7 @@ def _list_datasets() -> list[DatasetMeta]:
 
 @app.get("/api/datasets")
 def datasets():
-    from backend.config import enabled_datasets
+    from tsfm4finance.backend.config import enabled_datasets
     enabled = enabled_datasets()
     metas = _list_datasets()
     if enabled is not None:
@@ -291,7 +291,7 @@ def dataset_detail(name: str):
 @app.get("/api/models")
 def models():
     """Return the available model adapters as a list of {name, info}."""
-    from backend.config import enabled_models
+    from tsfm4finance.backend.config import enabled_models
     enabled = enabled_models()
     out = []
     for name, info in available_models().items():
@@ -403,7 +403,7 @@ def upload_answer(req: UploadAnswerReq):
     truth = truth[:n]
     pred = pred[:n]
 
-    from arena.schemas import PredictOutput
+    from tsfm4finance.core.schemas import PredictOutput
     metrics = run_eval(PredictOutput(point=pred.tolist()), truth_df_from(truth),
                         meta, train_df=_train_df(req.dataset))
     record = {
@@ -429,7 +429,7 @@ def upload_answer(req: UploadAnswerReq):
 
 
 def _extract_truth(test: pd.DataFrame, meta: DatasetMeta) -> np.ndarray:
-    from arena.metrics import _extract_forecast_truth, _extract_labels
+    from tsfm4finance.core.metrics import _extract_forecast_truth, _extract_labels
     if meta.task == TaskType.FORECAST:
         return _extract_forecast_truth(test, meta)
     return _extract_labels(test, meta)
@@ -515,7 +515,8 @@ def leaderboard_model(model: str):
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 
-FRONTEND = Path(__file__).resolve().parent.parent / "frontend"
+from tsfm4finance.paths import PACKAGE_DIR
+FRONTEND = PACKAGE_DIR / "web"
 
 
 @app.get("/")

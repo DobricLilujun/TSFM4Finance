@@ -31,10 +31,10 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from arena.schemas import DatasetMeta, Domain, TaskType, Frequency
+from tsfm4finance.core.schemas import DatasetMeta, Domain, TaskType, Frequency
 
-ROOT = Path(__file__).resolve().parent.parent / "data"
-RAW = ROOT / "raw"  # real data downloaded by arena/download_real.py
+from tsfm4finance.paths import DATA as ROOT, ROOT as _PROJ_ROOT
+RAW = _PROJ_ROOT / "data" / "raw"  # real data downloaded by download_real.py
 
 
 # --------------------------------------------------------------------------- #

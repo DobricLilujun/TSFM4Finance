@@ -64,8 +64,8 @@ def client(tmp_path):
         df.to_parquet(synth / f"{name}.parquet")
 
     # Point the backend at the isolated dirs BEFORE importing the app.
-    import backend.app as appmod
-    import backend.registry as regmod
+    from tsfm4finance.backend import app as appmod
+    from tsfm4finance.backend import registry as regmod
     old_data, old_lb = appmod.DATA, appmod.LB.path
     old_reg, old_sub, old_idx = regmod.REGISTRY, regmod.SUB_DIR, regmod.SUB_INDEX
     old_models, old_index = None, None
@@ -77,7 +77,7 @@ def client(tmp_path):
 
     # Bypass the enabled-config filter so the synthetic dataset / registered
     # models are always visible (tests must not depend on real config files).
-    import backend.config as cfg
+    from tsfm4finance.backend import config as cfg
     cfg.enabled_datasets = lambda: None
     cfg.enabled_models = lambda: None
 

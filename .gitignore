@@ -19,8 +19,4 @@ data/bis_raw/
 # Generated outputs that should not be committed by default, but some assets
 # are required for CI / GitHub Pages (see explicit force-adds below).
 assets/outputs/
-assets/data/**/train.parquet
-assets/data/**/validation.parquet
-assets/data/**/test.parquet
-assets/data/bis_raw/
-assets/data/bis/ckpts/
+assets/data/

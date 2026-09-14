@@ -34,7 +34,7 @@ jobs:
         run: uv pip install -e src/tsfm_eval -e . --system
 
       - name: Build deploy bundle
-        run: uv run --system python scripts/make_deploy.py
+        run: python scripts/make_deploy.py
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3

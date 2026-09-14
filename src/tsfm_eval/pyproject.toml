@@ -1,0 +1,31 @@
+[project]
+name = "tsfm-eval"
+version = "0.1.0"
+description = "Unified data interface, metrics and evaluation harness for time-series foundation models on financial tasks."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "pandas>=2.0",
+    "numpy>=1.24",
+    "pydantic>=2.7",
+    "scikit-learn>=1.4",
+    "pyarrow>=15.0",
+]
+
+[project.optional-dependencies]
+download = [
+    "requests>=2.31",
+    "yfinance>=0.4",
+]
+
+[project.urls]
+Homepage = "https://github.com/.../TSFM4Finance"
+Repository = "https://github.com/.../TSFM4Finance"
+
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["tsfm_eval*"]

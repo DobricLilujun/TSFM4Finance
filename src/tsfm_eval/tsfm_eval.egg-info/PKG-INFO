@@ -1,0 +1,66 @@
+Metadata-Version: 2.4
+Name: tsfm-eval
+Version: 0.1.0
+Summary: Unified data interface, metrics and evaluation harness for time-series foundation models on financial tasks.
+Project-URL: Homepage, https://github.com/.../TSFM4Finance
+Project-URL: Repository, https://github.com/.../TSFM4Finance
+Requires-Python: >=3.10
+Description-Content-Type: text/markdown
+Requires-Dist: pandas>=2.0
+Requires-Dist: numpy>=1.24
+Requires-Dist: pydantic>=2.7
+Requires-Dist: scikit-learn>=1.4
+Requires-Dist: pyarrow>=15.0
+Provides-Extra: download
+Requires-Dist: requests>=2.31; extra == "download"
+Requires-Dist: yfinance>=0.4; extra == "download"
+
+# tsfm_eval
+
+Unified evaluation library for time-series foundation models on financial tasks.
+
+This package provides:
+
+- **Standard data interface**: `TSDataset`, `load_dataset()`, `list_datasets()`
+- **Task types**: `forecast`, `classify`, `anomaly`
+- **Metrics**: RMSE, MAE, MASE, sMAPE, directional accuracy, rank correlation,
+  accuracy, F1, AUC-ROC, etc.
+- **Model adapter**: `BaseModel` with a single `predict()` contract
+- **Evaluation**: `evaluate(pred, truth_df, meta)` and `run_benchmark()`
+
+## Quick start
+
+```python
+import tsfm_eval
+
+# List all public datasets under ./assets/data
+print(tsfm_eval.list_datasets(open_only=True))
+
+# Load one dataset
+ds = tsfm_eval.load_dataset("sp500_daily")
+print(ds.meta)
+
+# Iterate rolling windows
+for context, truth in ds.iter_rolling("test"):
+    ...
+
+# Evaluate a prediction
+from tsfm_eval.schemas import PredictOutput
+metrics = tsfm_eval.evaluate(
+    PredictOutput(point=[101.0, 102.0]),
+    truth,
+    ds.meta,
+)
+print(metrics)
+```
+
+## Configuration
+
+By default `tsfm_eval` looks for datasets in `./assets/data`. Override with:
+
+```python
+from tsfm_eval.config import set_data_root
+set_data_root("/path/to/assets/data")
+```
+
+Or via the environment variable `TSFM_EVAL_DATA_ROOT`.

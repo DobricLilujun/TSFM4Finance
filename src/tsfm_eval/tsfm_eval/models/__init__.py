@@ -1,4 +1,4 @@
-"""Re-export the unified model interface from tsfm_eval."""
+"""Model adapter base class."""
 from __future__ import annotations
 
 from tsfm_eval.models.base import BaseModel, PredictionResult

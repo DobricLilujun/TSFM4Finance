@@ -23,4 +23,10 @@ from tsfm4finance.core import (  # noqa: F401
     PredictionResult,
 )
 
+# Ensure tsfm_eval resolves datasets relative to this project's assets/data.
+from tsfm4finance.paths import DATA  # noqa: E402
+from tsfm_eval.config import set_data_root  # noqa: E402
+
+set_data_root(DATA)
+
 __version__ = "1.1.0"

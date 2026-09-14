@@ -26,12 +26,21 @@ models = [
     "chronos-forecasting>=1.0",
     "pmdarima>=2.0",
 ]
+dev = [
+    "pytest>=8.0",
+    "httpx2>=2.12",
+    "ruff>=0.4",
+    "mypy>=1.9",
+]
+
+[tool.uv.sources]
+tsfm-eval = { path = "src/tsfm_eval" }
 
 [tool.uv]
-package = false
+package = true
 
 [tool.setuptools]
 packages = ["tsfm4finance"]
 
 [tool.setuptools.package-data]
-tsfm4finance.web = ["static/**/*"]
+tsfm4finance = ["web/static/**/*"]

@@ -17,8 +17,9 @@ import pandas as pd
 
 from tsfm4finance.core.datasets import _read_raw  # noqa: F401 (keeps import graph warm)
 from tsfm4finance.backend.app import _evaluate_dataset, _load_dataset, _to_native
+from tsfm4finance.paths import LEADERBOARD
 
-LB_PATH = Path(__file__).resolve().parent.parent / "backend" / "leaderboard.json"
+LB_PATH = LEADERBOARD / "leaderboard.json"
 
 # (model, [datasets to run on])
 # Baselines + ARIMA are cheap -> run on a broad set. Chronos/TimesFM are slow ->

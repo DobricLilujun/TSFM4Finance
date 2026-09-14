@@ -1,3 +1,32 @@
+Metadata-Version: 2.4
+Name: tsfm4finance
+Version: 0.1.0
+Summary: Finance TSFMs Arena - a unified benchmark/leaderboard for financial time-series foundation models
+Requires-Python: >=3.11
+Description-Content-Type: text/markdown
+Requires-Dist: pandas>=2.2
+Requires-Dist: numpy>=1.26
+Requires-Dist: pydantic>=2.7
+Requires-Dist: fastapi>=0.110
+Requires-Dist: uvicorn[standard]>=0.29
+Requires-Dist: requests>=2.31
+Requires-Dist: scikit-learn>=1.4
+Requires-Dist: yfinance>=0.4
+Requires-Dist: pyjwt>=2.13.0
+Requires-Dist: cryptography>=50.0.0
+Requires-Dist: passlib>=1.7.4
+Requires-Dist: bcrypt>=5.0.0
+Requires-Dist: itsdangerous>=2.2.0
+Provides-Extra: models
+Requires-Dist: timesfm>=1.0; extra == "models"
+Requires-Dist: chronos-forecasting>=1.0; extra == "models"
+Requires-Dist: pmdarima>=2.0; extra == "models"
+Provides-Extra: dev
+Requires-Dist: pytest>=8.0; extra == "dev"
+Requires-Dist: httpx2>=2.12; extra == "dev"
+Requires-Dist: ruff>=0.4; extra == "dev"
+Requires-Dist: mypy>=1.9; extra == "dev"
+
 # Finance TSFMs Arena
 
 A unified benchmark, leaderboard and evaluation library for **financial time-series foundation models (TSFMs)**.

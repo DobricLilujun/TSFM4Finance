@@ -1,0 +1,13 @@
+README.md
+pyproject.toml
+tests/test_backend.py
+tsfm4finance/__init__.py
+tsfm4finance/paths.py
+tsfm4finance.egg-info/PKG-INFO
+tsfm4finance.egg-info/SOURCES.txt
+tsfm4finance.egg-info/dependency_links.txt
+tsfm4finance.egg-info/requires.txt
+tsfm4finance.egg-info/top_level.txt
+tsfm4finance/web/static/logos/luxembourg.png
+tsfm4finance/web/static/logos/northwestern.svg
+tsfm4finance/web/static/logos/princeton.svg

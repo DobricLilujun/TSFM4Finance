@@ -1,7 +1,7 @@
 """Central path resolution for tsfm4finance.
 
-The data directory lives at the project root (one level above this package),
-shared by the core dataset builder and the backend service.
+All user inputs and generated artifacts live under assets/ at the project root.
+This module gives every other module a single source of truth for those paths.
 """
 from __future__ import annotations
 from pathlib import Path
@@ -10,6 +10,12 @@ from pathlib import Path
 PACKAGE_DIR = Path(__file__).resolve().parent
 # project root -> .../TSFM4Finance
 ROOT = PACKAGE_DIR.parent
-DATA = ROOT / "data"
+
+# All datasets (open, closed, raw, bis) live under assets/data.
+DATA = ROOT / "assets" / "data"
+# Leaderboard and evaluation outputs are also under assets/.
+LEADERBOARD = ROOT / "assets" / "leaderboard"
+OUTPUTS = ROOT / "assets" / "outputs"
+
 REPORTS = ROOT / "reports"
 DOCS = ROOT / "docs"

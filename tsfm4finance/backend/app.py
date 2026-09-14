@@ -32,7 +32,7 @@ from tsfm4finance.core.models import _build, available_models
 from tsfm4finance.core.metrics import evaluate as run_eval
 from tsfm4finance.backend import registry
 
-from tsfm4finance.paths import DATA
+from tsfm4finance.paths import DATA, LEADERBOARD
 
 
 def _to_native(obj):
@@ -246,7 +246,7 @@ class Leaderboard:
         return sorted(out, key=lambda r: r.get("score", 0), reverse=True)
 
 
-LB = Leaderboard(Path(__file__).resolve().parent / "leaderboard.json")
+LB = Leaderboard(LEADERBOARD / "leaderboard.json")
 
 
 # --------------------------------------------------------------------------- #
@@ -429,7 +429,7 @@ def upload_answer(req: UploadAnswerReq):
 
 
 def _extract_truth(test: pd.DataFrame, meta: DatasetMeta) -> np.ndarray:
-    from tsfm4finance.core.metrics import _extract_forecast_truth, _extract_labels
+    from tsfm_eval.evaluation.evaluator import _extract_forecast_truth, _extract_labels
     if meta.task == TaskType.FORECAST:
         return _extract_forecast_truth(test, meta)
     return _extract_labels(test, meta)

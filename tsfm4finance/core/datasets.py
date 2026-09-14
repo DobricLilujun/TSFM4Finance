@@ -33,8 +33,8 @@ import pandas as pd
 
 from tsfm4finance.core.schemas import DatasetMeta, Domain, TaskType, Frequency
 
-from tsfm4finance.paths import DATA as ROOT, ROOT as _PROJ_ROOT
-RAW = _PROJ_ROOT / "data" / "raw"  # real data downloaded by download_real.py
+from tsfm4finance.paths import DATA as ROOT
+RAW = ROOT / "raw"  # real data downloaded by download_real.py
 
 
 # --------------------------------------------------------------------------- #
@@ -346,13 +346,17 @@ def _build_closed(defn: dict) -> DatasetMeta:
 
 def _write(name: str, meta: DatasetMeta, train: pd.DataFrame,
            val: pd.DataFrame, test: pd.DataFrame, closed: bool):
-    bucket = "closed" if closed else "open"
-    d = ROOT / bucket / name
-    d.mkdir(parents=True, exist_ok=True)
-    train.to_parquet(d / "train.parquet")
-    val.to_parquet(d / "validation.parquet")
-    test.to_parquet(d / "test.parquet")
-    (d / "meta.json").write_text(meta.model_dump_json(indent=2))
+    from tsfm_eval.data.registry import register_dataset
+
+    register_dataset(
+        name=name,
+        meta=meta,
+        train=train,
+        val=val,
+        test=test,
+        data_root=ROOT,
+        closed=closed,
+    )
 
 
 # --------------------------------------------------------------------------- #

@@ -11,11 +11,13 @@ from tsfm_eval.schemas import DatasetMeta
 
 def _dataset_dir(name: str, data_root: Path | None = None) -> Path:
     root = data_root or get_data_root()
-    for bucket in ("open", "closed"):
+    for bucket in ("open", "closed", "standard"):
         d = root / bucket / name
         if (d / "meta.json").exists():
             return d
-    raise FileNotFoundError(f"Dataset '{name}' not found under {root}/open or {root}/closed")
+    raise FileNotFoundError(
+        f"Dataset '{name}' not found under {root}/open, {root}/closed, or {root}/standard"
+    )
 
 
 def load_meta(name: str, data_root: Path | None = None) -> DatasetMeta:

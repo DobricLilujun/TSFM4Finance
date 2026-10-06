@@ -10,7 +10,7 @@ from tsfm_eval.config import get_data_root
 from tsfm_eval.schemas import DatasetMeta
 
 
-BUCKETS = ("open", "closed")
+BUCKETS = ("open", "closed", "standard")
 
 
 def _scan(data_root: Path) -> dict[str, Path]:
@@ -62,6 +62,7 @@ def register_dataset(
     test: pd.DataFrame,
     data_root: Path | None = None,
     closed: bool = False,
+    bucket: str | None = None,
 ) -> Path:
     """Write a dataset to disk in the standard parquet + meta.json layout.
 
@@ -74,7 +75,7 @@ def register_dataset(
     closed: if True, write to ``closed/`` bucket, otherwise ``open/``.
     """
     root = data_root or get_data_root()
-    bucket = "closed" if closed else "open"
+    bucket = bucket or ("closed" if closed else "open")
     d = root / bucket / name
     d.mkdir(parents=True, exist_ok=True)
 

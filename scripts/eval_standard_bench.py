@@ -204,38 +204,60 @@ def _write_report(rows, args):
     models = sorted({r["model"] for r in ok})
     splits = sorted({r.get("split", "validation") for r in ok}) or ["validation"]
     split_desc = {"validation": "2019-01-01 .. 2020-12-31", "test": "2021-01-01 .. 2023-12-31"}
-    lines = ["# Standard-Bench Evaluation\n",
-             "Mean of per-dataset aggregate metrics over rolling windows (step subsampling = %d). "
-             "Lower is better for MAE/SMAPE/MAPE/RMSE/MASE. Splits: %s.\n"
+    lines = ["# Standard-Bench Evaluation (by granularity)\n",
+             "Reported **per granularity (frequency)** — not per dataset, not per model. Each table "
+             "aggregates every dataset at one frequency (across all domains). Mean of per-dataset "
+             "aggregate metrics over rolling windows (step subsampling = %d). Lower is better for "
+             "MAE/SMAPE/MAPE/RMSE/MASE. Splits: %s.\n"
              % (args.step, ", ".join(f"**{s}** ({split_desc.get(s, '')})" for s in splits))]
 
-    def _table(cells_filter):
-        out = []
-        for v in sorted({r[key] for r in cells_filter}):
-            out.append(f"### {v.upper()}")
-            out.append("| model | n | MAE | SMAPE | MAPE | RMSE | MASE |")
-            out.append("|---|---:|---:|---:|---:|---:|---:|")
+    def _model_table(cells_filter):
+        """One table: rows = models, columns = metrics, aggregated over `cells_filter`."""
+        out = ["| model | n | MAE | SMAPE | MAPE | RMSE | MASE |",
+               "|---|---:|---:|---:|---:|---:|---:|"]
+        for model in models:
+            cells = {k: [] for k in METRIC_KEYS}
+            n = 0
+            for r in cells_filter:
+                if r["model"] != model:
+                    continue
+                n += 1
+                for k in cells:
+                    if k in r["metrics"]:
+                        cells[k].append(r["metrics"][k])
+            out.append(f"| {model} | {n} | {_fmt(cells['mae'])} | {_fmt(cells['smape'])} | "
+                      f"{_fmt(cells['mape'])} | {_fmt(cells['rmse'])} | {_fmt(cells['mase'])} |")
+        out.append("")
+        return out
+
+    def _domain_table(cells_filter):
+        """Break the same frequency group down by domain (still grouped under the frequency)."""
+        out = ["| domain | model | MAE | SMAPE | MASE |",
+               "|---|---|---:|---:|---:|"]
+        for dom in sorted({r["domain"] for r in cells_filter}):
             for model in models:
-                cells = {k: [] for k in METRIC_KEYS}
-                n = 0
+                mae, smape, mase, n = [], [], [], 0
                 for r in cells_filter:
-                    if r[key] != v or r["model"] != model:
+                    if r["domain"] != dom or r["model"] != model:
                         continue
                     n += 1
-                    for k in cells:
-                        if k in r["metrics"]:
-                            cells[k].append(r["metrics"][k])
-                out.append(f"| {model} | {n} | {_fmt(cells['mae'])} | {_fmt(cells['smape'])} | "
-                          f"{_fmt(cells['mape'])} | {_fmt(cells['rmse'])} | {_fmt(cells['mase'])} |")
-            out.append("")
+                    if "mae" in r["metrics"]: mae.append(r["metrics"]["mae"])
+                    if "smape" in r["metrics"]: smape.append(r["metrics"]["smape"])
+                    if "mase" in r["metrics"]: mase.append(r["metrics"]["mase"])
+                out.append(f"| {dom} | {model} | {_fmt(mae)} | {_fmt(smape)} | {_fmt(mase)} |")
+        out.append("")
         return out
 
     for split in splits:
         sub = [r for r in ok if r.get("split", "validation") == split]
-        lines.append(f"## {split.upper()} split\n")
-        for key, title in (("domain", "By domain"), ("freq", "By frequency")):
-            lines.append(f"### {title}\n")
-            lines += _table(sub)
+        lines.append(f"## {split.upper()} split ({split_desc.get(split, '')})\n")
+        # PRIMARY axis: granularity (frequency). DAY then HOUR.
+        for v in sorted({r["freq"] for r in sub}):
+            grp = [r for r in sub if r["freq"] == v]
+            lines.append(f"### {v.upper()} granularity\n")
+            lines += _model_table(grp)
+            lines.append("_by domain within this frequency_\n")
+            lines += _domain_table(grp)
     lines.append(f"Total runs: {len(rows)}; errors: {sum(1 for r in rows if r.get('error'))} "
                  f"({[r.get('split')+'-'+r['model']+'/'+r['dataset'] for r in rows if r.get('error')][:12]})\n")
     OUT.mkdir(parents=True, exist_ok=True)
@@ -252,7 +274,14 @@ def main():
     ap.add_argument("--split", default="both", choices=["validation", "test", "both"])
     ap.add_argument("--smoke", action="store_true", help="tiny end-to-end check (1 per domain/freq)")
     ap.add_argument("--out", default=str(OUT / "standard_bench_report.md"))
+    ap.add_argument("--report-only", action="store_true",
+                    help="skip evaluation; rebuild the report from the existing <out>.jsonl")
     args = ap.parse_args()
+    if args.report_only:
+        j = pathlib.Path(args.out).with_suffix(".jsonl")
+        rows = [json.loads(l) for l in j.read_text(encoding="utf-8").splitlines() if l.strip()]
+        _write_report(rows, args)
+        return
     run(args)
 
 

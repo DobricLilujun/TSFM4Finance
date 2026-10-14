@@ -6,9 +6,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
-  pages: write
-  id-token: write
+  contents: write
 
 concurrency:
   group: pages
@@ -19,6 +17,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -36,18 +36,16 @@ jobs:
       - name: Build deploy bundle
         run: python scripts/make_deploy.py
 
-      - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: assets/outputs/deploy
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+      - name: Push to gh-pages
+        run: |
+          cp assets/outputs/deploy/index.html /tmp/deploy_index.html
+          git fetch origin gh-pages
+          git checkout gh-pages
+          cp /tmp/deploy_index.html index.html
+          git add index.html
+          if git diff --staged --quiet; then
+            echo "No changes for gh-pages."
+          else
+            git commit -m "chore: update gh-pages deploy bundle [skip ci]"
+            git push "https://github-actions:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" HEAD:gh-pages
+          fi

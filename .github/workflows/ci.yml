@@ -33,13 +33,8 @@ jobs:
       - name: Install test deps
         run: uv pip install pytest httpx2 --system
 
+      - name: Build datasets
+        run: python scripts/build_datasets.py
+
       - name: Run tests
         run: pytest tests/ -q
-
-      - name: Build datasets (smoke test)
-        run: python scripts/build_datasets.py
-        continue-on-error: true
-
-      - name: Build deploy bundle
-        run: python scripts/make_deploy.py
-        continue-on-error: true

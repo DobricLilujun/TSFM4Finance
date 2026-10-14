@@ -30,8 +30,8 @@ jobs:
       - name: Install tsfm_eval + tsfm4finance + dev deps
         run: uv pip install -e src/tsfm_eval -e . --system
 
-      - name: Install pytest
-        run: uv pip install pytest --system
+      - name: Install test deps
+        run: uv pip install pytest httpx2 --system
 
       - name: Run tests
         run: pytest tests/ -q

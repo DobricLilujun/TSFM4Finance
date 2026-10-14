@@ -36,6 +36,11 @@ jobs:
       - name: Build deploy bundle
         run: python scripts/make_deploy.py
 
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
       - name: Push to gh-pages
         run: |
           cp assets/outputs/deploy/index.html /tmp/deploy_index.html

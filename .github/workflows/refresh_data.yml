@@ -29,6 +29,11 @@ jobs:
       - name: Install packages
         run: uv pip install -e src/tsfm_eval -e . --system
 
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
       - name: Build datasets
         run: python scripts/build_datasets.py
 
@@ -40,8 +45,6 @@ jobs:
 
       - name: Commit and push changes
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
           git add assets/data assets/leaderboard assets/outputs/deploy
           if git diff --staged --quiet; then
             echo "No changes to commit."

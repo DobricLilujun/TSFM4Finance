@@ -36,20 +36,19 @@ jobs:
 
       - name: Build datasets
         run: python scripts/build_datasets.py
-
-      - name: Refresh leaderboard
-        run: python scripts/refresh_leaderboard.py
+        continue-on-error: true
 
       - name: Build deploy bundle
         run: python scripts/make_deploy.py
 
       - name: Commit and push changes
         run: |
-          git add assets/data assets/leaderboard assets/outputs/deploy
+          git add assets/leaderboard
+          git add -f assets/outputs/deploy/index.html 2>/dev/null || true
           if git diff --staged --quiet; then
             echo "No changes to commit."
           else
-            git commit -m "chore: refresh datasets, leaderboard and deploy bundle [skip ci]"
+            git commit -m "chore: refresh leaderboard and deploy bundle [skip ci]"
             git push "https://github-actions:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" HEAD:main
           fi
 

@@ -17,6 +17,7 @@ Usage:  python -m tsfm4finance.bench.run [--stage NAME ...] [--limit N]
 from __future__ import annotations
 
 import argparse
+import os
 import shutil
 import json
 import sys
@@ -41,6 +42,8 @@ REPORT_DIR = ROOT / "reports"
 RESULTS_PATH = REPORT_DIR / "timesfm_benchmark_results.json"
 CKPT_DIR = REPORT_DIR / "ft_ckpts"
 LEADERBOARD = ROOT / "tsfm4finance" / "backend" / "leaderboard.json"
+LOCK = REPORT_DIR / ".bench.lock"
+FT_BS = 8
 
 HORIZONS = P.HORIZONS                       # [1, 5, 12, 21, 63]
 PRIMARY_H = 21
@@ -147,7 +150,8 @@ def stage_finetune(res: dict, limit: int | None = None) -> None:
             t0 = time.time()
             try:
                 r = FT.finetune(close, out, dataset=base, k_windows=K, lr=FT_LR,
-                                context=FT_CONTEXT)
+                                context=FT_CONTEXT, batch_size=FT_BS, epochs=args.ft_epochs,
+                                device=args_ft["device"], amp=args_ft["amp"])
                 res["finetune"][key] = r.to_dict()
             except Exception as e:
                 res["finetune"][key] = {"error": f"{type(e).__name__}: {e}"}
@@ -243,6 +247,121 @@ def stage_forecast(res: dict, limit: int | None = None) -> None:
                 _gc_checkpoints(res)
             from tsfm4finance.core.models import TimesFMModel
             TimesFMModel.clear_cache()
+
+
+# --------------------------------------------------------------------------- #
+# stage: valcheck -- predict on the VALIDATION split (never seen by training)
+# --------------------------------------------------------------------------- #
+VAL_MODELS = ["naive", "seasonal_naive", "arima", "chronos", "timesfm@256", "timesfm@512"]
+VAL_HORIZONS = (5, 21)
+
+
+def stage_valcheck(res: dict, limit: int | None = None, with_ft: bool = True) -> None:
+    """Same rolling protocol, evaluated strictly on the validation span.
+
+    Answers the "did you actually hold data out?" question directly: fine-tuning windows
+    are sampled from the train span only, and this stage predicts on the *validation*
+    span -- a period that lies between training and test and that no model was tuned on.
+    """
+    res["valcheck"] = res.get("valcheck", {})
+    series = T.REAL_SERIES[:limit] if limit else T.REAL_SERIES
+    from tsfm4finance.core.models import TimesFMModel
+    for base, _dom in series:
+        meta, tr, va, te = load_ds(base)
+        done = all(f"{base}:h{h}:{m}" in res["valcheck"]
+                   for h in VAL_HORIZONS for m in VAL_MODELS)
+        if done and not with_ft:
+            print(f"[valcheck] skip {base} (done)", flush=True)
+            continue
+        t0 = time.time()
+        # --- fine-tuned model first: full-parameter training needs the whole GPU, so
+        # release the inference engines (Chronos ~1 GB, TimesFM ~1 GB) before it starts
+        if with_ft:
+            ck = CKPT_DIR / f"{base}_full"
+            ft_rows_done = all(f"{base}:h{h}:timesfm_ft:full:{base}" in res["valcheck"]
+                               and "aggregate" in res["valcheck"][f"{base}:h{h}:timesfm_ft:full:{base}"]
+                               for h in VAL_HORIZONS)
+            if not ft_rows_done and not (ck / "model.safetensors").exists():
+                shutil.rmtree(ck, ignore_errors=True)
+                import torch
+                torch.cuda.empty_cache()
+                _ENGINE_CACHE.pop("chronos", None)
+                print(f"[valcheck] retraining {base}:full for the val check ...", flush=True)
+                try:
+                    FT.finetune(tr["close"].to_numpy(dtype=float), ck, dataset=base,
+                                k_windows=None, lr=FT_LR, context=FT_CONTEXT,
+                                batch_size=FT_BS, epochs=args.ft_epochs,
+                                device=args_ft["device"], amp=args_ft["amp"])
+                except Exception as e:
+                    print(f"[valcheck] fine-tune failed for {base}: {e}", flush=True)
+                    shutil.rmtree(ck, ignore_errors=True)
+                    for h in VAL_HORIZONS:
+                        res["valcheck"][f"{base}:h{h}:timesfm_ft:full:{base}"] = {
+                            "unavailable": f"fine-tune failed: {type(e).__name__}"}
+                    save_results(res)
+        # zero-shot / statistical engines on the validation span
+        for h in VAL_HORIZONS:
+            W, info = P.build_windows(tr, va, te, horizon=h, target="close", span="val")
+            tr_df = tr
+            for name in VAL_MODELS:
+                key = f"{base}:h{h}:{name}"
+                if key in res["valcheck"]:
+                    continue
+                try:
+                    eng = _engines([name])[name]
+                    pts, qs = eng.predict_batch([w.context for w in W], h)
+                    per = []
+                    for i, w in enumerate(W):
+                        out = M.PredictOutput(point=[float(x) for x in pts[i]])
+                        if qs is not None:
+                            out.quantiles = [[float(x) for x in row] for row in qs[i].T]
+                        per.append(M.evaluate(out, pd.DataFrame({"close": w.truth}), meta,
+                                              train_df=tr_df))
+                    agg = P.aggregate(per)
+                    agg["_secs"] = round(time.time() - t0, 1)
+                    res["valcheck"][key] = {"aggregate": agg, "info": info}
+                except Exception as e:
+                    res["valcheck"][key] = {"error": f"{type(e).__name__}: {e}"}
+                    traceback.print_exc()
+                save_results(res)
+        # evaluate the fine-tuned model on the same validation windows
+        if with_ft:
+            ck = CKPT_DIR / f"{base}_full"
+            if (ck / "model.safetensors").exists():
+                TimesFMModel.clear_cache()
+                _ENGINE_CACHE.pop("chronos", None)
+                for h in VAL_HORIZONS:
+                    W, info = P.build_windows(tr, va, te, horizon=h, target="close", span="val")
+                    key = f"{base}:h{h}:timesfm_ft:full:{base}"
+                    if key not in res["valcheck"]:
+                        try:
+                            eng = P.TimesFMEngine(checkpoint=str(ck), max_context=FT_CONTEXT, name=key)
+                            pts, qs = eng.predict_batch([w.context for w in W], h)
+                            per = []
+                            for i, w in enumerate(W):
+                                out = M.PredictOutput(point=[float(x) for x in pts[i]])
+                                if qs is not None:
+                                    out.quantiles = [[float(x) for x in row] for row in qs[i].T]
+                                per.append(M.evaluate(out, pd.DataFrame({"close": w.truth}), meta,
+                                                      train_df=tr))
+                            agg = P.aggregate(per)
+                            agg["_secs"] = round(time.time() - t0, 1)
+                            res["valcheck"][key] = {"aggregate": agg, "info": info}
+                        except Exception as e:
+                            res["valcheck"][key] = {"error": f"{type(e).__name__}: {e}"}
+                            traceback.print_exc()
+                    save_results(res)
+                shutil.rmtree(ck, ignore_errors=True)      # transient weights only
+        TimesFMModel.clear_cache()
+        vals = [res["valcheck"][f"{base}:h21:{m}"]["aggregate"].get("mase", float("nan"))
+                for m in VAL_MODELS + [f"timesfm_ft:full:{base}"]
+                if f"{base}:h21:{m}" in res["valcheck"]
+                and "aggregate" in res["valcheck"][f"{base}:h21:{m}"]]
+        if vals:
+            print(f"[valcheck] {base:24s} h21 MASE {min(vals):.3f}-{max(vals):.3f} "
+                  f"({time.time()-t0:.0f}s)", flush=True)
+        else:
+            print(f"[valcheck] {base:24s} no successful val rows", flush=True)
 
 
 def _gc_checkpoints(res: dict) -> None:
@@ -595,16 +714,63 @@ def stage_leaderboard(res: dict, horizon: int = PRIMARY_H) -> int:
 
 
 # --------------------------------------------------------------------------- #
+args_ft: dict = {"device": None, "amp": None}
+
+
+def _acquire_lock(force: bool = False) -> None:
+    """One writer per GPU: two concurrent sweeps on a 6 GB card OOM each other."""
+    LOCK.parent.mkdir(parents=True, exist_ok=True)
+    if LOCK.exists() and not force:
+        try:
+            pid = int(LOCK.read_text().strip())
+            os.kill(pid, 0)
+        except (ValueError, ProcessLookupError, PermissionError):
+            LOCK.unlink(missing_ok=True)          # stale lock
+        else:
+            raise SystemExit(
+                f"another benchmark run is alive (pid {pid}); wait for it, or pass --force "
+                f"if you are sure it is dead (lock: {LOCK})")
+    LOCK.write_text(str(os.getpid()))
+
+
 def main(argv=None) -> int:
+    global FT_LR, FT_CONTEXT, FT_BS, HORIZONS, CONTEXTS
     ap = argparse.ArgumentParser(prog="tsfm4finance.bench.run")
     ap.add_argument("--stage", action="append", default=None,
                     choices=["tasks", "finetune", "forecast", "classify", "anomaly",
-                             "trading", "derive", "leaderboard", "report"])
+                             "trading", "valcheck", "derive", "leaderboard", "report"])
     ap.add_argument("--limit", type=int, default=None, help="limit number of series (debug)")
+    ap.add_argument("--series", default=None,
+                    help="comma-separated subset of series names (default: all 12)")
+    ap.add_argument("--horizons", default=None, help="comma list, e.g. 1,5,12,21,63")
+    ap.add_argument("--contexts", default=None, help="comma list of zero-shot contexts")
+    ap.add_argument("--ft-bs", type=int, default=FT_BS, help="fine-tune batch size")
+    ap.add_argument("--ft-amp", default="fp32", choices=["fp32", "bf16", "fp16"],
+                    help="mixed precision for fine-tuning (bf16 halves activation memory)")
+    ap.add_argument("--ft-lr", type=float, default=FT_LR)
+    ap.add_argument("--ft-context", type=int, default=FT_CONTEXT,
+                    help="fine-tune context length (also used by the FT forecast engines)")
+    ap.add_argument("--ft-device", default=None, help="e.g. cuda:0 / cpu (fine-tune only)")
+    ap.add_argument("--ft-epochs", type=int, default=None,
+                    help="override the auto epoch count for fine-tuning")
+    ap.add_argument("--force", action="store_true",
+                    help="ignore the single-writer GPU lock (not recommended)")
     ap.add_argument("--trade-h", type=int, default=5)
     args = ap.parse_args(argv)
     stages = args.stage or ["tasks", "finetune", "forecast", "classify", "anomaly",
-                            "trading", "derive", "leaderboard", "report"]
+                            "trading", "valcheck", "derive", "leaderboard", "report"]
+    FT_LR, FT_CONTEXT, FT_BS = args.ft_lr, args.ft_context, args.ft_bs
+    if args.horizons:
+        HORIZONS = [int(x) for x in args.horizons.split(",") if x.strip()]
+    if args.contexts:
+        CONTEXTS = [int(x) for x in args.contexts.split(",") if x.strip()]
+    if args.series:
+        want = {x.strip() for x in args.series.split(",") if x.strip()}
+        T.REAL_SERIES = [(b, d) for b, d in T.REAL_SERIES if b in want]
+        if not T.REAL_SERIES:
+            print(f"no series match {args.series!r}"); return 2
+    _acquire_lock(args.force)
+    args_ft.update({"device": args.ft_device, "amp": None if args.ft_amp == "fp32" else args.ft_amp})
     res = load_results()
     for st in stages:
         t0 = time.time()
@@ -622,6 +788,8 @@ def main(argv=None) -> int:
             stage_anomaly(res, args.limit)
         elif st == "trading":
             stage_trading(res, args.limit, h=args.trade_h)
+        elif st == "valcheck":
+            stage_valcheck(res, args.limit)
         elif st == "derive":
             stage_derive(res)
         elif st == "leaderboard":
@@ -631,6 +799,7 @@ def main(argv=None) -> int:
             report.build(res)
         print(f"=== stage {st} done in {time.time()-t0:.0f}s ===", flush=True)
     save_results(res)
+    LOCK.unlink(missing_ok=True)
     print(f"\nresults -> {RESULTS_PATH}")
     return 0
 

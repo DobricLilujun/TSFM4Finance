@@ -22,16 +22,20 @@ dependencies = [
 
 [project.optional-dependencies]
 models = [
-    "timesfm>=1.0",
-    "chronos-forecasting>=1.0",
+    "timesfm>=2.0",
+    "chronos-forecasting>=2.0",
     "pmdarima>=2.0",
+    "pyarrow>=16",
+]
+bench = [
+    "pytest>=8",
 ]
 
 [tool.uv]
 package = false
 
 [tool.setuptools]
-packages = ["arena", "backend"]
+packages = ["tsfm4finance"]
 
 [tool.setuptools.package-data]
-arena = ["datasets/*.json"]
+tsfm4finance.web = ["static/**/*"]

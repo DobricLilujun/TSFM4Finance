@@ -271,6 +271,41 @@ def build(res: dict | None = None) -> Path:
       "corpus for a 200M-parameter model; the K-ladder and LR pilot in §2 quantify what full "
       "fine-tuning costs in out-of-sample accuracy.\n")
 
+    # ---------------- 7. validation-span check ----------------#
+    if res.get("valcheck"):
+        A("## 7. Validation-span check (same protocol, evaluation restricted to the val split)\n")
+        A("Fine-tuning windows are sampled from the **train** span only; this stage runs the "
+          "identical rolling-origin protocol but evaluates on the **validation** span -- the "
+          "block between training and test that no model, threshold or cut-point was tuned on.\n")
+        vm = ["naive", "seasonal_naive", "arima", "chronos", "timesfm@256", "timesfm@512",
+              "__ftfull__"]
+
+        def _mean_of(src, keys):
+            v = [src[k]["aggregate"]["mase"] for k in keys if k in src and "aggregate" in src[k]]
+            return float(np.nanmean(v)) if v else float("nan")
+
+        def _vmean(h, m):
+            keys = [k for k in res["valcheck"] if k.endswith(f":h{h}:{m}")] or \
+                   [k for k in res["valcheck"] if f":h{h}:timesfm_ft:full:" in k]
+            return _mean_of(res["valcheck"], keys)
+
+        def _tmean(h, m):
+            if m == "__ftfull__":
+                keys = [k for k in res["forecast"] if f":h{h}:timesfm_ft:full:" in k]
+            else:
+                keys = [f"{b}:h{h}:{m}" for b, _d in T.REAL_SERIES]
+            return _mean_of(res["forecast"], keys)
+
+        rows = [[("TimesFM full fine-tune" if m == "__ftfull__" else m)]
+                + [_f(_vmean(h, m), 3) for h in (5, 21)]
+                + [_f(_tmean(h, m), 3) for h in (5, 21)] for m in vm]
+        A(_tbl(["model (mean MASE)", "val h=5", "val h=21", "test h=5", "test h=21"], rows))
+        A("\nRead: the *level* of the error is span-dependent and so is the *ranking* -- a model "
+          "that beats persistence on validation can tie it on test, and a fine-tuning gain "
+          "measured next to the training corpus can vanish one regime later. Quote several "
+          "spans, never one.\n")
+        A("")
+
     REPORT.write_text("\n".join(L))
     return REPORT
 

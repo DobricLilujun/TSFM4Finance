@@ -112,11 +112,17 @@ def _patchify_and_normalize(module, x: np.ndarray, y: np.ndarray, device,
     return normed, masks, cmu, csd, yin
 
 
-def _loss(module, normed, masks, cmu, csd, yin):
+def _loss(module, normed, masks, cmu, csd, yin, amp: str | None = None):
     import torch
     from timesfm.torch import util as tfutil
 
-    (_, _, normed_outputs, _), _ = module(normed, masks, None)
+    if amp:
+        dt = torch.bfloat16 if amp == "bf16" else torch.float16
+        with torch.autocast(device_type=normed.device.type, dtype=dt):
+            (_, _, normed_outputs, _), _ = module(normed, masks, None)
+        normed_outputs = normed_outputs.float()          # loss math stays in fp32
+    else:
+        (_, _, normed_outputs, _), _ = module(normed, masks, None)
     last = normed_outputs[:, -1, :]                                  # (1, o*q)
     o, q = module.o, module.q
     last = torch.reshape(last, (1, o, q))
@@ -135,8 +141,13 @@ def finetune(train_close: np.ndarray, out_dir: str | Path, dataset: str = "",
              k_windows: int | None = 64, context: int = CONTEXT,
              target_len: int = TARGET_LEN, stride: int = STRIDE,
              lr: float = 1e-5, batch_size: int = 8, epochs: int | None = None,
-             seed: int = 0, global_norm: bool = True, verbose: bool = False) -> FTResult:
-    """Full (all-parameter) fine-tune of the 200M TimesFM module; saves a loadable ckpt."""
+             seed: int = 0, global_norm: bool = True, verbose: bool = False,
+             device: str | None = None, amp: str | None = None) -> FTResult:
+    """Full (all-parameter) fine-tune of the 200M TimesFM module; saves a loadable ckpt.
+
+    Memory knobs for small GPUs: ``batch_size``, ``context`` (shorter windows) and
+    ``amp="bf16"|"fp16"`` (activations in half precision, loss computed in fp32).
+    """
     import torch
     import timesfm
 
@@ -159,6 +170,8 @@ def finetune(train_close: np.ndarray, out_dir: str | Path, dataset: str = "",
     wrapper = timesfm.TimesFM_2p5_200M_torch.from_pretrained(
         timesfm.TimesFM_2p5_200M_torch.DEFAULT_REPO_ID, torch_compile=False)
     module = wrapper.model
+    if device:
+        module.to(device)
     device = next(module.parameters()).device
     module.train()
     for prm in module.parameters():
@@ -182,7 +195,7 @@ def finetune(train_close: np.ndarray, out_dir: str | Path, dataset: str = "",
                     try:
                         normed, masks, cmu, csd, yin = _patchify_and_normalize(
                             module, ctx, tgt, device, global_norm)
-                        l, _, _ = _loss(module, normed, masks, cmu, csd, yin)
+                        l, _, _ = _loss(module, normed, masks, cmu, csd, yin, amp=amp)
                         accum.append(l / len(sel))
                     except torch.cuda.OutOfMemoryError:
                         torch.cuda.empty_cache()
@@ -210,13 +223,15 @@ def finetune(train_close: np.ndarray, out_dir: str | Path, dataset: str = "",
             del optim
             return finetune(train_close, out, dataset, k_windows, context, target_len,
                             stride, lr, batch_size=max(1, bs // 2), epochs=epochs, seed=seed,
-                            global_norm=global_norm, verbose=verbose)
+                            global_norm=global_norm, verbose=verbose,
+                            device=str(device) if device else None, amp=amp)
         raise
 
     wrapper.save_pretrained(str(out))
     meta = {"dataset": dataset, "k_windows": k_windows, "n_windows_used": len(wins),
             "trainable_parameters": int(sum(p.numel() for p in module.parameters()
                                             if p.requires_grad)),
+            "amp": amp or "fp32", "device": str(device),
             "context": context, "target_len": target_len, "epochs": ep, "steps": steps,
             "lr": lr, "batch_size": bs, "seed": seed, "loss_first": first, "loss_last": last,
             "loss_curve": losses[:: max(1, len(losses) // 40)]}

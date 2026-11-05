@@ -49,10 +49,62 @@ def build_block(res: dict) -> str:
              for b, _ in T.REAL_SERIES]
         return float(np.nanmean(v)) if v else float("nan")
 
+    groups = [
+        ("Statistical baselines",
+         [("Persistence (naive)", "naive"),
+          ("Seasonal naive (5-day week)", "seasonal_naive"),
+          ("Moving average (20-day)", "moving_average"),
+          ("ARIMA(1,1,0)", "arima")]),
+        ("Pre-trained TSFMs, zero-shot",
+         [("Chronos-2", "chronos"),
+          ("TimesFM 2.5-200M (context 512)", zs)]),
+        ("The same TSFM after adaptation",
+         [("TimesFM 2.5-200M, full fine-tune", "__ftfull__")]),
+    ]
+
+    def pv(base: str, h: int, model: str) -> float:
+        if model == "__ftfull__":
+            model = f"timesfm_ft:full:{base}"
+        return res["forecast"].get(f"{base}:h{h}:{model}", {}).get("aggregate", {}).get(
+            "mase", float("nan"))
+
+    def rowval(model: str, h: int) -> float:
+        if model == "__ftfull__":
+            v = [x for x in (pv(b, h, "__ftfull__") for b, _ in T.REAL_SERIES) if np.isfinite(x)]
+            return float(np.mean(v)) if v else float("nan")
+        return _mean_mase(res, model, h)
+
+    def rowndp(model: str) -> float:
+        if model == "__ftfull__":
+            v = [res.get("derived", {}).get(f"{b}:h21", {}).get(f"timesfm_ft:full:{b}",
+                                                               float("nan"))
+                 for b, _ in T.REAL_SERIES]
+        else:
+            v = [res.get("derived", {}).get(f"{b}:h21", {}).get(model, float("nan"))
+                 for b, _ in T.REAL_SERIES]
+        v = [x for x in v if np.isfinite(x)]
+        return float(np.mean(v)) if v else float("nan")
+
+    all_models = [m for _g, rs in groups for _l, m in rs]
+    val = {(m, h): rowval(m, h) for m in all_models for h in HS}
+    best = {h: min((val[(m, h)] for m in all_models if np.isfinite(val[(m, h)])),
+                   default=float("nan")) for h in HS}
+
     rows = []
-    for label, m in models:
-        rows.append(" & ".join([label] + [_f(_mean_mase(res, m, h), 3) for h in HS]
-                               + [_f(_ndp(m, 21), 3)]) + r" \\")
+    for gi, (gname, mrows) in enumerate(groups):
+        if gi:
+            rows.append(r"\addlinespace[2pt]")
+        rows.append(rf"\multicolumn{{{len(HS) + 2}}}{{@{{}}l@{{}}}}{{\textit{{{gname}}}}}\\")
+        for label, m in mrows:
+            cells = []
+            for h in HS:
+                x = val[(m, h)]
+                s = _f(x, 3)
+                if np.isfinite(x) and x == best[h]:
+                    s = r"\textbf{" + s + "}"
+                cells.append(s)
+            cells.append(_f(rowndp(m), 3))
+            rows.append(" & ".join([label] + cells) + r" \\")
 
     # headline comparisons
     zs21 = _mean_mase(res, zs, 21)
@@ -92,6 +144,62 @@ def build_block(res: dict) -> str:
         base = np.nanmean([_mean_mase(res, "timesfm@256", h) for _ in T.REAL_SERIES for h in (5, 21)])
         ft_rows.append((lbl, m, m - base))
         ft_deltas.append(m - base)
+
+    # ---- validation-span check: same protocol, evaluation restricted to the val split
+    def _val_mean(model: str, h: int = 21) -> float:
+        v = [res["valcheck"][k]["aggregate"]["mase"] for k in res.get("valcheck", {})
+             if k.endswith(f":h{h}:{model}") and "aggregate" in res["valcheck"][k]]
+        return float(np.nanmean(v)) if v else float("nan")
+
+    def _test_mean(model: str, h: int = 21) -> float:
+        return _mean_mase(res, model, h)
+
+    def _ft_val_mean(h: int = 21) -> float:
+        v = [res["valcheck"][k]["aggregate"]["mase"] for k in res.get("valcheck", {})
+             if f":h{h}:timesfm_ft:full:" in k and "aggregate" in res["valcheck"][k]]
+        return float(np.nanmean(v)) if v else float("nan")
+
+    def _ft_mean_full_test() -> float:
+        v = [pv(b, 21, "__ftfull__") for b, _ in T.REAL_SERIES]
+        v = [x for x in v if np.isfinite(x)]
+        return float(np.mean(v)) if v else float("nan")
+
+    def _v(model: str, h: int = 21) -> float:
+        v = [x["aggregate"]["mase"] for k, x in res.get("valcheck", {}).items()
+             if k.endswith(f":h{h}:{model}") and "aggregate" in x]
+        return float(np.nanmean(v)) if v else float("nan")
+
+    def _vft(h: int = 21) -> float:
+        v = [x["aggregate"]["mase"] for k, x in res.get("valcheck", {}).items()
+             if f":h{h}:timesfm_ft:full:" in k and "aggregate" in x]
+        return float(np.nanmean(v)) if v else float("nan")
+
+    val_ok = bool(res.get("valcheck"))
+    if val_ok:
+        v_naive, v_ch, v_ts, v_ft = _v("naive"), _v("chronos"), _v(zs), _vft()
+        t_naive, t_ch, t_ts, t_ft = (_mean_mase(res, "naive", 21), _mean_mase(res, "chronos", 21),
+                                     _mean_mase(res, zs, 21), _ft_mean_full_test())
+        up = lambda a, b: "higher" if a > b else "lower"
+        val_line = (
+            "Because the protocol's default evaluation span is the test split, the identical "
+            "rolling protocol was re-run with the evaluation window restricted to the "
+            "\emph{validation} split -- the block that sits between the fine-tuning corpus and "
+            "the test period, that no model or threshold was tuned on, and that is reached by "
+            "the same expanding-context rule. Mean MASE at $h=21$ on that span is "
+            f"{_f(v_naive,3)} for persistence, {_f(v_ch,3)} for Chronos-2, {_f(v_ts,3)} for "
+            f"zero-shot TimesFM and {_f(v_ft,3)} for the fully fine-tuned one, against "
+            f"{_f(t_naive,3)} / {_f(t_ch,3)} / {_f(t_ts,3)} / {_f(t_ft,3)} on the test split. "
+            f"Levels are again {abs(v_naive / t_naive - 1) * 100:.0f}\% {up(v_naive, t_naive)} "
+            "on validation for persistence and of the same order for every method, but the "
+            "\emph{ranking} is not stable across spans: on validation the zero-shot TSFM "
+            f"edges past persistence by {abs(v_ts/v_naive-1)*100:.0f}\%, whereas on test the two "
+            "are statistically indistinguishable, and the fine-tuned model is the best of the "
+            f"four on validation ({_f(v_ft,3)}) yet no better than zero-shot on test "
+            f"({_f(t_ft,3)} vs {_f(t_ts,3)}). Adaptation gains are therefore period-local: they "
+            "can be real in the window adjacent to the training corpus and still vanish one "
+            "regime later. Any TSFM claim in finance should quote several spans, not one.")
+    else:
+        val_line = ""
 
     # classification / anomaly / trading headlines
     def _cls_mean(suffix, method, key="f1"):
@@ -164,13 +272,19 @@ def build_block(res: dict) -> str:
          "ARIMA(1,1,0) statistical baselines.",
          "",
          r"\begin{table}[t]", r"\centering",
-         r"\caption{Forecast accuracy over the twelve real series: mean MASE by horizon, and the "
-         r"normalized error NDp$=$MAE(model)/MAE(persistence) at $h=21$ on identical rolling "
-         r"windows (NDp$<1$ beats ``keep the last price''). Zero-shot foundation models are "
-         r"compared with classical statistical baselines.}",
-         r"\label{tab:tsfm_case}", r"\begin{tabular}{l" + "c" * (len(HS) + 1) + "}",
+         r"\caption{Forecast accuracy on identical rolling windows, averaged over the twelve "
+         r"real series. MASE is scaled by the train-split naive error; NDp$=$MAE(model)/"
+         r"MAE(persistence) on the same windows, so NDp$<1$ beats ``keep the last price''. "
+         r"Bold marks the best value in each column; the fine-tuned row adapts all 200M "
+         r"parameters of the zero-shot TimesFM checkpoint on each series's train split.}",
+         r"\label{tab:tsfm_case}",
+         r"\small", r"\setlength{\tabcolsep}{5pt}",
+         r"\begin{tabular}{@{}l" + "r" * len(HS) + r"r@{}}",
          r"\toprule",
-         "Model & " + " & ".join(f"$h={h}$" for h in HS) + r" & NDp($h{=}21$) \\", r"\midrule",
+         r" & \multicolumn{" + str(len(HS)) + r"}{c}{MASE by horizon (lower is better)}"
+         r" & \multicolumn{1}{c}{NDp} \\",
+         r"\cmidrule(lr){2-" + str(1 + len(HS)) + r"} \cmidrule(lr){" + str(2 + len(HS)) + r"-" + str(1 + len(HS) + 1) + r"}",
+         "Model & " + " & ".join(f"$h={h}$" for h in HS) + r" & $h=21$ \\", r"\midrule",
          *rows,
          r"\bottomrule", r"\end{tabular}", r"\end{table}",
          "",
@@ -201,6 +315,8 @@ def build_block(res: dict) -> str:
          f"Three years of a single daily financial series is a small, noisy corpus for a model of "
          f"this size: full-parameter adaptation buys in-sample fit and largely spends "
          f"out-of-sample generality.",
+         "",
+         val_line,
          "",
          "Two discriminative tasks were built \emph{from the same real prices} (no synthetic "
          "labels): next-week return direction and next-month volatility regime. Mean macro-F1 "

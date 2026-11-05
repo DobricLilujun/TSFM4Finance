@@ -53,11 +53,14 @@ def build_windows(train: pd.DataFrame, val: pd.DataFrame, test: pd.DataFrame,
     if span == "auto":
         span = "val+test" if horizon > LONG_HORIZON_SWITCH else "test"
     if span == "test":
-        span_start = n_train + n_val
+        span_start, span_end = n_train + n_val, n
+    elif span == "val":
+        # strictly the validation split: an untouched span that fine-tuning never saw
+        span_start, span_end = n_train, n_train + n_val
     elif span == "val+test":
-        span_start = n_train
+        span_start, span_end = n_train, n
     elif span == "train+val+test":
-        span_start = 0
+        span_start, span_end = 0, n
     else:
         raise ValueError(f"unknown span {span!r}")
 
@@ -65,7 +68,7 @@ def build_windows(train: pd.DataFrame, val: pd.DataFrame, test: pd.DataFrame,
     windows: list[Window] = []
     o = span_start
     last_end = span_start
-    while o + horizon <= n:
+    while o + horizon <= span_end:
         ctx_lo = max(0, o - max_context)
         ctx = y[ctx_lo:o]
         truth = y[o:o + horizon]
@@ -77,7 +80,7 @@ def build_windows(train: pd.DataFrame, val: pd.DataFrame, test: pd.DataFrame,
     # simply report how much of the span was covered instead.
 
     covered = sum(len(w.truth) for w in windows)
-    span_len = n - span_start
+    span_len = span_end - span_start
     info = {
         "span": span,
         "horizon": int(horizon),
@@ -85,8 +88,9 @@ def build_windows(train: pd.DataFrame, val: pd.DataFrame, test: pd.DataFrame,
         "n_origins": len(windows),
         "coverage": float(covered / span_len) if span_len else float("nan"),
         "max_context": int(max_context),
-        "no_leakage": all((w.origin + len(w.truth) <= n) and (len(w.context) == w.origin - max(0, w.origin - max_context))
+        "no_leakage": all((w.origin + len(w.truth) <= span_end) and (len(w.context) == w.origin - max(0, w.origin - max_context))
                           for w in windows),
+        "train_end": int(n_train),        # everything at/after this index is unseen by training
     }
     return windows, info
 

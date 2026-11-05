@@ -183,3 +183,20 @@ Cost sensitivity (mean net Sharpe over the 12 series):
 - Predictive-band calibration is reported as the 10% quantile violation rate (target 0.10); a TSFM whose bands are too narrow is misleading for risk use even when its point forecast is competitive.
 - Trading significance: one asset at one horizon is breadth = 1 (Grinold), and this grid tests many configurations; per-strategy t-statistics are in the JSON (`t_stat_net`) and should be read with the multiple-testing caveat (Harvey 2017 / López de Prado 2018). No borrow cost, slippage, or funding spread is modelled; |position| ≤ 1, single asset.
 - Fine-tuning regime: three years of a single daily series is a very small, very noisy corpus for a 200M-parameter model; the K-ladder and LR pilot in §2 quantify what full fine-tuning costs in out-of-sample accuracy.
+
+## 7. Validation-span check (same protocol, evaluation restricted to the val split)
+
+Fine-tuning windows are sampled from the **train** span only; this stage runs the identical rolling-origin protocol but evaluates on the **validation** span -- the block between training and test that no model, threshold or cut-point was tuned on.
+
+| model (mean MASE) | val h=5 | val h=21 | test h=5 | test h=21 |
+|---|---|---|---|---|
+| naive | 2.277 | 5.076 | 2.017 | 4.553 |
+| seasonal_naive | 2.813 | 5.159 | 2.877 | 5.178 |
+| arima | 2.253 | 5.028 | 2.028 | 4.742 |
+| chronos | 2.123 | 4.882 | 2.171 | 4.655 |
+| timesfm@256 | 2.179 | 4.669 | 2.211 | 4.555 |
+| timesfm@512 | 2.160 | 4.784 | 2.139 | 4.644 |
+| TimesFM full fine-tune | 2.144 | 4.598 | 2.216 | 4.629 |
+
+Read: the *level* of the error is span-dependent and so is the *ranking* -- a model that beats persistence on validation can tie it on test, and a fine-tuning gain measured next to the training corpus can vanish one regime later. Quote several spans, never one.
+

@@ -1,0 +1,33 @@
+{
+  "name": "eth_crypto_trade",
+  "domain": "crypto",
+  "task": "trading",
+  "frequency": "day",
+  "n_features": 2,
+  "feature_names": [
+    "timestamp",
+    "close"
+  ],
+  "n_obs": 1247,
+  "date_range": [
+    "2023-08-15",
+    "2026-08-15"
+  ],
+  "split": {},
+  "license": "unknown",
+  "source": "eth_crypto (real)",
+  "open": true,
+  "requires_download": false,
+  "target": "close",
+  "lookback": 512,
+  "horizon": 5,
+  "rolling": true,
+  "notes": "signal -> position -> cost-aware PnL (spec §2.3); positions are held over non-overlapping h-day intervals",
+  "cost_bps": 10.0,
+  "n_classes": 2,
+  "labels": [
+    "long",
+    "flat",
+    "short"
+  ]
+}

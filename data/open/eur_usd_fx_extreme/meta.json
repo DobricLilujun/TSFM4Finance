@@ -1,0 +1,33 @@
+{
+  "name": "eur_usd_fx_extreme",
+  "domain": "fx",
+  "task": "anomaly",
+  "frequency": "day",
+  "n_features": 3,
+  "feature_names": [
+    "timestamp",
+    "close",
+    "label"
+  ],
+  "n_obs": 900,
+  "date_range": [
+    "2023-08-14",
+    "2026-08-14"
+  ],
+  "split": {},
+  "license": "unknown",
+  "source": "eur_usd_fx (real) + derived label",
+  "open": true,
+  "requires_download": false,
+  "target": "close",
+  "lookback": 512,
+  "horizon": 1,
+  "rolling": true,
+  "notes": "|daily return| beyond expanding median +/- 3.0 MAD (threshold from data strictly before t); base rate 0.024",
+  "cost_bps": 10.0,
+  "n_classes": 2,
+  "labels": [
+    "normal",
+    "extreme_move"
+  ]
+}

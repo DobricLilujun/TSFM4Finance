@@ -1,0 +1,33 @@
+{
+  "name": "ig_corp_bond_dir5",
+  "domain": "bond",
+  "task": "classify",
+  "frequency": "day",
+  "n_features": 3,
+  "feature_names": [
+    "timestamp",
+    "close",
+    "label"
+  ],
+  "n_obs": 873,
+  "date_range": [
+    "2023-08-15",
+    "2026-08-14"
+  ],
+  "split": {},
+  "license": "unknown",
+  "source": "ig_corp_bond (real) + derived label",
+  "open": true,
+  "requires_download": false,
+  "target": "close",
+  "lookback": 512,
+  "horizon": 5,
+  "rolling": true,
+  "notes": "sign of the 5-business-day forward log return; label is the target (uses the future), features use prices <= t",
+  "cost_bps": 10.0,
+  "n_classes": 2,
+  "labels": [
+    "down",
+    "up"
+  ]
+}

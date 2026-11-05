@@ -68,9 +68,10 @@
 
 | 任务 | 目标 | 评估指标（主） | 典型金融场景 |
 |---|---|---|---|
-| **forecast** | 预测未来 h 步数值 | MASE, RMSE, MAE, sMAPE, CRPS | 价格/收益/波动率预测 |
+| **forecast** | 预测未来 h 步数值 | MASE, RMSE, MAE, sMAPE, CRPS, ND | 价格/收益/波动率预测 |
 | **classify** | 预测类别标签 | Accuracy, Precision, Recall, F1, AUC-ROC | 涨跌方向、事件/情感分类 |
 | **anomaly** | 检测异常/欺诈 | F1, Precision, Recall, AUC-ROC, FPR | 欺诈检测、异常交易 |
+| **trading** | 预测信号 → 持仓 → 成本后可回测 | 净 Sharpe, IC/rank-IC, hit rate, MaxDD, turnover | 单资产择时、风险管理、组合信号（见 §2.3） |
 
 ### 2.1 预测子设定
 - `target`：预测目标列（默认最后一列，如 `close` 或 `return`）
@@ -82,6 +83,38 @@
 - `directional_accuracy`：预测方向与实际方向一致的比例
 - `return_rank_corr`：预测收益序列与真实收益序列的秩相关（Spearman）
 - `backtest_return` / `sharpe`：（可选）按预测信号回测的收益/夏普
+- `nd`：MAE(model) / MAE(seasonal-naive)，跨资产可比的归一化误差（<1 表示优于 seasonal-naive）
+- `crps` / `wql`：由 §3.2 的分位数输出计算的概率预测评分（CRPS ≈ 2·E_α ρ_α）
+- `var_0.90` / `es_0.90` / `violation_rate`：由预测分位数带得到的风险度量与校准（10% 分位带的越界率，理想值 ≈ 0.10）
+
+### 2.3 交易任务（trading）——量化金融的定义方式
+
+预测得准 ≠ 能赚钱，因此把"可交易性"作为一等任务。协议必须显式（同一数据在不同协议下
+Sharpe 可以差 4 倍：ml4trading.io 第 16 章 *Strategy Simulation*）：
+
+| 协议要素 | 本 Arena 的规定 |
+|---|---|
+| 信号时点 | 在 t 日收盘决策，只用 ≤ t 的价格；损益计入 (t, t+h] |
+| 再平衡 | 非重叠原点，stride = h（损益不重复计算） |
+| 信号 s | 预测的 h 日对数收益 `log(ŷ_{t+h}/P_t)`（来自 `PredictOutput.point`） |
+| 预测波动 σ̂ | 由 0.1–0.9 分位带反推：`(q90 − q10)/(2·1.2816)/P_t` |
+| 持仓规则 | `sign`：w = sign(s)（±1 多空）；`voltarget`：w = clip(s/σ̂, −1, +1) |
+| 成本模型 | 单边 cost_bps × \|Δw\|；必须在 0 / 10 / 30 bps 三档报告（成本敏感性是协议要求） |
+| 约束 | \|w\| ≤ 1，单资产，无杠杆；不建模融券/借券/滑点 |
+| 基准 | buy & hold（w≡+1）、短期动量（w = sign(过去 h 日收益)）、随机 |
+
+指标（`tsfm4finance.core.metrics.trading_metrics`）：`hit_rate`、`ic`（Pearson）、`rank_ic`
+（Spearman）、`ann_return_gross/net`、`ann_vol`、`sharpe_gross/net`、`sortino_net`、
+`max_drawdown`、`calmar_net`、`turnover_total`、`t_stat_net`（均值净收益的 t 统计量）。
+
+判读规则：只有当**净** Sharpe（≥10 bps 成本）超过 buy & hold 与动量基准时，才称该模型
+"有交易价值"。显著性须注意多重检验：单资产单地平线 breadth = 1（Grinold 基本定律
+IR ≈ IC·√breadth），网格搜索多组配置时 t 阈值需上调（Harvey 2017；López de Prado 2018）。
+
+派生任务数据集（由真实价格序列生成，标签全部来自真实数据，无合成注入）：
+`*_dir5`（classify：未来 5 交易日收益符号）、`*_volreg`（classify：未来 21 日实现波动三分位，
+切点仅在 train 上估计）、`*_extreme`（anomaly：当日收益超出"严格只用 t 之前数据"的
+expanding median ± 3·MAD 阈值）、`*_trade`（trading，携带 `cost_bps`）。
 
 ---
 
@@ -101,6 +134,14 @@ class BaseModel:
 - `context_df`：形状 `(lookback, n_features)` 的 DataFrame（含 timestamp）
 - `meta`：任务元数据（task, target, frequency, horizon, class labels...）
 - `horizon`：预测步数
+
+> TimesFM 适配器（`TimesFMModel` / `TimesFMFinetunedModel`）说明：pip `timesfm` 2.0.x 即
+> TimesFM 2.5-200M（PyTorch）。输出有 10 个通道：**通道 0 不是分位数**（它是
+> `flip_quantile_fn` 保持不动的参考通道），**通道 1..9 = 分位水平 0.1..0.9**，
+> **通道 5 = decode_index = 中位数 = 点预测**（该映射由 sp500_daily 上的预测覆盖率实测确认）。
+> `max_context` 用 512（官方 GIFT-Eval 设定），`max_horizon` 用 128（模型的 output patch 长度）。
+> 全量微调见 `tsfm4finance/bench/finetune.py`（复刻其 global REVIN + running-stat REVIN 归一化，
+> 监督最后一个 patch 的 128 步输出，损失 = 0.1..0.9 的 pinball + 中位通道 L1）。
 
 ### 3.2 输出（PredictOutput）
 | 字段 | 类型 | 说明 |
@@ -128,6 +169,24 @@ evaluate(pred: PredictOutput, truth_df, meta) -> dict[str, float]
 }
 ```
 
+### 4.1 评测协议（rolling-origin backtest，规范版）
+
+单一切分是时序评测的已知陷阱；本 Arena 采用滚动原点（walk-forward）协议，实现于
+`tsfm4finance/bench/protocol.py::build_windows`：
+
+1. **地平线是实验维度**，不是数据集常数：h ∈ {1, 5, 12, 21, 63} 交易日
+   （1 日 / 1 周 / 与旧排行榜可比的 12 / 1 月 / 1 季）。
+2. **非重叠窗口，stride = h**（GIFT-Eval / Chronos 的 "all disjoint horizons" 约定），
+   并报告跨窗 **mean ± std**。
+3. **评测跨度**：h ≤ 22 用 test split；h > 22 用 val+test（否则 test 只装得下 ~1.8 个窗口）。
+   报告 `coverage`（被窗口覆盖的跨度比例）。
+4. **context**：扩展历史，上限 **512**（TimesFM 官方 GIFT-Eval 设定）；context 必须严格结束于
+   原点之前 → 无未来信息泄漏；微调窗口只从 train split 采样。
+5. **归一化误差**：MASE 的分母来自 train（season=1，工作日日频），并报告 ND（相对 seasonal-naive）。
+6. 概率指标（CRPS/WQL、VaR/ES、10% 分位带越界率）在存在 `quantiles` 输出时自动计算。
+
+---
+
 ### 5. 综合评分（score）
 为便于排行榜排序，定义综合分（0~1，越高越好）。以 forecast 为例，采用多指标归一加权：
 
@@ -136,6 +195,8 @@ score = 0.35·(1−clip(mase)) + 0.25·directional_accuracy
       + 0.20·return_rank_corr + 0.20·(1−clip(smape/100))
 ```
 （分类任务用 F1/AUC 归一，异常任务用 F1/AUC-ROC 归一；权重按任务类型调整。）
+
+trading 任务：`score = 0.5·clip01((sharpe_net+1)/4) + 0.3·clip01((ic+0.1)/0.3) + 0.2·hit_rate`。
 
 ---
 
@@ -163,6 +224,8 @@ score = 0.35·(1−clip(mase)) + 0.25·directional_accuracy
 | `metrics` | 完整指标字典 |
 | `score` | 综合分 |
 | `mode` | `open` / `private` |
+| `protocol` | 评测协议标记：`spec-4.1-rolling`（本协议）或 `legacy-single-window`（旧单窗口结果，不可直接对比） |
+| `horizon` | 该行的预测地平线（协议 §4.1） |
 | `timestamp` | 评测时间 |
 | `is_benchmark` | 是否官方基准模型 |
 

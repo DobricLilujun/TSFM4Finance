@@ -1,0 +1,36 @@
+{
+ "name": "btc_long",
+ "domain": "crypto",
+ "task": "forecast",
+ "frequency": "day",
+ "n_features": 5,
+ "feature_names": [
+  "open",
+  "high",
+  "low",
+  "close",
+  "volume"
+ ],
+ "n_obs": 4433,
+ "date_range": [
+  "2014-09-17",
+  "2026-11-06"
+ ],
+ "split": {
+  "train": 3103,
+  "validation": 664,
+  "test": 666
+ },
+ "license": "market-data terms",
+ "source": "yahoo:BTC-USD",
+ "open": true,
+ "requires_download": false,
+ "target": "close",
+ "lookback": 512,
+ "horizon": 63,
+ "rolling": true,
+ "notes": "OHLCV daily, 2014-01-01 -> present; auto-adjusted closes; chronological 70/15/15 splits",
+ "ticker": "BTC-USD",
+ "ohlcv": true,
+ "start_requested": "2014-01-01"
+}

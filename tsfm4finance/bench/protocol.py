@@ -29,10 +29,18 @@ MIN_CONTEXT = 32              # TimesFM input patch size
 
 @dataclass
 class Window:
-    """One decision point: predict `truth` from `context`."""
+    """One decision point: predict `truth` from `context`.
+
+    ``panel`` / ``truth_panel`` carry the full OHLCV block for the same window.
+    They exist because some finance-native models (Kronos) consume candlesticks
+    rather than a single close series; models that do not need them simply ignore
+    them, and the metric layer always scores the same ``target`` column.
+    """
     origin: int            # index in the full (train+val+test) array where truth starts
     context: np.ndarray
     truth: np.ndarray
+    panel: object | None = None
+    truth_panel: object | None = None
 
 
 def build_windows(train: pd.DataFrame, val: pd.DataFrame, test: pd.DataFrame,
@@ -50,6 +58,9 @@ def build_windows(train: pd.DataFrame, val: pd.DataFrame, test: pd.DataFrame,
     n_train, n_val, n_test = len(train), len(val), len(test)
     n = len(y)
 
+    panel_cols = [c for c in full.columns if c != target]
+    with_panel = bool(panel_cols)
+
     if span == "auto":
         span = "val+test" if horizon > LONG_HORIZON_SWITCH else "test"
     if span == "test":
@@ -65,6 +76,7 @@ def build_windows(train: pd.DataFrame, val: pd.DataFrame, test: pd.DataFrame,
         raise ValueError(f"unknown span {span!r}")
 
     stride = int(stride or horizon)
+    want_panel = any(c != target for c in full.columns)      # OHLCV panels for K-line models
     windows: list[Window] = []
     o = span_start
     last_end = span_start
@@ -73,7 +85,11 @@ def build_windows(train: pd.DataFrame, val: pd.DataFrame, test: pd.DataFrame,
         ctx = y[ctx_lo:o]
         truth = y[o:o + horizon]
         if len(ctx) >= MIN_CONTEXT:
-            windows.append(Window(origin=o, context=ctx, truth=truth))
+            w = Window(origin=o, context=ctx, truth=truth)
+            if want_panel:
+                w.panel = full.iloc[ctx_lo:o]
+                w.truth_panel = full.iloc[o:o + horizon]
+            windows.append(w)
         o += stride
         last_end = o
     # a trailing partial window would break the non-overlap / fixed-h contract, so we

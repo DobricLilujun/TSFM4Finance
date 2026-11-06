@@ -1,0 +1,902 @@
+{
+ "sp500_long": {
+  "kind": "dataset",
+  "source": "yahoo:^GSPC",
+  "freq": "day",
+  "domain": "index",
+  "n_obs": 5748,
+  "columns": [
+   "open",
+   "high",
+   "low",
+   "close",
+   "volume"
+  ],
+  "date_range": [
+   "2004-01-02",
+   "2026-11-05"
+  ],
+  "sha256": "6bcfc8869eef8c97",
+  "updated_at": "2026-11-06T00:38:12+00:00"
+ },
+ "nasdaq_long": {
+  "kind": "dataset",
+  "source": "yahoo:^IXIC",
+  "freq": "day",
+  "domain": "index",
+  "n_obs": 5748,
+  "columns": [
+   "open",
+   "high",
+   "low",
+   "close",
+   "volume"
+  ],
+  "date_range": [
+   "2004-01-02",
+   "2026-11-05"
+  ],
+  "sha256": "f02308fc9696d488",
+  "updated_at": "2026-11-06T00:38:13+00:00"
+ },
+ "dow_long": {
+  "kind": "dataset",
+  "source": "yahoo:^DJI",
+  "freq": "day",
+  "domain": "index",
+  "n_obs": 5748,
+  "columns": [
+   "open",
+   "high",
+   "low",
+   "close",
+   "volume"
+  ],
+  "date_range": [
+   "2004-01-02",
+   "2026-11-05"
+  ],
+  "sha256": "b24b5ed0479864d8",
+  "updated_at": "2026-11-06T00:38:13+00:00"
+ },
+ "russell2000_long": {
+  "kind": "dataset",
+  "source": "yahoo:^RUT",
+  "freq": "day",
+  "domain": "index",
+  "n_obs": 5748,
+  "columns": [
+   "open",
+   "high",
+   "low",
+   "close",
+   "volume"
+  ],
+  "date_range": [
+   "2004-01-02",
+   "2026-11-05"
+  ],
+  "sha256": "fc9f54d657bb450a",
+  "updated_at": "2026-11-06T00:38:14+00:00"
+ },
+ "btc_long": {
+  "kind": "dataset",
+  "source": "yahoo:BTC-USD",
+  "freq": "day",
+  "domain": "crypto",
+  "n_obs": 4433,
+  "columns": [
+   "open",
+   "high",
+   "low",
+   "close",
+   "volume"
+  ],
+  "date_range": [
+   "2014-09-17",
+   "2026-11-06"
+  ],
+  "sha256": "cecc7e71db4a9e25",
+  "updated_at": "2026-11-06T00:38:14+00:00"
+ },
+ "eth_long": {
+  "kind": "dataset",
+  "source": "yahoo:ETH-USD",
+  "freq": "day",
+  "domain": "crypto",
+  "n_obs": 3284,
+  "columns": [
+   "open",
+   "high",
+   "low",
+   "close",
+   "volume"
+  ],
+  "date_range": [
+   "2017-11-09",
+   "2026-11-06"
+  ],
+  "sha256": "a785d1d52bba827f",
+  "updated_at": "2026-11-06T00:38:15+00:00"
+ },
+ "eurusd_long": {
+  "kind": "dataset",
+  "source": "yahoo:EURUSD=X",
+  "freq": "day",
+  "domain": "fx",
+  "n_obs": 5928,
+  "columns": [
+   "open",
+   "high",
+   "low",
+   "close",
+   "volume"
+  ],
+  "date_range": [
+   "2004-01-01",
+   "2026-11-06"
+  ],
+  "sha256": "124b19d14633a62e",
+  "updated_at": "2026-11-06T00:38:15+00:00"
+ },
+ "gbpusd_long": {
+  "kind": "dataset",
+  "source": "yahoo:GBPUSD=X",
+  "freq": "day",
+  "domain": "fx",
+  "n_obs": 5940,
+  "columns": [
+   "open",
+   "high",
+   "low",
+   "close",
+   "volume"
+  ],
+  "date_range": [
+   "2004-01-01",
+   "2026-11-06"
+  ],
+  "sha256": "c5c30486fe48e627",
+  "updated_at": "2026-11-06T00:38:15+00:00"
+ },
+ "gold_long": {
+  "kind": "dataset",
+  "source": "yahoo:GC=F",
+  "freq": "day",
+  "domain": "commodity",
+  "n_obs": 5741,
+  "columns": [
+   "open",
+   "high",
+   "low",
+   "close",
+   "volume"
+  ],
+  "date_range": [
+   "2004-01-05",
+   "2026-11-05"
+  ],
+  "sha256": "e0b483b1d06b791c",
+  "updated_at": "2026-11-06T00:38:16+00:00"
+ },
+ "crude_oil_long": {
+  "kind": "dataset",
+  "source": "yahoo:CL=F",
+  "freq": "day",
+  "domain": "commodity",
+  "n_obs": 5744,
+  "columns": [
+   "open",
+   "high",
+   "low",
+   "close",
+   "volume"
+  ],
+  "date_range": [
+   "2004-01-05",
+   "2026-11-05"
+  ],
+  "sha256": "5c3d20b84b1d5e46",
+  "updated_at": "2026-11-06T00:38:16+00:00"
+ },
+ "us_treasury_7y_long": {
+  "kind": "dataset",
+  "source": "yahoo:IEF",
+  "freq": "day",
+  "domain": "rates",
+  "n_obs": 5748,
+  "columns": [
+   "open",
+   "high",
+   "low",
+   "close",
+   "volume"
+  ],
+  "date_range": [
+   "2004-01-02",
+   "2026-11-05"
+  ],
+  "sha256": "203ea8526c2f472c",
+  "updated_at": "2026-11-06T00:38:17+00:00"
+ },
+ "ig_corp_bond_long": {
+  "kind": "dataset",
+  "source": "yahoo:LQD",
+  "freq": "day",
+  "domain": "credit",
+  "n_obs": 4993,
+  "columns": [
+   "open",
+   "high",
+   "low",
+   "close",
+   "volume"
+  ],
+  "date_range": [
+   "2007-01-03",
+   "2026-11-05"
+  ],
+  "sha256": "3e081868e76f0229",
+  "updated_at": "2026-11-06T00:38:17+00:00"
+ },
+ "vix": {
+  "kind": "dataset",
+  "source": "yahoo:^VIX",
+  "freq": "day",
+  "domain": "volatility",
+  "n_obs": 5750,
+  "columns": [
+   "open",
+   "high",
+   "low",
+   "close",
+   "volume"
+  ],
+  "date_range": [
+   "2004-01-02",
+   "2026-11-05"
+  ],
+  "sha256": "e8106039309260ed",
+  "updated_at": "2026-11-06T00:38:18+00:00"
+ },
+ "us_10y_yield": {
+  "kind": "dataset",
+  "source": "yahoo:^TNX",
+  "freq": "day",
+  "domain": "rates",
+  "n_obs": 5743,
+  "columns": [
+   "open",
+   "high",
+   "low",
+   "close",
+   "volume"
+  ],
+  "date_range": [
+   "2004-01-02",
+   "2026-11-05"
+  ],
+  "sha256": "06e5495b9b4a2e2c",
+  "updated_at": "2026-11-06T00:38:18+00:00"
+ },
+ "us_30y_yield": {
+  "kind": "dataset",
+  "source": "yahoo:^TYX",
+  "freq": "day",
+  "domain": "rates",
+  "n_obs": 5743,
+  "columns": [
+   "open",
+   "high",
+   "low",
+   "close",
+   "volume"
+  ],
+  "date_range": [
+   "2004-01-02",
+   "2026-11-05"
+  ],
+  "sha256": "0ce1f10fbb8246b9",
+  "updated_at": "2026-11-06T00:38:19+00:00"
+ },
+ "us_5y_yield": {
+  "kind": "dataset",
+  "source": "yahoo:^FVX",
+  "freq": "day",
+  "domain": "rates",
+  "n_obs": 5743,
+  "columns": [
+   "open",
+   "high",
+   "low",
+   "close",
+   "volume"
+  ],
+  "date_range": [
+   "2004-01-02",
+   "2026-11-05"
+  ],
+  "sha256": "bd00753ef4d66397",
+  "updated_at": "2026-11-06T00:38:19+00:00"
+ },
+ "us_13w_bill": {
+  "kind": "dataset",
+  "source": "yahoo:^IRX",
+  "freq": "day",
+  "domain": "rates",
+  "n_obs": 5743,
+  "columns": [
+   "open",
+   "high",
+   "low",
+   "close",
+   "volume"
+  ],
+  "date_range": [
+   "2004-01-02",
+   "2026-11-05"
+  ],
+  "sha256": "fe5e2ec1541a36d6",
+  "updated_at": "2026-11-06T00:38:20+00:00"
+ },
+ "usdjpy": {
+  "kind": "dataset",
+  "source": "yahoo:JPY=X",
+  "freq": "day",
+  "domain": "fx",
+  "n_obs": 5928,
+  "columns": [
+   "open",
+   "high",
+   "low",
+   "close",
+   "volume"
+  ],
+  "date_range": [
+   "2004-01-01",
+   "2026-11-06"
+  ],
+  "sha256": "d61d51026df857f3",
+  "updated_at": "2026-11-06T00:38:30+00:00"
+ },
+ "audusd": {
+  "kind": "dataset",
+  "source": "yahoo:AUDUSD=X",
+  "freq": "day",
+  "domain": "fx",
+  "n_obs": 5327,
+  "columns": [
+   "open",
+   "high",
+   "low",
+   "close",
+   "volume"
+  ],
+  "date_range": [
+   "2006-05-16",
+   "2026-11-06"
+  ],
+  "sha256": "22813fa652d5c693",
+  "updated_at": "2026-11-06T00:38:31+00:00"
+ },
+ "usdchf": {
+  "kind": "dataset",
+  "source": "yahoo:CHF=X",
+  "freq": "day",
+  "domain": "fx",
+  "n_obs": 5941,
+  "columns": [
+   "open",
+   "high",
+   "low",
+   "close",
+   "volume"
+  ],
+  "date_range": [
+   "2004-01-01",
+   "2026-11-06"
+  ],
+  "sha256": "a3b9227d8067eb86",
+  "updated_at": "2026-11-06T00:38:31+00:00"
+ },
+ "usdcny": {
+  "kind": "dataset",
+  "source": "yahoo:CNY=X",
+  "freq": "day",
+  "domain": "fx",
+  "n_obs": 4384,
+  "columns": [
+   "open",
+   "high",
+   "low",
+   "close",
+   "volume"
+  ],
+  "date_range": [
+   "2010-01-04",
+   "2026-11-06"
+  ],
+  "sha256": "5e35289a6eb38321",
+  "updated_at": "2026-11-06T00:38:32+00:00"
+ },
+ "brent": {
+  "kind": "dataset",
+  "source": "yahoo:BZ=F",
+  "freq": "day",
+  "domain": "commodity",
+  "n_obs": 4206,
+  "columns": [
+   "open",
+   "high",
+   "low",
+   "close",
+   "volume"
+  ],
+  "date_range": [
+   "2010-01-04",
+   "2026-11-05"
+  ],
+  "sha256": "db76c3eeb54a0c80",
+  "updated_at": "2026-11-06T00:38:32+00:00"
+ },
+ "copper": {
+  "kind": "dataset",
+  "source": "yahoo:HG=F",
+  "freq": "day",
+  "domain": "commodity",
+  "n_obs": 4995,
+  "columns": [
+   "open",
+   "high",
+   "low",
+   "close",
+   "volume"
+  ],
+  "date_range": [
+   "2007-01-01",
+   "2026-11-05"
+  ],
+  "sha256": "f0eecd29f3b584ee",
+  "updated_at": "2026-11-06T00:38:33+00:00"
+ },
+ "nat_gas": {
+  "kind": "dataset",
+  "source": "yahoo:NG=F",
+  "freq": "day",
+  "domain": "commodity",
+  "n_obs": 4238,
+  "columns": [
+   "open",
+   "high",
+   "low",
+   "close",
+   "volume"
+  ],
+  "date_range": [
+   "2010-01-04",
+   "2026-11-05"
+  ],
+  "sha256": "455aa30cb136bffd",
+  "updated_at": "2026-11-06T00:38:33+00:00"
+ },
+ "wheat": {
+  "kind": "dataset",
+  "source": "yahoo:ZW=F",
+  "freq": "day",
+  "domain": "commodity",
+  "n_obs": 4236,
+  "columns": [
+   "open",
+   "high",
+   "low",
+   "close",
+   "volume"
+  ],
+  "date_range": [
+   "2010-01-04",
+   "2026-11-05"
+  ],
+  "sha256": "b8c7338be1a363af",
+  "updated_at": "2026-11-06T00:38:34+00:00"
+ },
+ "soybean": {
+  "kind": "dataset",
+  "source": "yahoo:ZS=F",
+  "freq": "day",
+  "domain": "commodity",
+  "n_obs": 4236,
+  "columns": [
+   "open",
+   "high",
+   "low",
+   "close",
+   "volume"
+  ],
+  "date_range": [
+   "2010-01-04",
+   "2026-11-05"
+  ],
+  "sha256": "f1ae57cad2c77da1",
+  "updated_at": "2026-11-06T00:38:34+00:00"
+ },
+ "silver": {
+  "kind": "dataset",
+  "source": "yahoo:SI=F",
+  "freq": "day",
+  "domain": "commodity",
+  "n_obs": 4993,
+  "columns": [
+   "open",
+   "high",
+   "low",
+   "close",
+   "volume"
+  ],
+  "date_range": [
+   "2007-01-02",
+   "2026-11-05"
+  ],
+  "sha256": "ce59dd4c4db24a1e",
+  "updated_at": "2026-11-06T00:38:35+00:00"
+ },
+ "dax": {
+  "kind": "dataset",
+  "source": "yahoo:^GDAXI",
+  "freq": "day",
+  "domain": "index",
+  "n_obs": 5804,
+  "columns": [
+   "open",
+   "high",
+   "low",
+   "close",
+   "volume"
+  ],
+  "date_range": [
+   "2004-01-02",
+   "2026-11-04"
+  ],
+  "sha256": "d30bab391d6f9d36",
+  "updated_at": "2026-11-06T00:38:35+00:00"
+ },
+ "ftse100": {
+  "kind": "dataset",
+  "source": "yahoo:^FTSE",
+  "freq": "day",
+  "domain": "index",
+  "n_obs": 5771,
+  "columns": [
+   "open",
+   "high",
+   "low",
+   "close",
+   "volume"
+  ],
+  "date_range": [
+   "2004-01-02",
+   "2026-11-04"
+  ],
+  "sha256": "09d5579334004494",
+  "updated_at": "2026-11-06T00:38:36+00:00"
+ },
+ "cac40": {
+  "kind": "dataset",
+  "source": "yahoo:^FCHI",
+  "freq": "day",
+  "domain": "index",
+  "n_obs": 5845,
+  "columns": [
+   "open",
+   "high",
+   "low",
+   "close",
+   "volume"
+  ],
+  "date_range": [
+   "2004-01-02",
+   "2026-11-04"
+  ],
+  "sha256": "afb6b39f83a8b592",
+  "updated_at": "2026-11-06T00:38:36+00:00"
+ },
+ "nikkei225": {
+  "kind": "dataset",
+  "source": "yahoo:^N225",
+  "freq": "day",
+  "domain": "index",
+  "n_obs": 5588,
+  "columns": [
+   "open",
+   "high",
+   "low",
+   "close",
+   "volume"
+  ],
+  "date_range": [
+   "2004-01-05",
+   "2026-11-06"
+  ],
+  "sha256": "43c18c7ce505c7dd",
+  "updated_at": "2026-11-06T00:38:37+00:00"
+ },
+ "hang_seng": {
+  "kind": "dataset",
+  "source": "yahoo:^HSI",
+  "freq": "day",
+  "domain": "index",
+  "n_obs": 5628,
+  "columns": [
+   "open",
+   "high",
+   "low",
+   "close",
+   "volume"
+  ],
+  "date_range": [
+   "2004-01-02",
+   "2026-11-04"
+  ],
+  "sha256": "99dc41410dd079f9",
+  "updated_at": "2026-11-06T00:38:37+00:00"
+ },
+ "eurostoxx50": {
+  "kind": "dataset",
+  "source": "yahoo:^STOXX50E",
+  "freq": "day",
+  "domain": "index",
+  "n_obs": 4914,
+  "columns": [
+   "open",
+   "high",
+   "low",
+   "close",
+   "volume"
+  ],
+  "date_range": [
+   "2007-03-30",
+   "2026-11-04"
+  ],
+  "sha256": "9961871243496111",
+  "updated_at": "2026-11-06T00:38:45+00:00"
+ },
+ "us_20y_etf": {
+  "kind": "dataset",
+  "source": "yahoo:TLT",
+  "freq": "day",
+  "domain": "rates",
+  "n_obs": 4993,
+  "columns": [
+   "open",
+   "high",
+   "low",
+   "close",
+   "volume"
+  ],
+  "date_range": [
+   "2007-01-03",
+   "2026-11-05"
+  ],
+  "sha256": "589f0796857184ad",
+  "updated_at": "2026-11-06T00:38:52+00:00"
+ },
+ "hy_credit_etf": {
+  "kind": "dataset",
+  "source": "yahoo:HYG",
+  "freq": "day",
+  "domain": "credit",
+  "n_obs": 4926,
+  "columns": [
+   "open",
+   "high",
+   "low",
+   "close",
+   "volume"
+  ],
+  "date_range": [
+   "2007-04-11",
+   "2026-11-05"
+  ],
+  "sha256": "b3503bd5e50946d2",
+  "updated_at": "2026-11-06T00:38:53+00:00"
+ },
+ "nasdaq_etf": {
+  "kind": "dataset",
+  "source": "yahoo:QQQ",
+  "freq": "day",
+  "domain": "equity_etf",
+  "n_obs": 5748,
+  "columns": [
+   "open",
+   "high",
+   "low",
+   "close",
+   "volume"
+  ],
+  "date_range": [
+   "2004-01-02",
+   "2026-11-05"
+  ],
+  "sha256": "94870d9dec3657ef",
+  "updated_at": "2026-11-06T00:38:54+00:00"
+ },
+ "russell_etf": {
+  "kind": "dataset",
+  "source": "yahoo:IWM",
+  "freq": "day",
+  "domain": "equity_etf",
+  "n_obs": 5748,
+  "columns": [
+   "open",
+   "high",
+   "low",
+   "close",
+   "volume"
+  ],
+  "date_range": [
+   "2004-01-02",
+   "2026-11-05"
+  ],
+  "sha256": "24b496659abcbd4e",
+  "updated_at": "2026-11-06T00:38:54+00:00"
+ },
+ "sector_technology": {
+  "kind": "dataset",
+  "source": "yahoo:XLK",
+  "freq": "day",
+  "domain": "equity_etf",
+  "n_obs": 5748,
+  "columns": [
+   "open",
+   "high",
+   "low",
+   "close",
+   "volume"
+  ],
+  "date_range": [
+   "2004-01-02",
+   "2026-11-05"
+  ],
+  "sha256": "90e44cef02334990",
+  "updated_at": "2026-11-06T00:38:55+00:00"
+ },
+ "sector_energy": {
+  "kind": "dataset",
+  "source": "yahoo:XLE",
+  "freq": "day",
+  "domain": "equity_etf",
+  "n_obs": 5748,
+  "columns": [
+   "open",
+   "high",
+   "low",
+   "close",
+   "volume"
+  ],
+  "date_range": [
+   "2004-01-02",
+   "2026-11-05"
+  ],
+  "sha256": "189a3cfc718f3f17",
+  "updated_at": "2026-11-06T00:38:55+00:00"
+ },
+ "sector_financials": {
+  "kind": "dataset",
+  "source": "yahoo:XLF",
+  "freq": "day",
+  "domain": "equity_etf",
+  "n_obs": 5748,
+  "columns": [
+   "open",
+   "high",
+   "low",
+   "close",
+   "volume"
+  ],
+  "date_range": [
+   "2004-01-02",
+   "2026-11-05"
+  ],
+  "sha256": "f0019719f26cfa87",
+  "updated_at": "2026-11-06T00:38:56+00:00"
+ },
+ "gold_etf": {
+  "kind": "dataset",
+  "source": "yahoo:GLD",
+  "freq": "day",
+  "domain": "commodity",
+  "n_obs": 5526,
+  "columns": [
+   "open",
+   "high",
+   "low",
+   "close",
+   "volume"
+  ],
+  "date_range": [
+   "2004-11-18",
+   "2026-11-05"
+  ],
+  "sha256": "06f71605828e6082",
+  "updated_at": "2026-11-06T00:38:56+00:00"
+ },
+ "commodity_index_etf": {
+  "kind": "dataset",
+  "source": "yahoo:DBC",
+  "freq": "day",
+  "domain": "commodity",
+  "n_obs": 4993,
+  "columns": [
+   "open",
+   "high",
+   "low",
+   "close",
+   "volume"
+  ],
+  "date_range": [
+   "2007-01-03",
+   "2026-11-05"
+  ],
+  "sha256": "cc5beb3611c77a16",
+  "updated_at": "2026-11-06T00:38:57+00:00"
+ },
+ "dxy": {
+  "kind": "dataset",
+  "source": "yahoo:DX-Y.NYB",
+  "freq": "day",
+  "domain": "fx",
+  "n_obs": 5761,
+  "columns": [
+   "open",
+   "high",
+   "low",
+   "close",
+   "volume"
+  ],
+  "date_range": [
+   "2004-01-02",
+   "2026-11-05"
+  ],
+  "sha256": "e1543335d9e41bbc",
+  "updated_at": "2026-11-06T01:22:35+00:00"
+ },
+ "shanghai_composite": {
+  "kind": "dataset",
+  "source": "yahoo:000001.SS",
+  "freq": "day",
+  "domain": "index",
+  "n_obs": 5541,
+  "columns": [
+   "open",
+   "high",
+   "low",
+   "close",
+   "volume"
+  ],
+  "date_range": [
+   "2004-01-02",
+   "2026-11-04"
+  ],
+  "sha256": "49bc34bc86ef35a6",
+  "updated_at": "2026-11-06T01:22:36+00:00"
+ },
+ "etracs_china": {
+  "kind": "dataset",
+  "source": "yahoo:2800.HK",
+  "freq": "day",
+  "domain": "index",
+  "n_obs": 4643,
+  "columns": [
+   "open",
+   "high",
+   "low",
+   "close",
+   "volume"
+  ],
+  "date_range": [
+   "2008-01-02",
+   "2026-11-06"
+  ],
+  "sha256": "6d8c7d2ab5ebdccb",
+  "updated_at": "2026-11-06T01:22:36+00:00"
+ }
+}

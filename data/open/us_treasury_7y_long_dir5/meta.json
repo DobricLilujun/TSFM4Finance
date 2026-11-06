@@ -1,0 +1,33 @@
+{
+  "name": "us_treasury_7y_long_dir5",
+  "domain": "general",
+  "task": "classify",
+  "frequency": "day",
+  "n_features": 3,
+  "feature_names": [
+    "timestamp",
+    "close",
+    "label"
+  ],
+  "n_obs": 5748,
+  "date_range": [
+    "2004-01-02",
+    "2026-11-05"
+  ],
+  "split": {},
+  "license": "unknown",
+  "source": "us_treasury_7y_long (real) + derived label",
+  "open": true,
+  "requires_download": false,
+  "target": "close",
+  "lookback": 512,
+  "horizon": 5,
+  "rolling": true,
+  "notes": "sign of the 5-business-day forward log return; label is the target (uses the future), features use prices <= t",
+  "cost_bps": 10.0,
+  "n_classes": 2,
+  "labels": [
+    "down",
+    "up"
+  ]
+}

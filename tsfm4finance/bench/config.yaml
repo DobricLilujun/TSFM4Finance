@@ -1,0 +1,334 @@
+# Benchmark grid + model registry. The sweep is data-driven: add a model here and
+# it enters every stage that its declared capabilities allow. `env` names a python
+# environment (see `envs`); the worker runs each cell in that env as a subprocess,
+# which isolates both crashes and the dependency conflicts between families
+# (uni2ts pins torch<2.5, momentfm pins numpy==1.25, toto-2 needs python>=3.12).
+
+envs:
+  core:    .venv2/bin/python      # torch 2.13, timesfm(2.5+3.0), chronos, transformers(Time-MoE), pmdarima, statsmodels
+  legacy:  .venv/bin/python       # the env the published §4.4 numbers were produced with (timesfm 2.0.2)
+  moirai:  .venv-moirai/bin/python
+  moment:  .venv-moment/bin/python
+  ttm:     .venv-ttm/bin/python
+  toto:    .venv-toto/bin/python
+  tirex:   .venv-tirex/bin/python
+  tirex2:  .venv-tirex2/bin/python
+  kronos:  .venv-kronos/bin/python
+
+series_groups:
+  core12: [sp500_daily, nasdaq_daily, dow_daily, russell2000_daily, btc_crypto, eth_crypto,
+           eurusd_fx, gbp_usd_fx, gold_commodity, crude_oil_commodity, us_treasury_7y,
+           ig_corp_bond]
+  long12: [sp500_long, nasdaq_long, dow_long, russell2000_long, btc_long, eth_long,
+           eurusd_long, gbpusd_long, gold_long, crude_oil_long, us_treasury_7y_long,
+           ig_corp_bond_long]
+  newx:   [vix, us_10y_yield, us_30y_yield, us_5y_yield, us_13w_bill, usdjpy, audusd, usdchf,
+           usdcny, brent, copper, nat_gas, wheat, soybean, silver, dax, ftse100, cac40,
+           nikkei225, hang_seng, shanghai_composite, eurostoxx50, etracs_china, us_20y_etf,
+           hy_credit_etf, nasdaq_etf, russell_etf, sector_technology, sector_energy,
+           sector_financials, gold_etf, commodity_index_etf]
+  fred:   [fred_dgs2, fred_dgs5, fred_dgs10, fred_dgs30, fred_10y2y_spread, fred_10y3m_spread,
+           fred_10y_breakeven, fred_10y_tips_real, fred_fed_funds_daily, fred_effr, fred_sofr,
+           fred_hy_oas, fred_ig_oas, fred_vix, fred_nfcI, fred_stlfsi, fred_ppi_financial,
+           fred_unemployment, fred_cpi, fred_pce_price, fred_m2, fred_industrial_production,
+           fred_housing_starts, fred_house_price_index, fred_case_shiller_10,
+           fred_consumer_credit, fred_fed_balance_sheet, fred_dollar_broad_index,
+           fred_current_account_balance, fred_gdp_nominal, fred_gdp_real]
+  intraday: []            # discovered from disk: bin_*
+  external: []            # discovered from disk: fev_*, ge_*
+
+sweep:
+  horizons: [1, 5, 12, 21, 63]
+  contexts: [512]
+  spans: auto                    # h<=22 -> test, else val+test (spec §4.1)
+  adaptations: [zero, fs16, fs64, full]
+  seeds: [0]
+  batch: 16
+  amp: fp32
+  device: cuda
+  tasks:                          # derived task datasets built from each base series
+    dir_horizon: 5                # *_dir5
+    vol_horizon: 21               # *_volreg
+    extreme: true                 # *_extreme
+    trade: true                   # *_trade
+  classify_routes: [stat, forecast_features, embedding_probe, native_head]
+  anomaly_routes: [zscore, band_violation, native_reconstruction]
+  trading:
+    rebalance_horizons: [5]
+    costs_bps: [0, 10, 30]
+    rules: [sign, voltarget]
+    benchmarks: [buy_hold, momentum, random]
+  valcheck:                       # span-sensitivity control (paper §4.4)
+    horizons: [5, 21]
+    spans: [val, test]
+
+models:
+  # ---------------- statistical baselines (every finance table needs them) ----
+  naive:            {family: baseline, env: core, tier: A, caps: [forecast], notes: persistence}
+  seasonal_naive:   {family: baseline, env: core, tier: A, caps: [forecast], notes: season=5}
+  moving_average:   {family: baseline, env: core, tier: A, caps: [forecast], notes: window=20}
+  arima:            {family: baseline, env: core, tier: A, caps: [forecast], notes: "ARIMA(1,1,0) refit per origin (matches the published table)"}
+  arima_auto:       {family: baseline, env: core, tier: A, caps: [forecast], notes: "auto_arima selection per origin (often collapses to (0,1,0))"}
+  ets:              {family: baseline, env: core, tier: A, caps: [forecast], notes: Holt (additive trend)}
+  theta:            {family: baseline, env: core, tier: A, caps: [forecast], notes: ThetaModel period=5}
+
+  # ---------------- TimesFM --------------------------------------------------
+  timesfm-2.5-200m:
+    family: timesfm25
+    env: legacy
+    weights: google/timesfm-2.5-200m-pytorch
+    params_m: 200
+    max_context: 512
+    license: apache-2.0
+    tier: A
+    caps: [forecast, quantiles, embed, finetune]
+    vram_mb: 1100
+    ft: {objective: pinball+l1_median, lr: 2e-5, epochs: 3, bs: 8, context: 256}
+  timesfm-3.0:
+    family: timesfm30
+    env: core
+    weights: google/timesfm-3.0-pytorch
+    params_m: 500
+    max_context: 512
+    license: timesfm-non-commercial-license-v1.0 (weights)
+    tier: A
+    caps: [forecast, quantiles, multivariate, covariates, finetune]
+    vram_mb: 1600
+    ft: {objective: pinball+l1_median, lr: 1e-5, epochs: 3, bs: 4, context: 256}
+
+  # ---------------- Chronos --------------------------------------------------
+  chronos-2:
+    family: chronos
+    env: core
+    weights: amazon/chronos-2
+    params_m: 120
+    max_context: 2048
+    license: apache-2.0
+    tier: A
+    caps: [forecast, quantiles, covariates, finetune]
+    vram_mb: 900
+    ft: {objective: pinball, lr: 1e-5, epochs: 3, bs: 8, context: 256}
+  chronos-bolt-base:
+    family: chronos
+    env: core
+    weights: amazon/chronos-bolt-base
+    params_m: 196
+    max_context: 2048
+    license: apache-2.0
+    tier: A
+    caps: [forecast, quantiles, finetune]
+    vram_mb: 1200
+    ft: {objective: pinball, lr: 1e-5, epochs: 3, bs: 8, context: 256}
+  chronos-t5-base:
+    family: chronos
+    env: core
+    weights: amazon/chronos-t5-base
+    params_m: 200
+    max_context: 512
+    license: apache-2.0
+    tier: B
+    caps: [forecast, quantiles, finetune]
+    vram_mb: 1200
+  chronos-t5-large:
+    family: chronos
+    env: core
+    weights: amazon/chronos-t5-large
+    params_m: 710
+    max_context: 512
+    license: apache-2.0
+    tier: B
+    caps: [forecast, quantiles, finetune]
+    vram_mb: 2600
+
+  # ---------------- Moirai / Moirai-MoE (CC-BY-NC weights) -------------------
+  moirai-2.0-R-small:
+    family: moirai
+    env: moirai
+    weights: Salesforce/moirai-2.0-R-small
+    params_m: 52
+    max_context: 2048
+    license: cc-by-nc-4.0
+    tier: A
+    caps: [forecast, quantiles, multivariate, covariates, finetune]
+    vram_mb: 600
+    ft: {objective: pinball, lr: 1e-5, epochs: 3, bs: 8, context: 256}
+  moirai-1.1-R-base:
+    family: moirai
+    env: moirai
+    weights: Salesforce/moirai-1.1-R-base
+    params_m: 305
+    max_context: 2048
+    license: cc-by-nc-4.0
+    tier: B
+    caps: [forecast, quantiles, multivariate, finetune]
+    vram_mb: 1200
+  moirai-moe-1.0-R-base:
+    family: moirai
+    env: moirai
+    weights: Salesforce/moirai-moe-1.0-R-base
+    params_m: 310
+    max_context: 2048
+    license: cc-by-nc-4.0
+    tier: B
+    caps: [forecast, quantiles, multivariate, finetune]
+    vram_mb: 1300
+
+  # ---------------- MOMENT (native classification / anomaly heads) -----------
+  moment-1-large:
+    family: moment
+    env: moment
+    weights: AutonLab/MOMENT-1-large
+    params_m: 225
+    max_context: 512
+    license: mit
+    tier: B
+    caps: [forecast, embed, clf_head, anomaly_head, finetune]
+    vram_mb: 1200
+    ft: {objective: pinball, lr: 1e-5, epochs: 3, bs: 8, context: 256}
+
+  # ---------------- IBM Granite ---------------------------------------------
+  ttm-r2:
+    family: ttm
+    env: ttm
+    weights: ibm-granite/granite-timeseries-ttm-r2
+    params_m: 42
+    max_context: 512
+    license: apache-2.0
+    tier: A
+    caps: [forecast, finetune]
+    vram_mb: 400
+    ft: {objective: mse, lr: 1e-4, epochs: 5, bs: 16, context: 256}
+  flowstate-r1:
+    family: flowstate
+    env: ttm
+    weights: ibm-granite/granite-timeseries-flowstate-r1
+    params_m: 66
+    max_context: 1536
+    license: apache-2.0
+    tier: B
+    caps: [forecast, quantiles, finetune]
+    vram_mb: 700
+    ft: {objective: pinball, lr: 2e-5, epochs: 3, bs: 8, context: 256}
+
+  # ---------------- Toto (Datadog) ------------------------------------------
+  toto-2-22m:
+    family: toto2
+    env: toto
+    weights: Datadog/Toto-2.0-22m
+    params_m: 22
+    max_context: 4096
+    license: apache-2.0
+    tier: B
+    caps: [forecast, quantiles, multivariate, finetune]
+    vram_mb: 600
+    ft: {objective: pinball, lr: 1e-5, epochs: 3, bs: 8, context: 256}
+  toto-2-313m:
+    family: toto2
+    env: toto
+    weights: Datadog/Toto-2.0-313m
+    params_m: 313
+    max_context: 4096
+    license: apache-2.0
+    tier: B
+    caps: [forecast, quantiles, multivariate, finetune]
+    vram_mb: 1400
+  toto-2-1B:
+    family: toto2
+    env: toto
+    weights: Datadog/Toto-2.0-1B
+    params_m: 1000
+    max_context: 4096
+    license: apache-2.0
+    tier: C
+    caps: [forecast, quantiles, multivariate, finetune]
+    vram_mb: 3000
+  toto-2-2.5B:
+    family: toto2
+    env: toto
+    weights: Datadog/Toto-2.0-2.5B
+    params_m: 2500
+    max_context: 4096
+    license: apache-2.0
+    tier: C
+    caps: [forecast, quantiles, multivariate, finetune]
+    vram_mb: 6000
+
+  # ---------------- TiRex (NXAI) --------------------------------------------
+  tirex:
+    family: tirex
+    env: tirex
+    weights: NX-AI/TiRex
+    params_m: 33
+    max_context: 2048
+    license: nxai-community (non-commercial)
+    tier: A
+    caps: [forecast, quantiles]
+    vram_mb: 500
+  tirex-2:
+    family: tirex2
+    env: tirex2
+    weights: NX-AI/TiRex-2
+    params_m: 75
+    max_context: 2048
+    license: apache-2.0
+    tier: C
+    caps: [forecast, quantiles, covariates]
+    vram_mb: 800
+
+  # ---------------- Time-MoE -----------------------------------------------
+  timemoe-50m:
+    family: timemoe
+    env: core
+    weights: Maple728/TimeMoE-50M
+    params_m: 50
+    max_context: 4096
+    license: apache-2.0
+    tier: B
+    caps: [forecast, finetune]
+    vram_mb: 400
+    ft: {objective: mse_norm, lr: 5e-5, epochs: 3, bs: 8, context: 256}
+  timemoe-200m:
+    family: timemoe
+    env: core
+    weights: Maple728/TimeMoE-200M
+    params_m: 200
+    max_context: 4096
+    license: apache-2.0
+    tier: B
+    caps: [forecast, finetune]
+    vram_mb: 900
+
+  # ---------------- Kronos (finance K-line native) --------------------------
+  kronos-small:
+    family: kronos
+    env: kronos
+    weights: NeoQuasar/Kronos-small
+    params_m: 24.7
+    max_context: 512
+    license: mit
+    tier: B
+    needs: [open, high, low, close, volume]
+    caps: [forecast, panel_in, ohlcv_out, finetune]
+    vram_mb: 900
+    ft: {objective: token_ce, lr: 5e-5, epochs: 2, bs: 8, context: 256}
+  kronos-base:
+    family: kronos
+    env: kronos
+    weights: NeoQuasar/Kronos-base
+    params_m: 102.3
+    max_context: 512
+    license: mit
+    tier: B
+    needs: [open, high, low, close, volume]
+    caps: [forecast, panel_in, ohlcv_out, finetune]
+    vram_mb: 1400
+    ft: {objective: token_ce, lr: 5e-5, epochs: 2, bs: 8, context: 256}
+
+deferred_models:
+  # not wired yet, with the reason recorded rather than left implicit
+  sundial: "own repo + tokenizer weights; THUMI code license - add in phase 2"
+  timer-xl: "THUML repo, no pip package; long-context S3 model - phase 2"
+  tabpfn-ts: "tabpfn requires its own env + non-commercial weights; phase 2"
+  forecastpfn: "small meta-model, phase 2"
+  kronos-large: "499M checkpoint not released by the authors"
+  time-moe-1b-plus: "weights exist but >=16GB VRAM; enable with --tier C"

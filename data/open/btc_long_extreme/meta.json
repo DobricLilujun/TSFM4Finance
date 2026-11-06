@@ -1,0 +1,33 @@
+{
+  "name": "btc_long_extreme",
+  "domain": "crypto",
+  "task": "anomaly",
+  "frequency": "day",
+  "n_features": 3,
+  "feature_names": [
+    "timestamp",
+    "close",
+    "label"
+  ],
+  "n_obs": 4433,
+  "date_range": [
+    "2014-09-17",
+    "2026-11-06"
+  ],
+  "split": {},
+  "license": "unknown",
+  "source": "btc_long (real) + derived label",
+  "open": true,
+  "requires_download": false,
+  "target": "close",
+  "lookback": 512,
+  "horizon": 1,
+  "rolling": true,
+  "notes": "|daily return| beyond expanding median +/- 3.0 MAD (threshold from data strictly before t); base rate 0.069",
+  "cost_bps": 10.0,
+  "n_classes": 2,
+  "labels": [
+    "normal",
+    "extreme_move"
+  ]
+}

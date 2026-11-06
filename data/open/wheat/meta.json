@@ -1,0 +1,36 @@
+{
+ "name": "wheat",
+ "domain": "commodity",
+ "task": "forecast",
+ "frequency": "day",
+ "n_features": 5,
+ "feature_names": [
+  "open",
+  "high",
+  "low",
+  "close",
+  "volume"
+ ],
+ "n_obs": 4236,
+ "date_range": [
+  "2010-01-04",
+  "2026-11-05"
+ ],
+ "split": {
+  "train": 2965,
+  "validation": 635,
+  "test": 636
+ },
+ "license": "market-data terms",
+ "source": "yahoo:ZW=F",
+ "open": true,
+ "requires_download": false,
+ "target": "close",
+ "lookback": 512,
+ "horizon": 63,
+ "rolling": true,
+ "notes": "OHLCV daily, 2010-01-01 -> present; auto-adjusted closes; chronological 70/15/15 splits",
+ "ticker": "ZW=F",
+ "ohlcv": true,
+ "start_requested": "2010-01-01"
+}

@@ -1,0 +1,36 @@
+{
+ "name": "eth_long",
+ "domain": "crypto",
+ "task": "forecast",
+ "frequency": "day",
+ "n_features": 5,
+ "feature_names": [
+  "open",
+  "high",
+  "low",
+  "close",
+  "volume"
+ ],
+ "n_obs": 3284,
+ "date_range": [
+  "2017-11-09",
+  "2026-11-06"
+ ],
+ "split": {
+  "train": 2298,
+  "validation": 492,
+  "test": 494
+ },
+ "license": "market-data terms",
+ "source": "yahoo:ETH-USD",
+ "open": true,
+ "requires_download": false,
+ "target": "close",
+ "lookback": 512,
+ "horizon": 63,
+ "rolling": true,
+ "notes": "OHLCV daily, 2015-08-01 -> present; auto-adjusted closes; chronological 70/15/15 splits",
+ "ticker": "ETH-USD",
+ "ohlcv": true,
+ "start_requested": "2015-08-01"
+}

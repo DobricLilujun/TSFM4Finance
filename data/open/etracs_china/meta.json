@@ -1,0 +1,36 @@
+{
+ "name": "etracs_china",
+ "domain": "index",
+ "task": "forecast",
+ "frequency": "day",
+ "n_features": 5,
+ "feature_names": [
+  "open",
+  "high",
+  "low",
+  "close",
+  "volume"
+ ],
+ "n_obs": 4643,
+ "date_range": [
+  "2008-01-02",
+  "2026-11-06"
+ ],
+ "split": {
+  "train": 3250,
+  "validation": 696,
+  "test": 697
+ },
+ "license": "market-data terms",
+ "source": "yahoo:2800.HK",
+ "open": true,
+ "requires_download": false,
+ "target": "close",
+ "lookback": 512,
+ "horizon": 63,
+ "rolling": true,
+ "notes": "OHLCV daily, 2007-01-01 -> present; auto-adjusted closes; chronological 70/15/15 splits",
+ "ticker": "2800.HK",
+ "ohlcv": true,
+ "start_requested": "2007-01-01"
+}

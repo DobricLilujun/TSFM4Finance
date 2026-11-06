@@ -111,3 +111,17 @@ def benchmark_trades(close: np.ndarray, origins: list[int], fwd_logret: np.ndarr
         block["cost_sensitivity_sharpe"] = [block[f"{cb:.0f}bps"]["sharpe_net"] for cb in cost_grid]
         out[name] = block
     return out
+
+
+def trading_returns(positions: np.ndarray, fwd_logret: np.ndarray,
+                    cost_bps: float = 0.0) -> np.ndarray:
+    """Per-period net log returns of a position series under proportional costs.
+
+    Costs are charged on |turnover| (the change in absolute exposure), which is the
+    convention behind the cost-sensitivity columns in the paper: a strategy that
+    changes hands every period pays ``cost_bps * 2`` per round trip.
+    """
+    pos = np.asarray(positions, dtype=float)
+    r = np.asarray(fwd_logret, dtype=float)
+    turn = np.abs(np.diff(pos, prepend=0.0))
+    return pos * r - turn * (float(cost_bps) / 1e4)

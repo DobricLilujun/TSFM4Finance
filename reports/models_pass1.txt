@@ -1,0 +1,1 @@
+arima,arima_auto,chronos-2,chronos-bolt-base,chronos-t5-base,ets,flowstate-r1,moirai-1.1-R-base,moirai-2.0-R-small,moment-1-large,moving_average,naive,seasonal_naive,theta,timesfm-2.5-200m,timesfm-3.0,tirex,toto-2-22m,ttm-r2

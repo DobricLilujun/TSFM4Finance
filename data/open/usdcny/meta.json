@@ -1,0 +1,36 @@
+{
+ "name": "usdcny",
+ "domain": "fx",
+ "task": "forecast",
+ "frequency": "day",
+ "n_features": 5,
+ "feature_names": [
+  "open",
+  "high",
+  "low",
+  "close",
+  "volume"
+ ],
+ "n_obs": 4384,
+ "date_range": [
+  "2010-01-04",
+  "2026-11-06"
+ ],
+ "split": {
+  "train": 3068,
+  "validation": 657,
+  "test": 659
+ },
+ "license": "market-data terms",
+ "source": "yahoo:CNY=X",
+ "open": true,
+ "requires_download": false,
+ "target": "close",
+ "lookback": 512,
+ "horizon": 63,
+ "rolling": true,
+ "notes": "OHLCV daily, 2010-01-01 -> present; auto-adjusted closes; chronological 70/15/15 splits",
+ "ticker": "CNY=X",
+ "ohlcv": true,
+ "start_requested": "2010-01-01"
+}

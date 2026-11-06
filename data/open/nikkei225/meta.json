@@ -1,0 +1,36 @@
+{
+ "name": "nikkei225",
+ "domain": "index",
+ "task": "forecast",
+ "frequency": "day",
+ "n_features": 5,
+ "feature_names": [
+  "open",
+  "high",
+  "low",
+  "close",
+  "volume"
+ ],
+ "n_obs": 5588,
+ "date_range": [
+  "2004-01-05",
+  "2026-11-06"
+ ],
+ "split": {
+  "train": 3911,
+  "validation": 838,
+  "test": 839
+ },
+ "license": "market-data terms",
+ "source": "yahoo:^N225",
+ "open": true,
+ "requires_download": false,
+ "target": "close",
+ "lookback": 512,
+ "horizon": 63,
+ "rolling": true,
+ "notes": "OHLCV daily, 2004-01-01 -> present; auto-adjusted closes; chronological 70/15/15 splits",
+ "ticker": "^N225",
+ "ohlcv": true,
+ "start_requested": "2004-01-01"
+}

@@ -1,0 +1,15 @@
+{
+ "python": "3.11.15",
+ "device": "cuda",
+ "venv": ".venv-kronos",
+ "checks": {
+  "kronos": {
+   "family": "kronos",
+   "import": "ok",
+   "forecast": {
+    "fail": "ModuleNotFoundError: No module named 'safetensors'",
+    "trace": "eturn fn(*args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^\n  File \"/home/ubadmin/projects/TSFM4Finance/.venv-kronos/lib/python3.11/site-packages/huggingface_hub/hub_mixin.py\", line 550, in from_pretrained\n    instance = cls._from_pretrained(\n               ^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/ubadmin/projects/TSFM4Finance/.venv-kronos/lib/python3.11/site-packages/huggingface_hub/hub_mixin.py\", line 782, in _from_pretrained\n    return cls._load_as_safetensor(model, model_file, map_location, strict)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/ubadmin/projects/TSFM4Finance/.venv-kronos/lib/python3.11/site-packages/huggingface_hub/hub_mixin.py\", line 806, in _load_as_safetensor\n    import safetensors\nModuleNotFoundError: No module named 'safetensors'\n"
+   }
+  }
+ }
+}

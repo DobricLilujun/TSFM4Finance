@@ -1,0 +1,36 @@
+{
+ "name": "eurostoxx50",
+ "domain": "index",
+ "task": "forecast",
+ "frequency": "day",
+ "n_features": 5,
+ "feature_names": [
+  "open",
+  "high",
+  "low",
+  "close",
+  "volume"
+ ],
+ "n_obs": 4914,
+ "date_range": [
+  "2007-03-30",
+  "2026-11-04"
+ ],
+ "split": {
+  "train": 3439,
+  "validation": 737,
+  "test": 738
+ },
+ "license": "market-data terms",
+ "source": "yahoo:^STOXX50E",
+ "open": true,
+ "requires_download": false,
+ "target": "close",
+ "lookback": 512,
+ "horizon": 63,
+ "rolling": true,
+ "notes": "OHLCV daily, 2004-01-01 -> present; auto-adjusted closes; chronological 70/15/15 splits",
+ "ticker": "^STOXX50E",
+ "ohlcv": true,
+ "start_requested": "2004-01-01"
+}

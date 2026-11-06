@@ -1,0 +1,126 @@
+{
+ "yf_panel:msci_china": {
+  "at": "2026-11-06T00:38:52+00:00",
+  "error": "too few rows (1)"
+ },
+ "yf_panel:btc_eth_ratio": {
+  "at": "2026-11-06T00:39:03+00:00",
+  "error": "too few rows (0)"
+ },
+ "fred:fred_dgs2": {
+  "at": "2026-11-06T01:41:14+00:00",
+  "error": "curl rc=28: b'curl: (28) Operation timed out after 90001 milliseconds with 0 bytes received\\n' for https://fred.stlouisfed.org/graph/fredgraph.csv?id=DGS2&cosd=2004-01-01"
+ },
+ "fred:fred_dgs5": {
+  "at": "2026-11-06T01:59:52+00:00",
+  "error": "curl rc=28: b'curl: (28) Operation timed out after 90002 milliseconds with 0 bytes received\\n' for https://fred.stlouisfed.org/graph/fredgraph.csv?id=DGS5&cosd=2004-01-01"
+ },
+ "fred:fred_dgs10": {
+  "at": "2026-11-06T02:18:30+00:00",
+  "error": "curl rc=28: b'curl: (28) Operation timed out after 90002 milliseconds with 0 bytes received\\n' for https://fred.stlouisfed.org/graph/fredgraph.csv?id=DGS10&cosd=2004-01-01"
+ },
+ "fred:fred_dgs30": {
+  "at": "2026-11-06T02:37:08+00:00",
+  "error": "curl rc=28: b'curl: (28) Operation timed out after 90001 milliseconds with 0 bytes received\\n' for https://fred.stlouisfed.org/graph/fredgraph.csv?id=DGS30&cosd=2004-01-01"
+ },
+ "fred:fred_10y2y_spread": {
+  "at": "2026-11-06T02:55:46+00:00",
+  "error": "curl rc=28: b'curl: (28) Operation timed out after 90001 milliseconds with 0 bytes received\\n' for https://fred.stlouisfed.org/graph/fredgraph.csv?id=T10Y2Y&cosd=2004-01-01"
+ },
+ "fred:fred_10y3m_spread": {
+  "at": "2026-11-06T01:06:42+00:00",
+  "error": "HTTPSConnectionPool(host='fred.stlouisfed.org', port=443): Read timed out. (read timeout=90)"
+ },
+ "fred:fred_10y_breakeven": {
+  "at": "2026-11-06T01:11:18+00:00",
+  "error": "HTTPSConnectionPool(host='fred.stlouisfed.org', port=443): Read timed out. (read timeout=90)"
+ },
+ "fred:fred_10y_tips_real": {
+  "at": "2026-11-06T01:15:54+00:00",
+  "error": "HTTPSConnectionPool(host='fred.stlouisfed.org', port=443): Read timed out. (read timeout=90)"
+ },
+ "fred:fred_fed_funds_daily": {
+  "at": "2026-11-06T01:20:31+00:00",
+  "error": "HTTPSConnectionPool(host='fred.stlouisfed.org', port=443): Read timed out. (read timeout=90)"
+ },
+ "fred:fred_effr": {
+  "at": "2026-11-06T01:25:07+00:00",
+  "error": "HTTPSConnectionPool(host='fred.stlouisfed.org', port=443): Read timed out. (read timeout=90)"
+ },
+ "fred:fred_sofr": {
+  "at": "2026-11-06T01:29:43+00:00",
+  "error": "HTTPSConnectionPool(host='fred.stlouisfed.org', port=443): Read timed out. (read timeout=90)"
+ },
+ "fred:fred_hy_oas": {
+  "at": "2026-11-06T01:34:19+00:00",
+  "error": "HTTPSConnectionPool(host='fred.stlouisfed.org', port=443): Read timed out. (read timeout=90)"
+ },
+ "fred:fred_ig_oas": {
+  "at": "2026-11-06T01:38:56+00:00",
+  "error": "HTTPSConnectionPool(host='fred.stlouisfed.org', port=443): Read timed out. (read timeout=90)"
+ },
+ "fred:fred_vix": {
+  "at": "2026-11-06T01:43:32+00:00",
+  "error": "HTTPSConnectionPool(host='fred.stlouisfed.org', port=443): Read timed out. (read timeout=90)"
+ },
+ "fred:fred_nfcI": {
+  "at": "2026-11-06T01:48:08+00:00",
+  "error": "HTTPSConnectionPool(host='fred.stlouisfed.org', port=443): Read timed out. (read timeout=90)"
+ },
+ "fred:fred_stlfsi": {
+  "at": "2026-11-06T01:52:45+00:00",
+  "error": "HTTPSConnectionPool(host='fred.stlouisfed.org', port=443): Read timed out. (read timeout=90)"
+ },
+ "fred:fred_ppi_financial": {
+  "at": "2026-11-06T01:57:21+00:00",
+  "error": "HTTPSConnectionPool(host='fred.stlouisfed.org', port=443): Read timed out. (read timeout=90)"
+ },
+ "fred:fred_unemployment": {
+  "at": "2026-11-06T02:01:57+00:00",
+  "error": "HTTPSConnectionPool(host='fred.stlouisfed.org', port=443): Read timed out. (read timeout=90)"
+ },
+ "fred:fred_cpi": {
+  "at": "2026-11-06T02:06:34+00:00",
+  "error": "HTTPSConnectionPool(host='fred.stlouisfed.org', port=443): Read timed out. (read timeout=90)"
+ },
+ "fred:fred_pce_price": {
+  "at": "2026-11-06T02:11:10+00:00",
+  "error": "HTTPSConnectionPool(host='fred.stlouisfed.org', port=443): Read timed out. (read timeout=90)"
+ },
+ "fred:fred_m2": {
+  "at": "2026-11-06T02:15:46+00:00",
+  "error": "HTTPSConnectionPool(host='fred.stlouisfed.org', port=443): Read timed out. (read timeout=90)"
+ },
+ "fred:fred_industrial_production": {
+  "at": "2026-11-06T02:20:23+00:00",
+  "error": "HTTPSConnectionPool(host='fred.stlouisfed.org', port=443): Read timed out. (read timeout=90)"
+ },
+ "fred:fred_housing_starts": {
+  "at": "2026-11-06T02:24:59+00:00",
+  "error": "HTTPSConnectionPool(host='fred.stlouisfed.org', port=443): Read timed out. (read timeout=90)"
+ },
+ "fred:fred_house_price_index": {
+  "at": "2026-11-06T02:29:35+00:00",
+  "error": "HTTPSConnectionPool(host='fred.stlouisfed.org', port=443): Read timed out. (read timeout=90)"
+ },
+ "fred:fred_case_shiller_10": {
+  "at": "2026-11-06T02:34:11+00:00",
+  "error": "HTTPSConnectionPool(host='fred.stlouisfed.org', port=443): Read timed out. (read timeout=90)"
+ },
+ "fred:fred_consumer_credit": {
+  "at": "2026-11-06T02:38:47+00:00",
+  "error": "HTTPSConnectionPool(host='fred.stlouisfed.org', port=443): Read timed out. (read timeout=90)"
+ },
+ "fred:fred_fed_balance_sheet": {
+  "at": "2026-11-06T02:43:24+00:00",
+  "error": "HTTPSConnectionPool(host='fred.stlouisfed.org', port=443): Read timed out. (read timeout=90)"
+ },
+ "fred:fred_dollar_broad_index": {
+  "at": "2026-11-06T02:48:00+00:00",
+  "error": "HTTPSConnectionPool(host='fred.stlouisfed.org', port=443): Read timed out. (read timeout=90)"
+ },
+ "fred:fred_current_account_balance": {
+  "at": "2026-11-06T02:52:36+00:00",
+  "error": "HTTPSConnectionPool(host='fred.stlouisfed.org', port=443): Read timed out. (read timeout=90)"
+ }
+}

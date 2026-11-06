@@ -1,0 +1,36 @@
+{
+ "name": "gold_long",
+ "domain": "commodity",
+ "task": "forecast",
+ "frequency": "day",
+ "n_features": 5,
+ "feature_names": [
+  "open",
+  "high",
+  "low",
+  "close",
+  "volume"
+ ],
+ "n_obs": 5741,
+ "date_range": [
+  "2004-01-05",
+  "2026-11-05"
+ ],
+ "split": {
+  "train": 4018,
+  "validation": 861,
+  "test": 862
+ },
+ "license": "market-data terms",
+ "source": "yahoo:GC=F",
+ "open": true,
+ "requires_download": false,
+ "target": "close",
+ "lookback": 512,
+ "horizon": 63,
+ "rolling": true,
+ "notes": "OHLCV daily, 2004-01-01 -> present; auto-adjusted closes; chronological 70/15/15 splits",
+ "ticker": "GC=F",
+ "ohlcv": true,
+ "start_requested": "2004-01-01"
+}

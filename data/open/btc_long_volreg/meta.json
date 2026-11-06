@@ -1,0 +1,34 @@
+{
+  "name": "btc_long_volreg",
+  "domain": "crypto",
+  "task": "classify",
+  "frequency": "day",
+  "n_features": 3,
+  "feature_names": [
+    "timestamp",
+    "close",
+    "label"
+  ],
+  "n_obs": 4433,
+  "date_range": [
+    "2014-09-17",
+    "2026-11-06"
+  ],
+  "split": {},
+  "license": "unknown",
+  "source": "btc_long (real) + derived label",
+  "open": true,
+  "requires_download": false,
+  "target": "close",
+  "lookback": 512,
+  "horizon": 21,
+  "rolling": true,
+  "notes": "tercile of realized vol over the next 21 business days; cut-points fitted on the TRAIN split only ([0.02649, 0.03764])",
+  "cost_bps": 10.0,
+  "n_classes": 3,
+  "labels": [
+    "calm",
+    "normal",
+    "turbulent"
+  ]
+}

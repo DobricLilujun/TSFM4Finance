@@ -1,0 +1,502 @@
+{
+ "naive": {
+  "ok": true,
+  "seconds": 0.0,
+  "n_windows": 4,
+  "horizon": 21,
+  "metrics": {
+   "rmse": 244.62370791586963,
+   "mae": 220.93245442708331,
+   "mape": 3.0369097252690977,
+   "smape": 3.1052548274663665,
+   "mase": 6.044735148684967,
+   "dir_acc": 1.0,
+   "n_origins": 4,
+   "shape_point": [
+    4,
+    21
+   ],
+   "shape_quantiles": null,
+   "dm_t_vs_naive": 0.0,
+   "dm_p_vs_naive": 1.0,
+   "ndp": 1.0
+  },
+  "meta": {},
+  "no_leakage": true,
+  "env": ".venv2"
+ },
+ "arima": {
+  "ok": true,
+  "seconds": 0.39,
+  "n_windows": 4,
+  "horizon": 21,
+  "metrics": {
+   "rmse": 244.62370791586963,
+   "mae": 220.93245442708331,
+   "mape": 3.0369097252690977,
+   "smape": 3.1052548274663665,
+   "mase": 6.044735148684967,
+   "dir_acc": 1.0,
+   "n_origins": 4,
+   "shape_point": [
+    4,
+    21
+   ],
+   "shape_quantiles": null,
+   "dm_t_vs_naive": 0.0,
+   "dm_p_vs_naive": 1.0,
+   "ndp": 1.0
+  },
+  "meta": {},
+  "no_leakage": true,
+  "env": ".venv2"
+ },
+ "ets": {
+  "ok": true,
+  "seconds": 0.08,
+  "n_windows": 4,
+  "horizon": 21,
+  "metrics": {
+   "rmse": 241.8673874894862,
+   "mae": 219.9838635015101,
+   "mape": 3.022086732117141,
+   "smape": 3.076785651367201,
+   "mase": 6.018781601369318,
+   "dir_acc": 1.0,
+   "n_origins": 4,
+   "shape_point": [
+    4,
+    21
+   ],
+   "shape_quantiles": null,
+   "dm_t_vs_naive": -1.132740175447667,
+   "dm_p_vs_naive": 0.26058503007252143,
+   "ndp": 0.9957064210958363
+  },
+  "meta": {},
+  "no_leakage": true,
+  "env": ".venv2"
+ },
+ "theta": {
+  "ok": true,
+  "seconds": 0.07,
+  "n_windows": 4,
+  "horizon": 21,
+  "metrics": {
+   "rmse": 238.83378023521144,
+   "mae": 216.66176405746927,
+   "mape": 2.97769732047624,
+   "smape": 3.0365063895640008,
+   "mase": 5.927888611795221,
+   "dir_acc": 1.0,
+   "n_origins": 4,
+   "shape_point": [
+    4,
+    21
+   ],
+   "shape_quantiles": null,
+   "dm_t_vs_naive": -1.5005104937411504,
+   "dm_p_vs_naive": 0.13727679322824915,
+   "ndp": 0.980669701150568
+  },
+  "meta": {},
+  "no_leakage": true,
+  "env": ".venv2"
+ },
+ "chronos-2": {
+  "ok": true,
+  "seconds": 2.04,
+  "n_windows": 4,
+  "horizon": 21,
+  "metrics": {
+   "rmse": 260.61565196354684,
+   "mae": 240.53236607142858,
+   "mape": 3.3063702078909305,
+   "smape": 3.3665486446667994,
+   "mase": 6.580990789056697,
+   "dir_acc": 1.0,
+   "crps": 200.1157536488169,
+   "wql": 0.39472128818257946,
+   "pinball_mean": 100.05787682440844,
+   "var90": 7002.092647898055,
+   "es90": 7095.139969234316,
+   "exceed_10": 0.0,
+   "band_10_exceeds": 0.15476190476190477,
+   "band_10_hits": 0.39285714285714285,
+   "sigma_hat": 134.00273269410883,
+   "sigma_real": 109.82899301619578,
+   "n_origins": 4,
+   "shape_point": [
+    4,
+    21
+   ],
+   "shape_quantiles": [
+    4,
+    21,
+    9
+   ],
+   "dm_t_vs_naive": 0.9356671396329223,
+   "dm_p_vs_naive": 0.3521590029346657,
+   "pit_mean": 0.6166078761423278,
+   "pit_ks": 0.45238095238095233,
+   "mean_abs_coverage_gap": 0.1484126984126984,
+   "kupiec_p": NaN,
+   "ndp": 1.0887144973569922
+  },
+  "meta": {},
+  "no_leakage": true,
+  "env": ".venv2"
+ },
+ "chronos-bolt-base": {
+  "ok": true,
+  "seconds": 0.62,
+  "n_windows": 4,
+  "horizon": 21,
+  "metrics": {
+   "rmse": 280.6605716781766,
+   "mae": 255.01094563802084,
+   "mape": 3.5064284134065082,
+   "smape": 3.5730309383570917,
+   "mase": 6.977126246095659,
+   "dir_acc": 1.0,
+   "crps": 204.64209798177086,
+   "wql": 0.40326844381068827,
+   "pinball_mean": 102.3210489908854,
+   "var90": 6940.370361328125,
+   "es90": 7057.967447916667,
+   "exceed_10": 0.0,
+   "band_10_exceeds": 0.14285714285714285,
+   "band_10_hits": 0.49999999999999994,
+   "sigma_hat": 172.82193073172698,
+   "sigma_real": 109.82899301619578,
+   "n_origins": 4,
+   "shape_point": [
+    4,
+    21
+   ],
+   "shape_quantiles": [
+    4,
+    21,
+    9
+   ],
+   "dm_t_vs_naive": 1.501613579711612,
+   "dm_p_vs_naive": 0.1369919046586489,
+   "pit_mean": 0.564582971956792,
+   "pit_ks": 0.3571428571428571,
+   "mean_abs_coverage_gap": 0.12433862433862435,
+   "kupiec_p": NaN,
+   "ndp": 1.154248461591164
+  },
+  "meta": {},
+  "no_leakage": true,
+  "env": ".venv2"
+ },
+ "timemoe-50m": {
+  "ok": false,
+  "error": "TypeError: GenerationMixin._extract_past_from_model_output() got an unexpected keyword argument 'standardize_cache_format'",
+  "trace": "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/ubadmin/projects/TSFM4Finance/.venv-timemoe/lib/python3.11/site-packages/torch/utils/_contextlib.py\", line 116, in decorate_context\n    return func(*args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/ubadmin/projects/TSFM4Finance/.venv-timemoe/lib/python3.11/site-packages/transformers/generation/utils.py\", line 2024, in generate\n    result = self._sample(\n             ^^^^^^^^^^^^^\n  File \"/home/ubadmin/projects/TSFM4Finance/.venv-timemoe/lib/python3.11/site-packages/transformers/generation/utils.py\", line 3032, in _sample\n    model_kwargs = self._update_model_kwargs_for_generation(\n                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/ubadmin/.cache/huggingface/modules/transformers_modules/Maple728/TimeMoE-50M/446753ee48ff3726d0606a81d0092d54acee995e/ts_generation_mixin.py\", line 209, in _update_model_kwargs_for_generation\n    model_kwargs[\"past_key_values\"] = self._extract_past_from_model_output(\n                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nTypeError: GenerationMixin._extract_past_from_model_output() got an unexpected keyword argument 'standardize_cache_format'\n"
+ },
+ "arima_auto": {
+  "ok": true,
+  "seconds": 1.06,
+  "n_windows": 4,
+  "horizon": 21,
+  "metrics": {
+   "rmse": 244.62370791586963,
+   "mae": 220.93245442708331,
+   "mape": 3.0369097252690977,
+   "smape": 3.1052548274663665,
+   "mase": 6.044735148684967,
+   "dir_acc": 1.0,
+   "n_origins": 4,
+   "shape_point": [
+    4,
+    21
+   ],
+   "shape_quantiles": null,
+   "dm_t_vs_naive": 0.0,
+   "dm_p_vs_naive": 1.0,
+   "ndp": 1.0
+  },
+  "meta": {},
+  "no_leakage": true,
+  "env": ".venv2"
+ },
+ "timesfm-3.0": {
+  "ok": true,
+  "seconds": 2.46,
+  "n_windows": 4,
+  "horizon": 21,
+  "metrics": {
+   "rmse": 249.86846783912875,
+   "mae": 228.08888462611608,
+   "mape": 3.128453939296021,
+   "smape": 3.1858385316526068,
+   "mase": 6.240535830279627,
+   "dir_acc": 1.0,
+   "crps": 188.37542020605986,
+   "wql": 0.3715162970541367,
+   "pinball_mean": 94.18771010302993,
+   "var90": 6958.5211181640625,
+   "es90": 7063.050252278646,
+   "exceed_10": 0.0,
+   "band_10_exceeds": 0.11904761904761904,
+   "band_10_hits": 0.40476190476190477,
+   "sigma_hat": 147.01694266052408,
+   "sigma_real": 109.82899301619578,
+   "n_origins": 4,
+   "shape_point": [
+    4,
+    21
+   ],
+   "shape_quantiles": [
+    4,
+    21,
+    9
+   ],
+   "dm_t_vs_naive": -0.2936235066786274,
+   "dm_p_vs_naive": 0.7697785688394098,
+   "pit_mean": 0.6351904856233288,
+   "pit_ks": 0.47619047619047616,
+   "mean_abs_coverage_gap": 0.13703703703703704,
+   "kupiec_p": NaN,
+   "ndp": 1.032391937244307
+  },
+  "meta": {
+   "per_core_batch_size": 16
+  },
+  "no_leakage": true,
+  "env": ".venv2"
+ },
+ "ttm-r2": {
+  "ok": true,
+  "seconds": 3.28,
+  "n_windows": 4,
+  "horizon": 21,
+  "metrics": {
+   "rmse": 94.77506920442887,
+   "mae": 75.0531761532738,
+   "mape": 0.979078391534195,
+   "smape": 0.983082620924094,
+   "mase": 6.716093707891041,
+   "dir_acc": 1.0,
+   "n_origins": 4,
+   "shape_point": [
+    4,
+    21
+   ],
+   "shape_quantiles": null,
+   "dm_t_vs_naive": 0.5462692527074505,
+   "dm_p_vs_naive": 0.5863463072998013,
+   "ndp": 1.1012162502973395
+  },
+  "meta": {
+   "pred_len": 96
+  },
+  "no_leakage": true,
+  "env": ".venv-ttm"
+ },
+ "flowstate-r1": {
+  "ok": true,
+  "seconds": 0.76,
+  "n_windows": 4,
+  "horizon": 21,
+  "metrics": {
+   "rmse": 109.982425085936,
+   "mae": 89.25907389322917,
+   "mape": 1.1670077590049823,
+   "smape": 1.165622861973669,
+   "mase": 7.987300941431897,
+   "dir_acc": 1.0,
+   "n_origins": 4,
+   "shape_point": [
+    4,
+    21
+   ],
+   "shape_quantiles": null,
+   "dm_t_vs_naive": 2.9546878542490878,
+   "dm_p_vs_naive": 0.004071918614977832,
+   "ndp": 1.3096520053592355
+  },
+  "meta": {},
+  "no_leakage": true,
+  "env": ".venv-ttm"
+ },
+ "toto-2-22m": {
+  "ok": true,
+  "seconds": 3.57,
+  "n_windows": 4,
+  "horizon": 21,
+  "metrics": {
+   "rmse": 78.08870176285902,
+   "mae": 61.44153994605655,
+   "mape": 0.8063264923419263,
+   "smape": 0.8041147925746647,
+   "mase": 5.498063652791153,
+   "dir_acc": 1.0,
+   "crps": 60.97294676442625,
+   "wql": 0.0898620991152721,
+   "pinball_mean": 30.486473382213127,
+   "var90": 7301.2010498046875,
+   "es90": 7422.6200764973955,
+   "exceed_10": 0.0,
+   "band_10_exceeds": 0.0,
+   "band_10_hits": 1.0,
+   "sigma_hat": 190.44640132132315,
+   "sigma_real": 70.89449967004657,
+   "n_origins": 4,
+   "shape_point": [
+    4,
+    21
+   ],
+   "shape_quantiles": [
+    4,
+    21,
+    9
+   ],
+   "dm_t_vs_naive": -1.860832551336497,
+   "dm_p_vs_naive": 0.06630875562376519,
+   "pit_mean": 0.4602589283179877,
+   "pit_ks": 0.23783546513320963,
+   "mean_abs_coverage_gap": 0.12566137566137567,
+   "kupiec_p": NaN,
+   "ndp": 0.901499785881337
+  },
+  "meta": {},
+  "no_leakage": true,
+  "env": ".venv-toto"
+ },
+ "moirai-2.0-R-small": {
+  "ok": true,
+  "seconds": 2.38,
+  "n_windows": 4,
+  "horizon": 21,
+  "metrics": {
+   "rmse": 104.39782413550967,
+   "mae": 84.66481236049107,
+   "mape": 1.1104090602548213,
+   "smape": 1.1051344469456783,
+   "mase": 7.5761858820316785,
+   "dir_acc": 1.0,
+   "crps": 69.96366515790343,
+   "wql": 0.10282111821286301,
+   "pinball_mean": 34.98183257895172,
+   "var90": 7310.965576171875,
+   "es90": 7433.018391927083,
+   "exceed_10": 0.0,
+   "band_10_exceeds": 0.0,
+   "band_10_hits": 1.0,
+   "sigma_hat": 187.1056486115814,
+   "sigma_real": 70.89449967004657,
+   "n_origins": 4,
+   "shape_point": [
+    4,
+    21
+   ],
+   "shape_quantiles": [
+    4,
+    21,
+    9
+   ],
+   "dm_t_vs_naive": 1.9512010941949278,
+   "dm_p_vs_naive": 0.05440668494697257,
+   "pit_mean": 0.43076809888491446,
+   "pit_ks": 0.23549647092430448,
+   "mean_abs_coverage_gap": 0.11560846560846562,
+   "kupiec_p": NaN,
+   "ndp": 1.2422427934208213
+  },
+  "meta": {},
+  "no_leakage": true,
+  "env": ".venv-moirai"
+ },
+ "moment-1-large": {
+  "ok": false,
+  "error": "ImportError: huggingface-hub>=0.15.1,<1.0 is required for a normal functioning of this module, but found huggingface-hub==2.4.0.\nTry: pip install transformers -U or pip install -e '.[dev]' if you're working with git main",
+  "trace": "n/projects/TSFM4Finance/.venv-moment/lib/python3.11/site-packages/transformers/__init__.py\", line 26, in <module>\n    from . import dependency_versions_check\n  File \"/home/ubadmin/projects/TSFM4Finance/.venv-moment/lib/python3.11/site-packages/transformers/dependency_versions_check.py\", line 57, in <module>\n    require_version_core(deps[pkg])\n  File \"/home/ubadmin/projects/TSFM4Finance/.venv-moment/lib/python3.11/site-packages/transformers/utils/versions.py\", line 117, in require_version_core\n    return require_version(requirement, hint)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/ubadmin/projects/TSFM4Finance/.venv-moment/lib/python3.11/site-packages/transformers/utils/versions.py\", line 111, in require_version\n    _compare_versions(op, got_ver, want_ver, requirement, pkg, hint)\n  File \"/home/ubadmin/projects/TSFM4Finance/.venv-moment/lib/python3.11/site-packages/transformers/utils/versions.py\", line 44, in _compare_versions\n    raise ImportError(\nImportError: huggingface-hub>=0.15.1,<1.0 is required for a normal functioning of this module, but found huggingface-hub==2.4.0.\nTry: pip install transformers -U or pip install -e '.[dev]' if you're working with git main\n"
+ },
+ "tirex": {
+  "ok": true,
+  "seconds": 2.4,
+  "n_windows": 4,
+  "horizon": 21,
+  "metrics": {
+   "rmse": 118.41426635148224,
+   "mae": 102.49085053943452,
+   "mape": 1.3414385990970814,
+   "smape": 1.340568689476552,
+   "mase": 9.171339464949106,
+   "dir_acc": 1.0,
+   "crps": 80.36935557208994,
+   "wql": 0.11782586897798243,
+   "pinball_mean": 40.18467778604497,
+   "var90": 7266.39892578125,
+   "es90": 7394.825764973959,
+   "exceed_10": 0.0,
+   "band_10_exceeds": 0.05952380952380952,
+   "band_10_hits": 0.9404761904761905,
+   "sigma_hat": 200.56107078095505,
+   "sigma_real": 70.89449967004657,
+   "n_origins": 4,
+   "shape_point": [
+    4,
+    21
+   ],
+   "shape_quantiles": [
+    4,
+    21,
+    9
+   ],
+   "dm_t_vs_naive": 2.908611408079997,
+   "dm_p_vs_naive": 0.004656858674082291,
+   "pit_mean": 0.4513977918836146,
+   "pit_ks": 0.15391053442929126,
+   "mean_abs_coverage_gap": 0.08703703703703702,
+   "kupiec_p": NaN,
+   "ndp": 1.503794987840738
+  },
+  "meta": {
+   "rollout_steps": 1
+  },
+  "no_leakage": true,
+  "env": ".venv-tirex"
+ },
+ "tirex-2": {
+  "ok": false,
+  "error": "AcceleratorError: CUDA error: the provided PTX was compiled with an unsupported toolchain.\nSearch for `cudaErrorUnsupportedPtxVersion' in https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__TYPES.html for more information.\n",
+  "trace": "\", line 1392, in to\n    return self._apply(convert)\n           ^^^^^^^^^^^^^^^^^^^^\n  File \"/home/ubadmin/projects/TSFM4Finance/.venv-tirex2/lib/python3.12/site-packages/torch/nn/modules/module.py\", line 933, in _apply\n    module._apply(fn)\n  File \"/home/ubadmin/projects/TSFM4Finance/.venv-tirex2/lib/python3.12/site-packages/torch/nn/modules/module.py\", line 933, in _apply\n    module._apply(fn)\n  File \"/home/ubadmin/projects/TSFM4Finance/.venv-tirex2/lib/python3.12/site-packages/torch/nn/modules/module.py\", line 933, in _apply\n    module._apply(fn)\n  [Previous line repeated 2 more times]\n  File \"/home/ubadmin/projects/TSFM4Finance/.venv-tirex2/lib/python3.12/site-packages/torch/nn/modules/module.py\", line 966, in _apply\n    param_applied = fn(param)\n                    ^^^^^^^^^\n  File \"/home/ubadmin/projects/TSFM4Finance/.venv-tirex2/lib/python3.12/site-packages/torch/nn/modules/module.py\", line 1374, in convert\n    return t.to(\n           ^^^^^\ntorch.AcceleratorError: CUDA error: the provided PTX was compiled with an unsupported toolchain.\nSearch for `cudaErrorUnsupportedPtxVersion' in https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__TYPES.html for more information.\n\n"
+ },
+ "kronos-small": {
+  "ok": true,
+  "seconds": 41.26,
+  "n_windows": 4,
+  "horizon": 21,
+  "metrics": {
+   "rmse": 333.07810225326153,
+   "mae": 293.0445789155506,
+   "mape": 3.8261594563242016,
+   "smape": 3.9285463016877933,
+   "mase": 26.222938900906996,
+   "dir_acc": 1.0,
+   "n_origins": 4,
+   "shape_point": [
+    4,
+    21
+   ],
+   "shape_quantiles": null,
+   "dm_t_vs_naive": 4.851214279288469,
+   "dm_p_vs_naive": 5.668089324241888e-06,
+   "ndp": 4.29969081793841
+  },
+  "meta": {
+   "sampling": {
+    "T": 1.0,
+    "top_p": 0.9,
+    "sample_count": 32
+   },
+   "note": "Kronos emits OHLCV; the benchmark scores the close column"
+  },
+  "no_leakage": true,
+  "env": ".venv-kronos"
+ }
+}

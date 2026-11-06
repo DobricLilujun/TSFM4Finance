@@ -1,0 +1,36 @@
+{
+ "name": "eurusd_long",
+ "domain": "fx",
+ "task": "forecast",
+ "frequency": "day",
+ "n_features": 5,
+ "feature_names": [
+  "open",
+  "high",
+  "low",
+  "close",
+  "volume"
+ ],
+ "n_obs": 5928,
+ "date_range": [
+  "2004-01-01",
+  "2026-11-06"
+ ],
+ "split": {
+  "train": 4149,
+  "validation": 889,
+  "test": 890
+ },
+ "license": "market-data terms",
+ "source": "yahoo:EURUSD=X",
+ "open": true,
+ "requires_download": false,
+ "target": "close",
+ "lookback": 512,
+ "horizon": 63,
+ "rolling": true,
+ "notes": "OHLCV daily, 2004-01-01 -> present; auto-adjusted closes; chronological 70/15/15 splits",
+ "ticker": "EURUSD=X",
+ "ohlcv": true,
+ "start_requested": "2004-01-01"
+}

@@ -535,6 +535,9 @@ def main() -> None:
         for pat in pats:
             hits = sorted(d.glob(pat)) or sorted((d / model).glob(pat.split("/")[-1]))
             for h in hits:
+                side = h.with_suffix(".json") if h.is_file() else None
+                if side is not None and side.exists() and '"smoke": true' in side.read_text():
+                    continue        # trainer --smoke artifact: never scored
                 if h.is_dir() and (any(h.glob("*.json")) or any(h.glob("*.safetensors"))):
                     return str(h)
                 if h.is_file():

@@ -85,6 +85,9 @@ def ft_checkpoints() -> dict[tuple[str, str], str]:
     if not FT_DIR.exists():
         return out
     for p in list(FT_DIR.rglob("*.pt")) + list(FT_DIR.rglob("*.safetensors")):
+        side = p.with_suffix(".json")
+        if side.exists() and '"smoke": true' in side.read_text():
+            continue        # 2-step wiring checks are quarantined, never scored
         stem = p.name.rsplit(".", 1)[0]
         parts = stem.split("__")
         if len(parts) >= 2:

@@ -13,6 +13,8 @@ import argparse
 import json
 import sys
 import traceback
+from pathlib import Path
+
 from .common import BUDGETS, REPO, TrainJob
 
 # family -> trainer module (each one implements its own loop, see module docstrings)
@@ -85,6 +87,10 @@ def main() -> None:
     ap.add_argument("--weights-root", default=os.environ.get("TSFM_WEIGHTS_ROOT", ""),
                     help="directory holding git-cloned / hf-downloaded models")
     a = ap.parse_args()
+    if a.smoke and not a.out_dir:
+        # keep smoke artifacts out of reports/ft_ckpts: the evaluator only reads that
+        # directory, and a 2-step checkpoint must never be scored as a fine-tune
+        a.out_dir = str(REPO / "reports" / "ft_smoke")
     if a.weights_root:
         os.environ["TSFM_WEIGHTS_ROOT"] = a.weights_root
 
@@ -115,10 +121,14 @@ def main() -> None:
         if spec is None:
             print(json.dumps({"model": key, "status": "unknown-model"}))
             continue
-        if spec.env and a.device == "cuda":
-            here = str(REPO / ".venv2" / "bin" / "python")
+        if spec.env and a.device == "cuda" and not a.ignore_env:
             want = grid.python_for(spec)
-            if want and str(want) != sys.executable and not a._ignore_env:
+            # compare venv roots, not symlinks: uv venvs symlink bin/python to the
+            # managed interpreter, so resolving both sides would compare equal
+            def _root(exe):
+                q = Path(exe).absolute()
+                return q.parent.parent if q.parent.name == "bin" else q
+            if want and _root(want) != _root(sys.executable):
                 print(json.dumps({"model": key, "status": "wrong-env",
                                   "rerun_with": str(want), "family": spec.family}))
                 continue

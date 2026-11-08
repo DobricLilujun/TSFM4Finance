@@ -19,3 +19,7 @@ models/
 
 # offline HF-cache mirror built by bench.weights --link-into-cache
 .hf-cache/
+
+# trainer checkpoints (fine-tuned weights) - never commit
+reports/ft_ckpts/
+reports/ft_smoke/

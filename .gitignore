@@ -39,3 +39,11 @@ trl/reports/*/series_csv/*
 models/
 # offline HF-cache mirror built by bench.weights --link-into-cache
 .hf-cache/
+
+# trainer checkpoints (fine-tuned weights) - never commit
+reports/ft_ckpts/
+reports/ft_smoke/
+
+# sqlite cell store: a run artifact, not source
+reports/state.sqlite3
+reports/**/*.sqlite3

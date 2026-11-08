@@ -39,19 +39,39 @@ reported as a full fine-tune.
 
 ## Recommended server run (this is the part we did not run locally)
 
+One script, resumable, offline (weights from `./models`, see `docs/08_offline_models.md`):
+
 ```bash
-# Tier-A models x the 12 long-history series, full fine-tune at h=21
-for M in timesfm-2.5-200m chronos-2; do
-  .venv2/bin/python -m tsfm4finance.bench.trainers --model $M \
-      --series sp500_long,nasdaq_long,dow_long,russell2000_long,btc_long,eth_long,eurusd_long,gbpusd_long,gold_long,crude_oil_long,us_treasury_7y_long,ig_corp_bond_long \
-      --budget full --epochs 3 --bs 8 --ctx 512 --amp bf16
-done
-.venv-moirai/bin/python -m tsfm4finance.bench.trainers --model moirai-2.0-R-small --series sp500_long --budget full --amp bf16
-.venv-ttm/bin/python  -m tsfm4finance.bench.trainers --model ttm-r2 --series sp500_long --budget full
-.venv-moment/bin/python -m tsfm4finance.bench.trainers --model moment-1-large --series sp500_long --budget full --bs 2
-.venv-toto/bin/python -m tsfm4finance.bench.trainers --model toto-2-22m --series sp500_long --budget full
-.venv-kronos/bin/python -m tsfm4finance.bench.trainers --model kronos-small --series sp500_long --budget full --run-training
+reports/run_train.sh fs16          # 16 windows / 40 steps  x all 24 series  (cheap, do it first)
+reports/run_train.sh fs64          # 64 windows / 120 steps x core12
+reports/run_train.sh full          # every train window, 3 epochs x long12
+reports/run_train.sh fs16 --smoke              # 2 optimiser steps per family, nothing scored
+reports/run_train.sh full --models chronos-2 --series sp500_long,btc_long --force
 ```
+It picks the right interpreter and memory knobs per family, skips checkpoints that
+already exist, retries once at `--bs 1 --ctx 128` if a run dies on VRAM, and logs to
+`reports/train_<budget>.log`.  Do not run it while `reports/run_sweep_pass1.sh` owns
+the same GPU (or pass `--device cuda:1`).
+
+Equivalent explicit commands (what the script runs):
+
+```bash
+export TSFM_WEIGHTS_ROOT=$PWD/models TSFM_OFFLINE=1 HF_HOME=$PWD/.hf-cache
+S24=sp500_daily,nasdaq_daily,dow_daily,russell2000_daily,btc_crypto,eth_crypto,eurusd_fx,gbp_usd_fx,gold_commodity,crude_oil_commodity,us_treasury_7y,ig_corp_bond
+L12=sp500_long,nasdaq_long,dow_long,russell2000_long,btc_long,eth_long,eurusd_long,gbpusd_long,gold_long,crude_oil_long,us_treasury_7y_long,ig_corp_bond_long
+
+.venv/bin/python        -m tsfm4finance.bench.trainers --model timesfm-2.5-200m --series $L12 --budget full --bs 4  --ctx 512 --amp fp32 --horizon 21
+.venv2/bin/python       -m tsfm4finance.bench.trainers --model chronos-2        --series $L12 --budget full --bs 16 --ctx 512 --amp bf16 --horizon 21
+.venv-ttm/bin/python    -m tsfm4finance.bench.trainers --model ttm-r2           --series $L12 --budget full --bs 32 --ctx 512 --amp fp32 --horizon 21
+.venv-moirai/bin/python -m tsfm4finance.bench.trainers --model moirai-2.0-R-small --series $L12 --budget full --bs 8 --ctx 512 --amp bf16 --horizon 21
+.venv-moirai/bin/python -m tsfm4finance.bench.trainers --model moirai-1.1-R-base  --series $L12 --budget full --bs 4 --ctx 512 --amp bf16 --horizon 21
+.venv-toto/bin/python   -m tsfm4finance.bench.trainers --model toto-2-22m       --series $L12 --budget full --bs 8  --ctx 512 --amp bf16 --horizon 21
+.venv-toto/bin/python   -m tsfm4finance.bench.trainers --model toto-2-313m      --series $L12 --budget full --bs 2  --ctx 256 --amp bf16 --horizon 21
+.venv-moment/bin/python -m tsfm4finance.bench.trainers --model moment-1-large   --series $L12 --budget full --bs 2  --ctx 256 --amp fp32 --horizon 21
+.venv-kronos/bin/python -m tsfm4finance.bench.trainers --model kronos-small     --series $L12 --budget full --bs 8  --ctx 256 --run-training --horizon 21
+```
+`--smoke` writes to `reports/ft_smoke/` and those checkpoints are ignored by the
+planner and by scoring, so a 2-step wiring check can never end up in the paper.
 
 Then re-plan and run the sweep: the planner only creates fine-tuned cells for
 checkpoints that exist, so the new rows appear automatically.

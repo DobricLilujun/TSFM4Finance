@@ -25,6 +25,7 @@ import traceback
 from collections import defaultdict
 from pathlib import Path
 
+import os
 import numpy as np
 
 from .config import load_grid
@@ -107,16 +108,19 @@ def _engine_failed(store: CellStore, rows, err: str) -> None:
 def run_forecast(store: CellStore, grid, rows, a) -> None:
     groups: dict[tuple, list[dict]] = defaultdict(list)
     for r in rows:
-        groups[(r["model"], r["adaptation"])].append(r)
+        # an adapted checkpoint belongs to one series, so adapted cells are grouped
+        # per (model, adaptation, series); zero-shot cells stay grouped per model
+        key = (r["model"], r["adaptation"], r["series"] if r["adaptation"] != "zero" else "")
+        groups[key].append(r)
     specs = grid.models()
     wc = WindowCache(a.ctx_cap)
 
-    for (model, adaptation), grp in sorted(groups.items()):
+    for (model, adaptation, _ser), grp in sorted(groups.items()):
         spec = specs.get(model)
         if spec is None:
             _engine_failed(store, grp, f"unknown model {model!r} in config")
             continue
-        ckpt = a.ft_ckpt_for(model, adaptation) if adaptation != "zero" else None
+        ckpt = a.ft_ckpt_for(model, adaptation, _ser) if adaptation != "zero" else None
         if adaptation != "zero" and not ckpt:
             _engine_failed(store, grp, f"no fine-tuned checkpoint for {model}/{adaptation} "
                                        f"(run: python -m tsfm4finance.bench.trainers "
@@ -164,6 +168,11 @@ def run_forecast(store: CellStore, grid, rows, a) -> None:
                     cell["engine"] = {"family": spec.family, "weights": spec.weights,
                                       "params_m": spec.params_m, "tier": spec.tier,
                                       "license": spec.license}
+                    _ft = getattr(eng, "ft_load", None)
+                    if _ft:
+                        cell["engine"]["ft"] = {k: _ft[k] for k in
+                                                ("checkpoint", "via", "missing", "unexpected")
+                                                if k in _ft}
                     cell["profile"] = _profile(step)
                     store.finish(r["cell_id"], cell, profile=cell["profile"],
                                  seconds=round(time.time() - t0, 2), vram_mb=_vram_mb())
@@ -200,18 +209,22 @@ def run_trading(store: CellStore, grid, rows, a) -> None:
 
     groups: dict[tuple, list[dict]] = defaultdict(list)
     for r in rows:
-        groups[(r["model"], r["adaptation"])].append(r)
+        key = (r["model"], r["adaptation"],
+               a.base_series(r["series"]) if r["adaptation"] != "zero" else "")
+        groups[key].append(r)
     specs = grid.models()
     wc = WindowCache(a.ctx_cap)
 
-    for (model, adaptation), grp in sorted(groups.items()):
+    for (model, adaptation, _ser), grp in sorted(groups.items()):
         spec = specs.get(model)
         if spec is None:
             _engine_failed(store, grp, f"unknown model {model!r}")
             continue
-        ckpt = a.ft_ckpt_for(model, adaptation) if adaptation != "zero" else None
+        ckpt = a.ft_ckpt_for(model, adaptation, _ser) if adaptation != "zero" else None
         if adaptation != "zero" and not ckpt:
-            _engine_failed(store, grp, f"no fine-tuned checkpoint for {model}/{adaptation}")
+            _engine_failed(store, grp, f"no fine-tuned checkpoint for {model}/{adaptation} "
+                                       f"on {_ser} (train it: bench.trainers --model {model} "
+                                       f"--series {_ser} --budget {adaptation})")
             continue
         engine = None
         for amp, ctx, bs, dev in ladder(a.amp, a.ctx_cap, a.batch, a.device):
@@ -290,21 +303,29 @@ def run_classify(store: CellStore, grid, rows, a) -> None:
 
     groups: dict[tuple, list[dict]] = defaultdict(list)
     for r in rows:
-        groups[(r["model"], r["adaptation"])].append(r)
+        key = (r["model"], r["adaptation"],
+               a.base_series(r["series"]) if r["adaptation"] != "zero" else "")
+        groups[key].append(r)
     specs = grid.models()
     wc = WindowCache(a.ctx_cap)
 
-    for (model, adaptation), grp in sorted(groups.items()):
+    for (model, adaptation, _ser), grp in sorted(groups.items()):
         spec = specs.get(model)
         if spec is None:
             _engine_failed(store, grp, f"unknown model {model!r}")
+            continue
+        ckpt = a.ft_ckpt_for(model, adaptation, _ser) if adaptation != "zero" else None
+        if adaptation != "zero" and not ckpt:
+            _engine_failed(store, grp, f"no fine-tuned checkpoint for {model}/{adaptation} "
+                                       f"on {_ser} (train it: bench.trainers --model {model} "
+                                       f"--series {_ser} --budget {adaptation})")
             continue
         engine = None
         if model != "stat":
             for amp, ctx, bs, dev in ladder(a.amp, a.ctx_cap, a.batch, a.device):
                 try:
-                    engine = build_engine(spec, adaptation=adaptation, device=dev,
-                                          amp=amp, batch=bs, ctx_cap=ctx)
+                    engine = build_engine(spec, adaptation=adaptation, ft_ckpt=ckpt,
+                                          device=dev, amp=amp, batch=bs, ctx_cap=ctx)
                     break
                 except Exception as e:                             # noqa: BLE001
                     last = f"{type(e).__name__}: {e}"
@@ -395,20 +416,28 @@ def run_anomaly(store: CellStore, grid, rows, a) -> None:
 
     groups: dict[tuple, list[dict]] = defaultdict(list)
     for r in rows:
-        groups[(r["model"], r["adaptation"])].append(r)
+        key = (r["model"], r["adaptation"],
+               a.base_series(r["series"]) if r["adaptation"] != "zero" else "")
+        groups[key].append(r)
     specs = grid.models()
     wc = WindowCache(a.ctx_cap)
-    for (model, adaptation), grp in sorted(groups.items()):
+    for (model, adaptation, _ser), grp in sorted(groups.items()):
         spec = specs.get(model)
         if spec is None:
             _engine_failed(store, grp, f"unknown model {model!r}")
+            continue
+        ckpt = a.ft_ckpt_for(model, adaptation, _ser) if adaptation != "zero" else None
+        if adaptation != "zero" and not ckpt:
+            _engine_failed(store, grp, f"no fine-tuned checkpoint for {model}/{adaptation} "
+                                       f"on {_ser}")
             continue
         route = grp[0]["span"] or "zscore"
         engine = None
         if route != "zscore":
             try:
-                engine = build_engine(spec, adaptation=adaptation, device=a.device,
-                                      amp=a.amp, batch=a.batch, ctx_cap=a.ctx_cap)
+                engine = build_engine(spec, adaptation=adaptation, ft_ckpt=ckpt,
+                                      device=a.device, amp=a.amp, batch=a.batch,
+                                      ctx_cap=a.ctx_cap)
             except Exception as e:                                 # noqa: BLE001
                 _engine_failed(store, grp, f"{type(e).__name__}: {e}")
                 continue
@@ -482,22 +511,47 @@ def main() -> None:
     ap.add_argument("--ft-dir", default=str(REPO / "reports" / "ft_ckpts"))
     ap.add_argument("--force", action="store_true",
                     help="re-queue terminal cells of this stage (done/failed/skipped)")
+    ap.add_argument("--weights-root", default=os.environ.get("TSFM_WEIGHTS_ROOT", ""),
+                    help="directory holding git-cloned / hf-downloaded models")
     a = ap.parse_args()
+    if a.weights_root:
+        os.environ["TSFM_WEIGHTS_ROOT"] = a.weights_root
 
     a.costs = [float(x) for x in str(a.costs).split(",") if x.strip()]
 
-    def ft_ckpt_for(model: str, adaptation: str) -> str | None:
-        """Trainers write ``reports/ft_ckpts/<model>/<series>__<budget>``."""
+    def ft_ckpt_for(model: str, adaptation: str, series: str = "") -> str | None:
+        """Trainers write ``reports/ft_ckpts/<model>__<series>__<budget>.pt``.
+
+        The checkpoint must belong to *this* cell's series: an adapted cell scored on
+        series B with a checkpoint trained on series A would be leakage, so there is
+        deliberately no cross-series fallback.
+        """
         d = Path(a.ft_dir)
         if not d.exists():
             return None
-        for cand in (d / f"{model}__*__{adaptation}.pt", d / model / f"*__{adaptation}.pt"):
-            hits = sorted(Path(str(cand.parent)).glob(cand.name))
-            if hits:
-                return str(hits[0])
+        pats = [f"{model}__{series}__{adaptation}.pt", f"{model}__{series}__{adaptation}"]
+        if not series:
+            pats = [f"{model}__*__{adaptation}.pt", f"{model}/*__{adaptation}.pt"]
+        for pat in pats:
+            hits = sorted(d.glob(pat)) or sorted((d / model).glob(pat.split("/")[-1]))
+            for h in hits:
+                if h.is_dir() and (any(h.glob("*.json")) or any(h.glob("*.safetensors"))):
+                    return str(h)
+                if h.is_file():
+                    return str(h)
         return None
 
     a.ft_ckpt_for = ft_ckpt_for                       # type: ignore[attr-defined]
+
+    def base_series(name: str) -> str:
+        """Derived task datasets (``*_trade``/``*_dir5``/``*_volreg``/``*_extreme``)
+        are scored on the same underlying series the trainer checkpoint was fit on."""
+        for suf in ("_trade", "_dir5", "_volreg", "_extreme"):
+            if name.endswith(suf):
+                return name[: -len(suf)]
+        return name
+
+    a.base_series = base_series                        # type: ignore[attr-defined]
 
     grid = load_grid(a.config)
     store = CellStore(a.db)

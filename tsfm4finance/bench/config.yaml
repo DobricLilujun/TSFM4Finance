@@ -4,16 +4,20 @@
 # which isolates both crashes and the dependency conflicts between families
 # (uni2ts pins torch<2.5, momentfm pins numpy==1.25, toto-2 needs python>=3.12).
 
+# An entry may be a path OR a bare family name: a bare name resolves to
+# envs/<name>/.venv/bin/python (the uv layout built by scripts/setup_envs.sh) and
+# falls back to .venv-<name>/bin/python, so both layouts work.
 envs:
-  core:    .venv2/bin/python      # torch 2.13, timesfm(2.5+3.0), chronos, transformers(Time-MoE), pmdarima, statsmodels
-  legacy:  .venv/bin/python       # the env the published §4.4 numbers were produced with (timesfm 2.0.2)
-  moirai:  .venv-moirai/bin/python
-  moment:  .venv-moment/bin/python
+  core:    core       # torch 2.11, timesfm 3.0, chronos, granite-tsfm, pmdarima, statsmodels
+  legacy:  legacy     # the env the published §4.4 numbers were produced with (timesfm 2.0.2)
+  timemoe: timemoe    # Time-MoE needs transformers==4.44 -> its own env
+  moirai:  moirai
+  moment:  moment
   ttm:     .venv-ttm/bin/python
   toto:    .venv-toto/bin/python
   tirex:   .venv-tirex/bin/python
-  tirex2:  .venv-tirex2/bin/python
-  kronos:  .venv-kronos/bin/python
+  tirex2:  tirex2
+  kronos:  kronos
 
 series_groups:
   core12: [sp500_daily, nasdaq_daily, dow_daily, russell2000_daily, btc_crypto, eth_crypto,
@@ -278,6 +282,7 @@ models:
   # ---------------- Time-MoE -----------------------------------------------
   timemoe-50m:
     family: timemoe
+    env: timemoe
     env: core
     weights: Maple728/TimeMoE-50M
     params_m: 50
@@ -289,6 +294,7 @@ models:
     ft: {objective: mse_norm, lr: 5e-5, epochs: 3, bs: 8, context: 256}
   timemoe-200m:
     family: timemoe
+    env: timemoe
     env: core
     weights: Maple728/TimeMoE-200M
     params_m: 200

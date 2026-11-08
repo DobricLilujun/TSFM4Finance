@@ -1,0 +1,22 @@
+[project]
+name = "tsfm4finance-legacy"
+version = "0.1.0"
+description = "Arena benchmark environment for the legacy model family. TimesFM 2.5-200M: the env that produced the published §4.4 numbers."
+requires-python = ">=3.11"
+dependencies = [
+    "torch==2.13.0",
+    "transformers==5.15.0",
+    "timesfm==2.0.2",
+    "chronos-forecasting==2.3.1",
+    "numpy==2.4.6",
+    "pandas==3.0.5",
+    "pyarrow==25.0.1",
+    "statsmodels==0.14.6",
+    "pmdarima==2.1.1",
+    "scikit-learn==1.9.0",
+    "scipy==1.17.1",
+]
+
+[tool.uv]
+# library-style env: uv must not try to build/install this project itself
+package = false

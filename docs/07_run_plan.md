@@ -3,6 +3,29 @@
 所有命令都在仓库根目录执行：`cd TSFM4Finance`。
 所有阶段都是**可断点续跑**的（`reports/state.sqlite3`）：中断后重跑同一条命令即可继续。
 
+## 离线上网受限？先看这一节（本地权重 + uv 环境）
+
+```bash
+# 有网机器：抓权重 + 训练栈
+.venv2/bin/python -m tsfm4finance.bench.weights --list-clone > fetch_models.sh
+git lfs install && bash fetch_models.sh
+git clone https://github.com/NeoQuasar/Kronos third_party/Kronos
+rsync -a models/ third_party/Kronos/ user@server:~/TSFM4Finance/
+
+# 离线服务器：一键建环境 + 启用本地权重
+scripts/setup_envs.sh build                     # uv 项目环境（envs/*/.venv），pin 已冻结
+export TSFM_WEIGHTS_ROOT=$PWD/models TSFM_OFFLINE=1
+.venv2/bin/python -m tsfm4finance.bench.weights --verify
+.venv2/bin/python -m tsfm4finance.bench.weights --link-into-cache .hf-cache && export HF_HOME=$PWD/.hf-cache
+```
+之后下面所有命令里的 `.venv2/bin/python` 都可换成 `envs/core/.venv/bin/python`；
+`config.yaml` 的 `envs:` 用裸名（`core`/`moirai`/…）会自动解析到 uv 环境。
+模型地址三种写法都支持：Hub id、`models/<org>/<repo>`、绝对路径（或 `--weights-root`）。
+详见 `docs/08_offline_models.md`、`docs/09_uv_environments.md`。
+
+微调阶段的产物命名是契约：`reports/ft_ckpts/<model>__<series>__<budget>.pt`；
+评测端按 series 严格匹配，缺 checkpoint 会 skip 而不是退回零样本权重（见 `docs/08_offline_models.md`）。
+
 约定：
 - `core` 环境 = `.venv2/bin/python`（sweep 驱动、Chronos/TimesFM3.0/基线）
 - 其它模型家族各有自己的 venv（见 `docs/06_multi_model_sweep.md` 的安装矩阵）

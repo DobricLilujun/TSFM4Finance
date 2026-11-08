@@ -49,6 +49,19 @@ class MovingAverageModel(BaseModel):
         return PredictionResult(point=[base] * horizon)
 
 
+def _local_weights(hf_id: str) -> str:
+    """Offline support: use ``$TSFM_WEIGHTS_ROOT/<org>/<repo>`` when it exists."""
+    import os
+    from pathlib import Path
+    root = Path(os.environ.get("TSFM_WEIGHTS_ROOT")
+                or Path(__file__).resolve().parents[3] / "models")
+    for cand in (root / hf_id, root / hf_id.replace("/", "__"), root / hf_id.split("/")[-1]):
+        if cand.is_dir() and any(f.suffix in (".json", ".safetensors", ".bin", ".pt", ".ckpt") for f in cand.iterdir()):
+            return str(cand)
+    return hf_id
+
+
+
 class SeasonalNaiveModel(BaseModel):
     """Repeat the last season (for daily data, season=seasonality)."""
 
@@ -139,17 +152,17 @@ class ChronosModel(BaseModel):
         # Prefer the current chronos 2.x pipeline; fall back to bolt, then legacy.
         try:
             from chronos import Chronos2Pipeline  # type: ignore
-            return "chronos2", Chronos2Pipeline.from_pretrained("amazon/chronos-2")
+            return "chronos2", Chronos2Pipeline.from_pretrained(_local_weights("amazon/chronos-2"))
         except Exception:
             pass
         try:
             from chronos import ChronosBoltPipeline  # type: ignore
-            return "bolt", ChronosBoltPipeline.from_pretrained("amazon/chronos-bolt-base")
+            return "bolt", ChronosBoltPipeline.from_pretrained(_local_weights("amazon/chronos-bolt-base"))
         except Exception:
             pass
         # legacy
         from chronos import ChronosModel as Legacy  # type: ignore
-        return "legacy", Legacy.from_pretrained("amazon/chronos-t5-small")
+        return "legacy", Legacy.from_pretrained(_local_weights("amazon/chronos-t5-small"))
 
     def predict(self, context_df, meta, horizon=None):
         horizon = horizon or meta.horizon
@@ -261,7 +274,8 @@ class TimesFMModel(BaseModel):
                 self.checkpoint, torch_compile=False)
         else:
             model = timesfm.TimesFM_2p5_200M_torch.from_pretrained(
-                timesfm.TimesFM_2p5_200M_torch.DEFAULT_REPO_ID, torch_compile=False)
+                _local_weights(timesfm.TimesFM_2p5_200M_torch.DEFAULT_REPO_ID),
+                torch_compile=False)
         model.compile(timesfm.ForecastConfig(
             max_context=self.max_context, max_horizon=self.max_horizon,
             normalize_inputs=self.normalize_inputs, infer_is_positive=False,

@@ -10,6 +10,7 @@ import time
 
 import numpy as np
 
+from tsfm4finance.bench.weights import resolve
 from .common import (LEVELS, TrainJob, autocast, combined_loss_t, count_trainable,
                      free_gpu, log_step, save_ckpt, set_trainable, train_windows)
 
@@ -22,7 +23,7 @@ def train(job: TrainJob) -> dict:
     from tsfm4finance.bench.engines.granite import TTMEngine
 
     spec = load_grid().models()[job.model_key]
-    eng = TTMEngine(checkpoint=spec.weights, device=job.device, amp="fp32",
+    eng = TTMEngine(checkpoint=resolve(spec.weights), device=job.device, amp="fp32",
                     batch=job.bs, ctx_cap=job.ctx)
     model = eng.model
     model.train()

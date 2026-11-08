@@ -7,6 +7,8 @@ reports/PROGRESS.md instead of a silent gap in the paper.
 """
 from __future__ import annotations
 
+import os
+
 import argparse
 import json
 import sys
@@ -80,7 +82,11 @@ def main() -> None:
     ap.add_argument("--ignore-env", action="store_true",
                     help="run even if config.yaml points this model at another venv")
     ap.add_argument("--list", action="store_true", help="show trainer status per family and exit")
+    ap.add_argument("--weights-root", default=os.environ.get("TSFM_WEIGHTS_ROOT", ""),
+                    help="directory holding git-cloned / hf-downloaded models")
     a = ap.parse_args()
+    if a.weights_root:
+        os.environ["TSFM_WEIGHTS_ROOT"] = a.weights_root
 
     if a.list:
         for fam in sorted(set(list(REGISTRY) + list(PENDING))):

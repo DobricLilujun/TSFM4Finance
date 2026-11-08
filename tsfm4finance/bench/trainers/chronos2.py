@@ -12,6 +12,11 @@ import numpy as np
 from .common import TrainJob, free_gpu
 
 
+def _weights(job, spec) -> str:
+    from tsfm4finance.bench.weights import resolve
+    return resolve((spec.weights if spec and spec.weights else "amazon/chronos-2"))
+
+
 def train(job: TrainJob) -> dict:
     import torch
     from chronos import Chronos2Pipeline
@@ -19,6 +24,8 @@ def train(job: TrainJob) -> dict:
     from tsfm4finance.bench.download.common import load_dataset
     from .common import train_windows
 
+    from tsfm4finance.bench.config import load_grid
+    spec = load_grid().models().get(job.model_key)
     tr, _va, _te, meta = load_dataset(job.series)
     target = str(meta.get("target", "close"))
     wins, info = train_windows(job.series, job.horizon, job.ctx, job.seed,
@@ -31,7 +38,8 @@ def train(job: TrainJob) -> dict:
     inputs = [{"target": torch.tensor(np.r_[w[0], w[1]], dtype=torch.float32)}
               for w in wins]
 
-    pipe = Chronos2Pipeline.from_pretrained("amazon/chronos-2", device_map=job.device,
+    from tsfm4finance.bench.weights import resolve
+    pipe = Chronos2Pipeline.from_pretrained(resolve(_weights(job, spec)), device_map=job.device,
                                             dtype=torch.float32)
     steps = 2 if job.smoke else int(job.budget_kw()["steps"] or max(
         60, job.effective_epochs() * max(1, len(wins) // max(1, job.bs))))

@@ -24,6 +24,8 @@ Examples
 """
 from __future__ import annotations
 
+import os
+
 import argparse
 import json
 import subprocess
@@ -199,7 +201,7 @@ def stage_run(a) -> None:
     cmds = []
     for stage, env in product(stages, envs):
         for shard in range(a.n_shards):
-            cmds.append([sys.executable, "-m", "tsfm4finance.bench.cell_worker",
+            cmds.append([grid.interpreter(env), "-m", "tsfm4finance.bench.cell_worker",
                          "--stage", stage, "--env", env, "--shard", str(shard),
                          "--n-shards", str(a.n_shards), "--db", str(a.db),
                          "--device", a.device, "--amp", a.amp, "--batch", str(a.batch),
@@ -345,7 +347,11 @@ def main() -> None:
     ap.add_argument("--force", action="store_true", help="re-run terminal cells")
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("--tiers-list", action="store_true", help="print the model registry and exit")
+    ap.add_argument("--weights-root", default=os.environ.get("TSFM_WEIGHTS_ROOT", ""),
+                    help="directory holding git-cloned / hf-downloaded models")
     a = ap.parse_args()
+    if a.weights_root:
+        os.environ["TSFM_WEIGHTS_ROOT"] = a.weights_root
 
     if a.tiers_list:
         a.stage = a.stage or "status"

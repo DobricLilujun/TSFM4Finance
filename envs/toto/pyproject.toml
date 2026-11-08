@@ -1,0 +1,20 @@
+[project]
+name = "tsfm4finance-toto"
+version = "0.1.0"
+description = "Arena benchmark environment for the toto model family. toto-2 requires python>=3.12."
+requires-python = ">=3.12"
+dependencies = [
+    "torch==2.15.0",
+    "toto-2==2.0.0",
+    "gluonts==0.17.0",
+    "einops==0.8.2",
+    "numpy==2.5.4",
+    "pandas==2.3.3",
+    "pyarrow==26.0.1",
+    "datasets==5.1.0",
+    "torchmetrics==1.9.0",
+]
+
+[tool.uv]
+# library-style env: uv must not try to build/install this project itself
+package = false

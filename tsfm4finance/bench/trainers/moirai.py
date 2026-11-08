@@ -67,10 +67,11 @@ def train(job: TrainJob) -> dict:
 
 def _weights(job: TrainJob) -> str:
     from tsfm4finance.bench.config import load_grid
+    from tsfm4finance.bench.weights import resolve
     spec = load_grid().models().get(job.model_key)
     if spec is None or not spec.weights:
         raise KeyError(f"no weights configured for {job.model_key}")
-    return spec.weights
+    return resolve(spec.weights)
 
 
 def _batch(wins, bs, rng):

@@ -167,8 +167,9 @@ def finetune(train_close: np.ndarray, out_dir: str | Path, dataset: str = "",
     np.random.seed(seed)
 
     t0 = time.time()
+    from tsfm4finance.bench.weights import resolve as _resolve
     wrapper = timesfm.TimesFM_2p5_200M_torch.from_pretrained(
-        timesfm.TimesFM_2p5_200M_torch.DEFAULT_REPO_ID, torch_compile=False)
+        _resolve(timesfm.TimesFM_2p5_200M_torch.DEFAULT_REPO_ID), torch_compile=False)
     module = wrapper.model
     if device:
         module.to(device)

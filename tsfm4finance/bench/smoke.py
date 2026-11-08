@@ -16,6 +16,7 @@ import time
 import traceback
 from pathlib import Path
 
+import os
 import numpy as np
 
 from .config import load_grid
@@ -66,7 +67,11 @@ def main() -> None:
     ap.add_argument("--n", type=int, default=4)
     ap.add_argument("--device", default="cuda")
     ap.add_argument("--amp", default="fp32")
+    ap.add_argument("--weights-root", default=os.environ.get("TSFM_WEIGHTS_ROOT", ""),
+                    help="directory holding git-cloned / hf-downloaded models")
     a = ap.parse_args()
+    if a.weights_root:
+        os.environ["TSFM_WEIGHTS_ROOT"] = a.weights_root
 
     grid = load_grid()
     tiers = tuple(t.strip() for t in a.all_tiers.split(",") if t.strip()) or None

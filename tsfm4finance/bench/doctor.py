@@ -18,6 +18,7 @@ import time
 import traceback
 from pathlib import Path
 
+import os
 import numpy as np
 import pandas as pd
 
@@ -268,7 +269,11 @@ def main() -> None:
     ap.add_argument("--weights", action="store_true", help="also load weights and forecast")
     ap.add_argument("--device", default="cuda")
     ap.add_argument("--python", default=None, help="label recorded in the report")
+    ap.add_argument("--weights-root", default=os.environ.get("TSFM_WEIGHTS_ROOT", ""),
+                    help="directory holding git-cloned / hf-downloaded models")
     a = ap.parse_args()
+    if a.weights_root:
+        os.environ["TSFM_WEIGHTS_ROOT"] = a.weights_root
     import sys
     report = {"python": sys.version.split()[0], "device": a.device,
               "venv": a.python or str(Path(sys.executable).parent.parent.name),

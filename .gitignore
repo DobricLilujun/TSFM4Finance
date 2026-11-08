@@ -13,3 +13,9 @@ data/bis_raw/*.xml
 reports/*.log
 reports/ft_ckpts/
 reports/run*.log
+
+# locally cloned model weights (git-lfs; never commit)
+models/
+
+# offline HF-cache mirror built by bench.weights --link-into-cache
+.hf-cache/

@@ -1,0 +1,18 @@
+[project]
+name = "tsfm4finance-kronos"
+version = "0.1.0"
+description = "Arena benchmark environment for the kronos model family. Kronos K-line model; also needs third_party/Kronos for its trainer."
+requires-python = ">=3.11"
+dependencies = [
+    "torch==2.5.1",
+    "triton==3.1.0",
+    "einops==0.8.2",
+    "numpy==2.3.5",
+    "pandas==3.1.1",
+    "pyarrow==26.0.1",
+    "datasets==5.1.0",
+]
+
+[tool.uv]
+# library-style env: uv must not try to build/install this project itself
+package = false

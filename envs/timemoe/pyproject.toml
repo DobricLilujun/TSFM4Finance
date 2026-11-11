@@ -2,7 +2,7 @@
 name = "tsfm4finance-timemoe"
 version = "0.1.0"
 description = "Arena benchmark environment for the timemoe model family. Time-MoE remote code needs transformers==4.44 (fails on 4.46+/5.x)."
-requires-python = ">=3.11"
+requires-python = ">=3.11,<3.13"
 dependencies = [
     "torch==2.5.1",
     "triton==3.1.0",
@@ -12,6 +12,11 @@ dependencies = [
     "numpy==2.4.6",
     "pandas==3.1.1",
     "pyarrow==26.0.1",
+    "pydantic>=2.7",
+    "pyyaml>=6",
+    "requests>=2.31",
+    "tqdm>=4.66",
+    "pytest>=8",
 ]
 
 [tool.uv]

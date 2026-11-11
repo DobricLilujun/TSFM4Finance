@@ -2,7 +2,7 @@
 name = "tsfm4finance-tirex"
 version = "0.1.0"
 description = "Arena benchmark environment for the tirex model family. TiRex v1."
-requires-python = ">=3.11"
+requires-python = ">=3.11,<3.13"
 dependencies = [
     "torch==2.15.0",
     "tirex-ts==1.4.2",
@@ -10,6 +10,11 @@ dependencies = [
     "numpy==2.4.6",
     "pandas==3.1.1",
     "pyarrow==26.0.1",
+    "pydantic>=2.7",
+    "pyyaml>=6",
+    "requests>=2.31",
+    "tqdm>=4.66",
+    "pytest>=8",
 ]
 
 [tool.uv]

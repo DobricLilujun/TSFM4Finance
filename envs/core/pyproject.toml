@@ -2,7 +2,7 @@
 name = "tsfm4finance-core"
 version = "0.1.0"
 description = "Arena benchmark environment for the core model family. sweep driver + TimesFM 3.0 + Chronos + baselines."
-requires-python = ">=3.11"
+requires-python = ">=3.11,<3.13"
 dependencies = [
     "torch==2.11.0",
     "transformers==5.22.1",
@@ -17,6 +17,11 @@ dependencies = [
     "pmdarima==2.1.1",
     "scikit-learn==1.7.2",
     "scipy==1.17.1",
+    "pytest>=8",
+    "pydantic>=2.7",
+    "pyyaml>=6",
+    "requests>=2.31",
+    "tqdm>=4.66",
     "pytest>=8",
 ]
 

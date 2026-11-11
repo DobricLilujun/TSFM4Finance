@@ -2,7 +2,7 @@
 name = "tsfm4finance-ttm"
 version = "0.1.0"
 description = "Arena benchmark environment for the ttm model family. Granite TTM r2 + FlowState r1 (tsfm_public)."
-requires-python = ">=3.12"
+requires-python = ">=3.12,<3.13"
 dependencies = [
     "torch==2.11.0",
     "transformers==5.22.1",
@@ -13,6 +13,11 @@ dependencies = [
     "pyarrow==26.0.1",
     "einops==0.8.2",
     "statsmodels==0.15.0",
+    "pydantic>=2.7",
+    "pyyaml>=6",
+    "requests>=2.31",
+    "tqdm>=4.66",
+    "pytest>=8",
 ]
 
 [tool.uv]

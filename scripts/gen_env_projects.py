@@ -32,9 +32,11 @@ FAMILIES: dict[str, tuple[str, str, list[str], str]] = {
                "datasets==2.17.1", "einops==0.7.0", "torchmetrics==1.9.0", "scipy==1.11.4",
                "huggingface-hub<1.0"], "uni2ts pins torch<2.5"),
     "moment":  (".venv-moment", "3.11", ["torch==2.3.1", "triton==2.3.1", "momentfm==0.1.4",
-               "transformers==4.33.3", "huggingface-hub==0.36.2", "numpy==1.25.2",
-               "pandas==2.1.4", "pyarrow==15.0.2", "datasets==2.16.1", "scipy==1.16.3"],
-               "momentfm pins numpy==1.25.2; hub must stay <1.0"),
+               "transformers==4.33.3", "numpy>=1.25,<2", "pandas>=2.1,<3", "pyarrow>=15",
+               "datasets>=2.16,<3", "scipy>=1.11"],
+               "momentfm hard-pins huggingface-hub==0.24.0, so this env must not pin hub "
+               "or the numpy/pandas versions momentfm pulls (pinning hub==0.36.2 makes the "
+               "environment unsatisfiable); hub must stay <1.0 for its remote code"),
     "ttm":     (".venv-ttm", "3.12", ["torch==2.11.0", "transformers==5.22.1",
                "granite-tsfm==0.3.12", "datasets==5.1.0", "numpy==2.5.4", "pandas==3.1.1",
                "pyarrow==26.0.1", "einops==0.8.2", "statsmodels==0.15.0"],
@@ -59,6 +61,9 @@ FAMILIES: dict[str, tuple[str, str, list[str], str]] = {
 }
 
 
+COMMON = ["pydantic>=2.7", "pyyaml>=6", "requests>=2.31", "tqdm>=4.66", "pytest>=8"]
+
+
 def installed(venv: str) -> dict[str, str]:
     out = subprocess.run(["uv", "pip", "list", "--python", f"{venv}/bin/python"],
                          capture_output=True, text=True).stdout
@@ -72,14 +77,18 @@ def installed(venv: str) -> dict[str, str]:
 
 def main() -> None:
     for fam, (venv, py, pins, note) in FAMILIES.items():
+        # the watson cluster ships 3.12/3.13 and forbids uv python downloads
+        # (python-downloads = "never"); 3.13 is excluded because the older families'
+        # torch/triton pins have no cp313 wheels, so UV_PYTHON=3.12 picks 3.12.
+        lo = py.split(".")[1]
         d = REPO / "envs" / fam
         d.mkdir(parents=True, exist_ok=True)
-        deps = "\n".join(f'    "{p}",' for p in pins)
+        deps = "\n".join(f'    "{p}",' for p in pins + COMMON)
         (d / "pyproject.toml").write_text(f'''[project]
 name = "tsfm4finance-{fam}"
 version = "0.1.0"
 description = "Arena benchmark environment for the {fam} model family. {note}."
-requires-python = ">=3.{py.split('.')[1]}"
+requires-python = ">=3.{lo},<3.13"
 dependencies = [
 {deps}
 ]

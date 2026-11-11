@@ -2,7 +2,7 @@
 name = "tsfm4finance-toto"
 version = "0.1.0"
 description = "Arena benchmark environment for the toto model family. toto-2 requires python>=3.12."
-requires-python = ">=3.12"
+requires-python = ">=3.12,<3.13"
 dependencies = [
     "torch==2.15.0",
     "toto-2==2.0.0",
@@ -13,6 +13,11 @@ dependencies = [
     "pyarrow==26.0.1",
     "datasets==5.1.0",
     "torchmetrics==1.9.0",
+    "pydantic>=2.7",
+    "pyyaml>=6",
+    "requests>=2.31",
+    "tqdm>=4.66",
+    "pytest>=8",
 ]
 
 [tool.uv]

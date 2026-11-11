@@ -2,7 +2,7 @@
 name = "tsfm4finance-kronos"
 version = "0.1.0"
 description = "Arena benchmark environment for the kronos model family. Kronos K-line model; also needs third_party/Kronos for its trainer."
-requires-python = ">=3.11"
+requires-python = ">=3.11,<3.13"
 dependencies = [
     "torch==2.5.1",
     "triton==3.1.0",
@@ -11,6 +11,11 @@ dependencies = [
     "pandas==3.1.1",
     "pyarrow==26.0.1",
     "datasets==5.1.0",
+    "pydantic>=2.7",
+    "pyyaml>=6",
+    "requests>=2.31",
+    "tqdm>=4.66",
+    "pytest>=8",
 ]
 
 [tool.uv]

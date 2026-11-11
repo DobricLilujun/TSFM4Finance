@@ -2,7 +2,7 @@
 name = "tsfm4finance-legacy"
 version = "0.1.0"
 description = "Arena benchmark environment for the legacy model family. TimesFM 2.5-200M: the env that produced the published §4.4 numbers."
-requires-python = ">=3.11"
+requires-python = ">=3.11,<3.13"
 dependencies = [
     "torch==2.13.0",
     "transformers==5.15.0",
@@ -15,6 +15,11 @@ dependencies = [
     "pmdarima==2.1.1",
     "scikit-learn==1.9.0",
     "scipy==1.17.1",
+    "pydantic>=2.7",
+    "pyyaml>=6",
+    "requests>=2.31",
+    "tqdm>=4.66",
+    "pytest>=8",
 ]
 
 [tool.uv]

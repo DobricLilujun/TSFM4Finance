@@ -2,7 +2,7 @@
 name = "tsfm4finance-tirex2"
 version = "0.1.0"
 description = "Arena benchmark environment for the tirex2 model family. IMPORTANT: mlstm_kernels/flashrnn use tl.make_block_ptr, removed in Triton 3.9 - keep triton<3.6 (local torch 2.15/triton 3.9 cannot run them)."
-requires-python = ">=3.12"
+requires-python = ">=3.12,<3.13"
 dependencies = [
     "torch==2.7.1",
     "triton==3.3.1",
@@ -15,6 +15,11 @@ dependencies = [
     "pandas==2.3.3",
     "pyarrow==26.0.1",
     "datasets==5.1.0",
+    "pydantic>=2.7",
+    "pyyaml>=6",
+    "requests>=2.31",
+    "tqdm>=4.66",
+    "pytest>=8",
 ]
 
 [tool.uv]

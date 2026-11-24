@@ -1,0 +1,34 @@
+{
+ "generated": "2026-11-17 20:25:32",
+ "python": "3.11.15",
+ "machine": "ubadmin-Precision-3591",
+ "n": 1,
+ "rows": [
+  {
+   "model": "moment-1-large",
+   "family": "moment",
+   "tier": "A",
+   "env": "moment",
+   "weights": "AutonLab/MOMENT-1-large",
+   "license": "mit",
+   "weights_present": true,
+   "load": "ok",
+   "predict": "skip",
+   "quantiles": "skip",
+   "embed": "skip",
+   "finetune": "skip",
+   "ft_loss_first": NaN,
+   "ft_loss_last": NaN,
+   "ft_params": 0,
+   "classify": "skip",
+   "clf_metrics": {},
+   "anomaly": "skip",
+   "reward": "ok",
+   "seconds": 6.1,
+   "reasons": {},
+   "machine": "ubadmin-Precision-3591/x86_64",
+   "python": "3.11.15",
+   "device": "cuda"
+  }
+ ]
+}

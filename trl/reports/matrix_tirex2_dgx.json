@@ -1,0 +1,49 @@
+{
+ "generated": "2026-11-21 13:09:12",
+ "python": "3.12.14",
+ "machine": "gpu7",
+ "n": 1,
+ "rows": [
+  {
+   "model": "tirex-2",
+   "family": "tirex2",
+   "tier": "B",
+   "env": "tirex2",
+   "weights": "NX-AI/TiRex-2",
+   "license": "apache-2.0",
+   "weights_present": true,
+   "load": "ok",
+   "predict": "fail",
+   "quantiles": "skip",
+   "embed": "fail",
+   "finetune": "skip",
+   "ft_loss_first": NaN,
+   "ft_loss_last": NaN,
+   "ft_params": 0,
+   "classify": "fail",
+   "clf_metrics": {
+    "routes": {
+     "probe": "fail",
+     "head": "fail",
+     "native": "n/a"
+    }
+   },
+   "anomaly": "n/a",
+   "reward": "skip",
+   "reward_mode": "",
+   "reward_early": NaN,
+   "reward_late": NaN,
+   "seconds": 46.1,
+   "reasons": {
+    "predict": "RuntimeError: tirex-2 Triton kernels failed to compile (CompilationError: at 85:21:\n        # each thread block loads the scaMinter_initial\n        scaMinterinitial_ptr = scaMinter_initial + idx_b_BNH * str_scaMinterinitial_B_NH\n\n        # load initial states\n        matC_k); the native fallback nee",
+    "embed": "RuntimeError: tirex-2 Triton kernels failed to compile (CompilationError: at 85:21:\n        # each thread block loads the scaMinter_initial\n        scaMinterinitial_ptr = scaMinter_initial + idx_b_BNH",
+    "classify:probe": "RuntimeError: tirex-2 Triton kernels failed to compile (CompilationError: at 85:21:\n        # each thread block loads the scaMinter_initial\n        scaMinterinitial_ptr = scaMinter_initial + idx_b_BNH",
+    "classify:head": "RuntimeError: tirex-2 Triton kernels failed to compile (CompilationError: at 85:21:\n        # each thread block loads the scaMinter_initial\n        scaMinterinitial_ptr = scaMinter_initial + idx_b_BNH",
+    "anomaly": "RuntimeError: tirex-2 Triton kernels failed to compile (CompilationError: at 85:21:\n        # each thread block loads the scaMinter_initial\n        scaMinterinitial_ptr = scaMinter_initial + idx_b_BNH"
+   },
+   "machine": "gpu7/aarch64",
+   "python": "3.12.14",
+   "device": "cuda"
+  }
+ ]
+}

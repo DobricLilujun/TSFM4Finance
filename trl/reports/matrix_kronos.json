@@ -1,0 +1,37 @@
+{
+ "generated": "2026-11-17 20:27:27",
+ "python": "3.11.15",
+ "machine": "ubadmin-Precision-3591",
+ "n": 1,
+ "rows": [
+  {
+   "model": "kronos-small",
+   "family": "kronos",
+   "tier": "A",
+   "env": "kronos",
+   "weights": "NeoQuasar/Kronos-small",
+   "license": "mit",
+   "weights_present": true,
+   "load": "ok",
+   "predict": "bad-shape (4, 16, 6)",
+   "quantiles": "none",
+   "embed": "skip",
+   "finetune": "prepared",
+   "ft_loss_first": NaN,
+   "ft_loss_last": NaN,
+   "ft_params": 0,
+   "classify": "fail",
+   "clf_metrics": {},
+   "anomaly": "skip",
+   "reward": "skip",
+   "seconds": 8.5,
+   "reasons": {
+    "finetune": "vendor fine-tune prepared but not run (pass extra={'run_training': True}); CSV at reports/ft_smoke/kronos-small__kronos/train.csv",
+    "classify": "CapabilityError: kronos-small: no 'panel_in' support (Kronos needs OHLCV panels (pass panels=[DataFrame, ...]))"
+   },
+   "machine": "ubadmin-Precision-3591/x86_64",
+   "python": "3.11.15",
+   "device": "cuda"
+  }
+ ]
+}

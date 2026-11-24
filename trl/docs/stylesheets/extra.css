@@ -1,0 +1,20 @@
+/* The compatibility matrix is ~13 columns wide. Material's content column is narrow and
+   tables do not scroll by default, so the matrix used to be squeezed into unreadable
+   40 px columns. Make wide tables scroll instead, and give the page more room on wide
+   screens. */
+.md-content__inner table {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+@media (min-width: 1400px) {
+  /* a 46-row x 13-column table is the reason this page exists: give it the width */
+  .md-content__inner table { white-space: normal; }
+  .md-grid { max-width: 76rem; }
+  .md-sidebar--secondary { margin-left: 1rem; }
+}
+
+.md-content__inner h2 { margin-top: 2.2em; }
+.md-content__inner .highlight { margin: 1em 0; }

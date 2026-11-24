@@ -1,0 +1,61 @@
+{
+ "model": "flowstate-r1",
+ "seeds": 3,
+ "runs": [
+  {
+   "status": "ok",
+   "mode": "reward_descent",
+   "steps": 96,
+   "reward_first": 0.32016,
+   "reward_last": -0.14549,
+   "reward_early_mean": -1.26002,
+   "reward_late_mean": -1.03718,
+   "improved": true,
+   "fallbacks": [],
+   "mean_loss": 0.145486,
+   "reason": "",
+   "trainable_parameters": 1181952,
+   "checkpoint": "reports/ft/flowstate-r1__reward_descent__fs64__flowstate-r1.pt",
+   "seed": 0
+  },
+  {
+   "status": "ok",
+   "mode": "reward_descent",
+   "steps": 96,
+   "reward_first": -1.03897,
+   "reward_last": 0.30657,
+   "reward_early_mean": -1.51587,
+   "reward_late_mean": -1.13375,
+   "improved": true,
+   "fallbacks": [],
+   "mean_loss": -0.306569,
+   "reason": "",
+   "trainable_parameters": 1181952,
+   "checkpoint": "reports/ft/flowstate-r1__reward_descent__fs64__flowstate-r1.pt",
+   "seed": 1
+  },
+  {
+   "status": "ok",
+   "mode": "reward_descent",
+   "steps": 96,
+   "reward_first": -1.2818,
+   "reward_last": -1.80679,
+   "reward_early_mean": -1.75843,
+   "reward_late_mean": -1.0861,
+   "improved": true,
+   "fallbacks": [],
+   "mean_loss": 1.806788,
+   "reason": "",
+   "trainable_parameters": 1181952,
+   "checkpoint": "reports/ft/flowstate-r1__reward_descent__fs64__flowstate-r1.pt",
+   "seed": 2
+  }
+ ],
+ "delta_mean": 0.42576,
+ "delta_sd": 0.2279,
+ "n_improved": 3,
+ "modes": [
+  "reward_descent"
+ ],
+ "verdict": "late-minus-early reward +0.4258 \u00b1 0.2279 over 3 seeds; 3/3 seeds improved"
+}

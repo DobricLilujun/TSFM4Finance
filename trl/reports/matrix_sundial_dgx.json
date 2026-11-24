@@ -1,0 +1,53 @@
+{
+ "generated": "2026-11-18 18:21:42",
+ "python": "3.11.14",
+ "machine": "gpu7",
+ "n": 1,
+ "rows": [
+  {
+   "model": "sundial-base-128m",
+   "family": "sundial",
+   "tier": "A",
+   "env": "sundial",
+   "weights": "thuml/sundial-base-128m",
+   "license": "apache-2.0",
+   "weights_present": true,
+   "load": "ok",
+   "predict": "ok",
+   "quantiles": "ok",
+   "embed": "skip",
+   "finetune": "skip",
+   "ft_loss_first": NaN,
+   "ft_loss_last": NaN,
+   "ft_params": 0,
+   "classify": "ok",
+   "clf_metrics": {
+    "pr_auc": 0.4527,
+    "roc_auc": 0.5038,
+    "accuracy": 0.5,
+    "macro_f1": 0.2222,
+    "f1_beta2": 0.2778,
+    "precision": 0.1667,
+    "recall": 0.3333,
+    "n": 66,
+    "n_classes": 3,
+    "base_rate": 0.5,
+    "auc_roc": 0.5038,
+    "routes": {
+     "probe": "ok",
+     "head": "ok",
+     "native": "n/a"
+    }
+   },
+   "anomaly": "ok",
+   "reward": "skip",
+   "seconds": 12.8,
+   "reasons": {
+    "reward": "sundial-base-128m: no 'finetune' support (adapter exposes no trainable module)"
+   },
+   "machine": "gpu7/aarch64",
+   "python": "3.11.14",
+   "device": "cuda"
+  }
+ ]
+}

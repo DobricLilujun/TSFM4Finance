@@ -1,0 +1,2 @@
+# documentation site only (pip install -r requirements-docs.txt)
+mkdocs-material>=9.5

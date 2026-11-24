@@ -1,0 +1,10 @@
+/raid/yewei/projects_yewei/TSFM4Finance/assets/data/standard/std_equity_1d_10104
+/raid/yewei/projects_yewei/TSFM4Finance/assets/data/standard/std_equity_1d_11308
+/raid/yewei/projects_yewei/TSFM4Finance/assets/data/standard/std_fi_1d_uk_10y
+/raid/yewei/projects_yewei/TSFM4Finance/assets/data/standard/std_fi_1d_uk_2y
+/raid/yewei/projects_yewei/TSFM4Finance/assets/data/standard/std_fx_1d_audjpy
+/raid/yewei/projects_yewei/TSFM4Finance/assets/data/standard/std_fx_1d_eurchf
+/raid/yewei/projects_yewei/TSFM4Finance/assets/data/standard/std_fx_1h_eurusd
+/raid/yewei/projects_yewei/TSFM4Finance/assets/data/standard/std_fx_1h_gbpusd
+/raid/yewei/projects_yewei/TSFM4Finance/assets/data/standard/std_fx_1d_audusd
+/raid/yewei/projects_yewei/TSFM4Finance/assets/data/open/sp500_daily

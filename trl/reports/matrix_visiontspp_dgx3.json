@@ -1,0 +1,46 @@
+{
+ "generated": "2026-11-21 16:33:47",
+ "python": "3.11.14",
+ "machine": "gpu7",
+ "n": 1,
+ "rows": [
+  {
+   "model": "visiontspp-base",
+   "family": "visionts",
+   "tier": "C",
+   "env": "new",
+   "weights": "Lefei/VisionTSpp",
+   "license": "mit",
+   "weights_present": false,
+   "load": "fail",
+   "predict": "skip",
+   "quantiles": "skip",
+   "embed": "skip",
+   "finetune": "skip",
+   "ft_loss_first": NaN,
+   "ft_loss_last": NaN,
+   "ft_params": 0,
+   "classify": "skip",
+   "clf_metrics": {},
+   "anomaly": "skip",
+   "reward": "skip",
+   "reward_mode": "",
+   "reward_early": NaN,
+   "reward_late": NaN,
+   "seconds": 1.3725438117980957,
+   "reasons": {
+    "load": "UnavailableError: visiontspp-base: UnavailableError: visiontspp-base: VisionTS++ needs the upstream package (the Hub repo ships .ckpt weights only): No module named 'visiontspp'  [install: git clone the VisionTS/VisionTS++ upstream, then weights=/path/to/visiontspp_base.ckpt. clone it and point the ",
+    "predict": "not attempted: the model did not load",
+    "quantiles": "not attempted: the model did not load",
+    "embed": "not attempted: the model did not load",
+    "classify": "not attempted: the model did not load",
+    "anomaly": "not attempted: the model did not load",
+    "finetune": "not attempted: the model did not load",
+    "reward": "not attempted: the model did not load"
+   },
+   "machine": "gpu7/aarch64",
+   "python": "3.11.14",
+   "device": "auto"
+  }
+ ]
+}

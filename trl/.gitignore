@@ -1,0 +1,25 @@
+# environments live here, not in git (envs.toml + locks + local.json are tracked)
+envs/*/
+!envs/*.txt
+# matrix and training artifacts: regenerate with `tsfm-trl doctor`
+reports/ft/
+reports/ft_smoke/
+reports/ft_examples/
+*.pt
+*.safetensors
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+.venv*/
+.cache/
+-
+reports/check_matrix.json
+
+# docs site build
+site/
+docs/matrix.md
+.venv-docs/
+envs/local.json
+docs/effectiveness.md

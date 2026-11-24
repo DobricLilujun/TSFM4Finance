@@ -1,0 +1,13 @@
+{
+  "core": "/path/to/.venv-core/bin/python",
+  "moirai": "/home/ubadmin/projects/TSFM4Finance/.venv-moirai/bin/python",
+  "moment": "/home/ubadmin/projects/TSFM4Finance/.venv-moment/bin/python",
+  "tirex": "/home/ubadmin/projects/TSFM4Finance/.venv-tirex/bin/python",
+  "tirex2": "/home/ubadmin/projects/TSFM4Finance/.venv-tirex2/bin/python",
+  "timemoe": "/home/ubadmin/projects/TSFM4Finance/.venv-timemoe/bin/python",
+  "kronos": "/home/ubadmin/projects/TSFM4Finance/.venv-kronos/bin/python",
+  "timesfm20": "/home/ubadmin/projects/tsfm-trl/envs/timesfm20/bin/python",
+  "new": "/path/to/.venv-core/bin/python",
+  "vendor": "/home/ubadmin/projects/TSFM4Finance/.venv-vendor/bin/python",
+  "toto": "/home/ubadmin/projects/TSFM4Finance/.venv-toto/bin/python"
+}

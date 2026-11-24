@@ -1,0 +1,50 @@
+{
+ "generated": "2026-11-21 16:26:32",
+ "python": "3.12.14",
+ "machine": "gpu7",
+ "n": 1,
+ "rows": [
+  {
+   "model": "tirex-2",
+   "family": "tirex2",
+   "tier": "B",
+   "env": "tirex2",
+   "weights": "NX-AI/TiRex-2",
+   "license": "apache-2.0",
+   "weights_present": true,
+   "load": "ok",
+   "predict": "fail",
+   "quantiles": "skip",
+   "embed": "skip",
+   "finetune": "skipped",
+   "ft_loss_first": NaN,
+   "ft_loss_last": NaN,
+   "ft_params": 0,
+   "classify": "fail",
+   "clf_metrics": {
+    "routes": {
+     "probe": "fail",
+     "head": "fail",
+     "native": "n/a"
+    }
+   },
+   "anomaly": "n/a",
+   "reward": "skipped",
+   "reward_mode": "",
+   "reward_early": NaN,
+   "reward_late": NaN,
+   "seconds": 57.7,
+   "reasons": {
+    "predict": "RuntimeError: tirex-2 Triton kernels failed to compile (CompilationError: at 85:21:\n        # each thread block loads the scaMinter_initial\n        scaMinterinitial_ptr = scaMinter_initial + idx_b_BNH * str_scaMinterinitial_B_NH\n\n        # load initial states\n        matC_k); the native fallback nee",
+    "finetune": "tirex2: no trainable module and no loss_kind in the installed package (nothing to fine-tune)",
+    "classify:probe": "RuntimeError: tirex-2 Triton kernels failed to compile (CompilationError: at 85:21:\n        # each thread block loads the scaMinter_initial\n        scaMinterinitial_ptr = scaMinter_initial + idx_b_BNH",
+    "classify:head": "RuntimeError: tirex-2 Triton kernels failed to compile (CompilationError: at 85:21:\n        # each thread block loads the scaMinter_initial\n        scaMinterinitial_ptr = scaMinter_initial + idx_b_BNH",
+    "anomaly": "RuntimeError: tirex-2 Triton kernels failed to compile (CompilationError: at 85:21:\n        # each thread block loads the scaMinter_initial\n        scaMinterinitial_ptr = scaMinter_initial + idx_b_BNH",
+    "reward": "tirex-2: no 'finetune' support (adapter exposes no trainable module)"
+   },
+   "machine": "gpu7/aarch64",
+   "python": "3.12.14",
+   "device": "cuda"
+  }
+ ]
+}

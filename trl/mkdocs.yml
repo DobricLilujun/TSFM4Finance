@@ -1,0 +1,77 @@
+# tsfm-trl documentation site (GitHub Pages).
+#
+# The site is a *view* of the repo's markdown, not a second copy of it: every page in
+# nav is a file that also lives in the working tree, and `docs/matrix.md` is generated
+# from the machine-readable matrix before each build (scripts/build_docs.sh).
+site_name: tsfm-trl
+site_description: Time-series foundation models behind one API — a benchmark and compatibility harness
+site_author: tsfm-trl maintainers
+
+docs_dir: docs
+site_dir: site
+strict: true
+
+theme:
+  name: material
+  features:
+    - navigation.sections
+    - navigation.top
+    - navigation.footer
+    - toc.follow
+    - content.code.copy
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to dark
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/weather-night
+        name: Switch to light
+  font: false                          # no Google Fonts: an offline build must work
+
+extra:
+  generator: false
+
+extra_css:
+  - stylesheets/extra.css
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.tilde
+
+plugins:
+  - search:
+      separator: '[\s\-_,/.]+'
+
+nav:
+  - Home: index.md
+  - Install: 01_install.md
+  - Benchmark:
+      - Benchmark protocol: 09_benchmark.md
+      - Compatibility matrix tool: 06_matrix.md
+      - Measured matrix: matrix.md
+      - Measured effectiveness: effectiveness.md
+  - Forecasting: 02_forecast.md
+  - TRL — post-training:
+      - RL / reward API: 10_trl_api.md
+      - Reward & RL paths: 05_reward_rl.md
+      - Fine-tune (capability gate): 03_fine_tune.md
+      - Classification & probing: 04_classify_probing.md
+  - Finance tasks: 07_finance_tasks.md
+  - Known issues: 08_known_issues.md

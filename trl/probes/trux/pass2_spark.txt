@@ -1,0 +1,6 @@
+/raid/yewei/projects_yewei/TSFM4Finance/assets/data/standard/std_equity_1d_10107
+/raid/yewei/projects_yewei/TSFM4Finance/assets/data/standard/std_equity_1d_11850
+/raid/yewei/projects_yewei/TSFM4Finance/assets/data/standard/std_fi_1d_uk_20y
+/raid/yewei/projects_yewei/TSFM4Finance/assets/data/standard/std_fx_1d_euraud
+/raid/yewei/projects_yewei/TSFM4Finance/assets/data/standard/std_fx_1h_eurchf
+/raid/yewei/projects_yewei/TSFM4Finance/assets/data/open/btc_crypto

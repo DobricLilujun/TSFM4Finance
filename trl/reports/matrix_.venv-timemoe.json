@@ -1,0 +1,39 @@
+{
+ "generated": "2026-11-17 20:30:35",
+ "python": "3.11.15",
+ "machine": "ubadmin-Precision-3591",
+ "n": 1,
+ "rows": [
+  {
+   "model": "timemoe-50m",
+   "family": "timemoe",
+   "tier": "A",
+   "env": "new",
+   "weights": "Maple728/TimeMoE-50M",
+   "license": "apache-2.0",
+   "weights_present": true,
+   "load": "ok",
+   "predict": "fail",
+   "quantiles": "skip",
+   "embed": "skip",
+   "finetune": "ok",
+   "ft_loss_first": 0.060277,
+   "ft_loss_last": 0.076158,
+   "ft_params": 113352192,
+   "classify": "fail",
+   "clf_metrics": {},
+   "anomaly": "n/a",
+   "reward": "failed",
+   "seconds": 4.2,
+   "reasons": {
+    "predict": "AttributeError: 'str' object has no attribute 'shape'",
+    "classify": "AttributeError: 'str' object has no attribute 'shape'",
+    "anomaly": "AttributeError: 'str' object has no attribute 'shape'",
+    "reward": "AttributeError: 'str' object has no attribute 'shape'"
+   },
+   "machine": "ubadmin-Precision-3591/x86_64",
+   "python": "3.11.15",
+   "device": "cuda"
+  }
+ ]
+}

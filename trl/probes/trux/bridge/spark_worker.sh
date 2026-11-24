@@ -1,0 +1,58 @@
+#!/usr/bin/env bash
+# Run this ON THE SPARK (gpu7). It is the only side that can dial trux, so the worker
+# pulls its command from trux and pushes results back. Nothing listens on the Spark.
+#
+#   BRIDGE_SSH='ssh -i ~/.ssh/id_ed25519_gm_transfer' BRIDGE_USER=yewei \
+#   BRIDGE_HOST=trux-tsubame.uni.lux BRIDGE_DIR=/raid/yewei/spark_bridge \
+#   nohup ./spark_worker.sh > ~/spark_worker.log 2>&1 &
+#
+# One job at a time, sequence-numbered, with a heartbeat that carries this machine's
+# environment — cross-machine rows are only meaningful with that context attached.
+set -u
+BRIDGE_SSH=${BRIDGE_SSH:-"ssh -i $HOME/.ssh/id_ed25519_gm_transfer -o StrictHostKeyChecking=accept-new"}
+BRIDGE_USER=${BRIDGE_USER:-yewei}
+BRIDGE_HOST=${BRIDGE_HOST:-trux-tsubame.uni.lux}
+BRIDGE_DIR=${BRIDGE_DIR:-/raid/yewei/spark_bridge}
+POLL=${POLL:-60}
+TRANSPORT=${TRANSPORT:-remote}
+LOCAL=${LOCAL:-$HOME/spark_bridge}
+# TRANSPORT=local exists for testing the control plane on one machine; the real worker
+# uses ssh/rsync and is the only side that can dial trux. Both the transport AND the
+# path prefix have to switch — leaving `user@host:` on a local rsync silently does
+# nothing, which is how a worker looks alive while never transferring a byte.
+RS() { if [ "${TRANSPORT:-remote}" = local ]; then rsync -a "$@"; else rsync -e "$BRIDGE_SSH" -a "$@"; fi; }
+RDEST() { if [ "${TRANSPORT:-remote}" = local ]; then printf '%s' "$BRIDGE_DIR/$1";
+          else printf '%s' "$BRIDGE_USER@$BRIDGE_HOST:$BRIDGE_DIR/$1"; fi; }
+mkdir -p "$LOCAL/inbox" "$LOCAL/outbox/results"
+beat() {                                   # machine facts = provenance, not decoration
+  { echo "host=$(hostname)"; echo "arch=$(uname -m)"; echo "when=$(date -u +%FT%TZ)";
+    [ -d "${REPO:-$HOME/tsfm-trl}/.git" ] && echo "code_sha=$(git -C "$REPO" rev-parse HEAD)"
+    echo "gpu_free=$(nvidia-smi --query-gpu=memory.free --format=csv,noheader,nounits 2>/dev/null | tr '\n' ',')"
+    [ -n "${PY:-}" ] && "$PY" -c 'import torch;print("torch",torch.__version__,"cuda",torch.cuda.is_available())' 2>/dev/null
+  } > "$LOCAL/outbox/heartbeat" 2>/dev/null
+  RS "$LOCAL/outbox/heartbeat" "$(RDEST outbox)/" 2>/dev/null
+}
+echo "worker up: $BRIDGE_USER@$BRIDGE_HOST:$BRIDGE_DIR poll=${POLL}s"
+while :; do
+  RS "$(RDEST inbox)/" "$LOCAL/inbox/" 2>/dev/null
+  # learn which jobs already have a log: trux keeps the job file in inbox until it
+  # reaps it, and rsync will hand it back to us on every poll. Without this check the
+  # same job runs forever.
+  RS "$(RDEST outbox)/" "$LOCAL/outbox/" 2>/dev/null
+  job=""
+  for cand in $(ls -1 "$LOCAL/inbox"/*.sh 2>/dev/null | grep -v '\.done\.sh$' | sort); do
+    if [ ! -f "$LOCAL/outbox/$(basename "$cand").log" ]; then job=$cand; break; fi
+  done
+  if [ -n "$job" ]; then
+    name=$(basename "$job"); stamp=$(date -u +%FT%TZ)
+    echo "running $name at $stamp"
+    # the log goes next to the job name so trux can tell a failure from an idle worker
+    bash "$job" > "$LOCAL/outbox/$name.log" 2>&1; rc=$?
+    mv "$job" "${job%.sh}.done.sh"
+    RS "$LOCAL/outbox/" "$(RDEST outbox)/" 2>/dev/null
+    RS "$LOCAL/inbox/" "$(RDEST inbox)/" 2>/dev/null
+    echo "$name rc=$rc at $stamp"
+  fi
+  beat
+  sleep "$POLL"
+done

@@ -31,3 +31,7 @@ trl/.venv*/
 trl/.pytest_cache/
 trl/.ruff_cache/
 trl/*.egg-info/
+
+# flattened CSVs are regenerable with probes/trux/series_to_csv.py; the MANIFEST stays in git
+trl/reports/*/series_csv/*
+!trl/reports/*/series_csv/MANIFEST.json

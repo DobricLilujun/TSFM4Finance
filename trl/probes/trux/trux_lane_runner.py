@@ -24,8 +24,8 @@ device-guard logic can be checked before the code has even arrived.
 
 Usage:
     trux_lane_runner.py --series-file sweep_stratified.txt --dry-run
-    trux_lane_runner.py --series-file sweep_stratified.txt --horizons 21,63,126 \
-        --windows 12 --out-dir reports/trux_pass2
+    trux_lane_runner.py --series-file pass2_trux.txt --horizons 21,63,126 \
+        --max-windows 12 --out-dir reports/trux_pass2
 """
 from __future__ import annotations
 
@@ -135,7 +135,11 @@ def main() -> int:
     ap.add_argument("--lanes", default="cuda-a,cuda-b,cpu",
                     help="lane names; devices are resolved by free memory at start")
     ap.add_argument("--horizons", default="21,63,126")
-    ap.add_argument("--windows", type=int, default=12)
+    ap.add_argument("--max-windows", dest="max_windows", type=int, default=12)
+    ap.add_argument("--models", default="",
+                    help="comma-separated registry keys; empty = every model the "
+                         "sweep knows about (models whose family env is missing are "
+                         "recorded as skips, never silently run in core)")
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--sweep-arg", action="append", default=[],
                     help="extra argument passed verbatim to sweep_evaluate.py "
@@ -149,17 +153,21 @@ def main() -> int:
 
     series_paths = [l.strip() for l in Path(a.series_file).read_text().splitlines()
                     if l.strip() and not l.startswith("#")]
-    missing = [p for p in series_paths if not Path(p).is_dir()]
+    # a series is either a corpus directory (parquet splits) or a flattened CSV produced by
+    # probes/trux/series_to_csv.py; both are legitimate inputs to sweep_evaluate.py
+    missing = [p for p in series_paths if not Path(p).exists()]
     if missing:
-        print(f"ERROR: {len(missing)} series dirs missing, e.g. {missing[:3]}",
+        print(f"ERROR: {len(missing)} series inputs missing, e.g. {missing[:3]}",
               file=sys.stderr)
         return 2
 
     # cost proxy; see plan_lanes
     weighted = []
     for p in series_paths:
+        f = Path(p)
         try:
-            weighted.append((p, max((Path(p) / "train.parquet").stat().st_size // 40, 1)))
+            size = f.stat().st_size if f.is_file() else (f / "train.parquet").stat().st_size
+            weighted.append((p, max(size // 40, 1)))
         except OSError:
             weighted.append((p, 1000))
 
@@ -217,7 +225,7 @@ def main() -> int:
     (out_dir / "plan.json").write_text(json.dumps({
         "when": dt.datetime.now(dt.timezone.utc).isoformat(),
         "series_file": str(a.series_file), "series": len(series_paths),
-        "horizons": a.horizons, "windows": a.windows, "seed": a.seed,
+        "horizons": a.horizons, "max_windows": a.max_windows, "seed": a.seed,
         "lanes": assign, "buckets": {n: b for n, b in zip(lanes, buckets)},
         "gpus_at_plan": gpus, "core_env_torch": probe,
         "min_free_mib": a.min_free_mib,
@@ -241,9 +249,17 @@ def main() -> int:
             env.pop("CUDA_VISIBLE_DEVICES", None)
             env["OMP_NUM_THREADS"] = "16"
         cmd = [str(env_core / "bin" / "python"), str(sweep),
-               "--horizons", a.horizons, "--windows", str(a.windows),
+               "--horizons", a.horizons, "--max-windows", str(a.max_windows),
                "--seed", str(a.seed), "--device", assign[name]["device"],
-               "--out", str(jsonl)] + list(a.sweep_arg) + [str(p) for p in todo]
+               "--out", str(jsonl)] + list(a.sweep_arg)
+        if a.models:
+            cmd += ["--models", a.models]
+        # verified against `sweep_evaluate.py --help`: --series is a repeatable option,
+        # not a positional list. A positional call fails at launch, which is cheap, but
+        # an option renamed since the flag list was written would be worse, so the
+        # contract test mirrors the real interface.
+        for p in todo:
+            cmd += ["--series", str(p)]
         if a.dry_run:
             print(f"  [{name}] CUDA_VISIBLE_DEVICES={env.get('CUDA_VISIBLE_DEVICES')!r} "
                   + " ".join(cmd[:6]) + f" ... {len(todo)} series args")

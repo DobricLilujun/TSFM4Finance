@@ -374,3 +374,54 @@ like a model or harness failure and is neither. Two mitigations are now in the t
 The lesson generalises: **a benchmark row is its environment.** A CPU row and a GPU row for
 the same model are different experiments, and "it ran" is not evidence about which one you
 got.
+
+## Sixth pass: moving the harness onto other machines
+
+The same code went to trux (2× RTX 6000 Ada) and watson (SLURM, A6000). What broke was not
+the models; it was the boundary between "a machine that has this project" and "a machine
+that has the right *environments*".
+
+**A recorded skip is sticky.** On watson the first run had no `envs/local.json`, so all 16
+models were written as env-skips — the resolver refusing to run a family in a foreign
+interpreter, exactly as designed. After writing the mapping, the next run printed
+`0 ok / 0 failed / 0 env-skipped`, which reads like a working sweep: the models already
+appear in the incremental JSONL, so resume treats them as done. Fixing the environment is
+not enough — the log needs `--fresh`. The merge rule ("rows beat errors") hides the
+symptom in a report, not the trap at launch.
+
+**Seven of twelve lock files do not re-resolve** (`core`, `moment`, `new`, `timemoe`,
+`tirex2`, `toto`, `ttm`): `uv` proves the frozen set contradicts itself, e.g. `gluonts`
+wants `pandas<2.2` while the freeze pins `2.3.3`. Those freezes were taken from layered
+installs, so they are a *record* of what worked, not a recipe a solver can reproduce.
+`uv pip install --no-deps -r <lock>` reinstalls exactly the recorded set; a solver-driven
+install does not. `core.lock.txt` also carries no `torch` pin by design (torch is
+platform-specific and installed separately), which surprises anyone expecting one command
+to rebuild an env. Related drift: `envs.toml` notes `transformers==4.57.6` for core while
+the committed lock pins `5.22.1` — the lock records a *later*, drifted env, not the one
+that produced the published matrix.
+
+**A plausible command line is not the real one.** The lane runner had been written against
+a remembered CLI: `--windows` and positional series do not exist (`--max-windows`,
+repeatable `--series`). It died at launch, which is the cheap way to find out. Now
+`probes/trux/selftest/` keeps a stub whose argparse mirrors `sweep_evaluate.py --help`, so
+an interface drift fails a 1-second test instead of a 12-hour sweep. Note that the real CLI
+inherits argparse prefix matching, so a typo like `--windows=3` is *silently accepted* as
+`--max-windows=3`; the stub forbids abbreviations so a runner cannot lean on that hazard.
+
+**Flattening the corpus needs a rule, not a shrug.** The corpus stores parquet splits, the
+sweep documents `timestamp,close` CSVs. Flattening found 19 series whose splits share
+timestamps — always *across* splits, never within one, which is lookback context reuse.
+But `open/sp500_daily`'s train range runs *past* its validation range, with validation
+entirely inside train. Zero-shot rows sliding over the whole series are unaffected;
+calling those splits held-out data is wrong. The converter now records overlap kind and
+range per series, and refuses to flatten a timestamp that carries *different* values.
+
+**A green cell can still be an untrained head.** MOMENT's released checkpoint contains one
+head — `head.linear` (8, d_model), reconstruction. Asking for `task_name="forecasting"`
+loads that head unchanged (transformers reports "0 missing keys" because the new head has
+different *shapes*), and the `init()` the model card tells you to call replaces it with a
+randomly initialised one. The compatibility matrix therefore shows a pass; the benchmark
+rows say what ran — MASE 7.0–19.6 where a naive forecast gets 2.1–8.4, `large` within ~1 of
+`small`. Rows now carry `head_from_checkpoint` and `head_trained_here`, and the report
+lists flagged models under "Flagged: the scored head was never trained" while keeping the
+numbers.

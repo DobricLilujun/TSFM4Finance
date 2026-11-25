@@ -391,6 +391,25 @@ def report(args) -> int:
                 "These models consume a covariate panel; the close-only series cannot "
                 "score them at all, so their absence from a table is about the dataset:",
                 ""] + [f"- **{m}**: {w[:160]}" for m, w in dataset_gaps] + [""]
+    # rows whose adapter says the task head was never trained for the task. MOMENT's
+    # released checkpoint has only a reconstruction head, so its zero-shot forecast row
+    # scores a randomly initialised linear map: keep the number, label it.
+    untrained = {}
+    for rec in recs:
+        for r in rec.get("rows", []):
+            mt = r.get("meta") or {}
+            if mt.get("head_from_checkpoint") is False and not mt.get("head_trained_here"):
+                untrained.setdefault(rec["model"], set()).add(str(r.get("series", "?")))
+    if untrained:
+        out += ["## Flagged: the scored head was never trained", "",
+                "These rows ran fine and are **kept**, because a number you can see beats a "
+                "blank — but they do not measure the model doing this task. The checkpoint "
+                "ships no trained head for it, and `init()` randomises the one that gets "
+                "built. Read them as a reference point for a fine-tune column, not as "
+                "zero-shot performance:", ""] + [
+            f"- **{m}**: {len(s)} series ("
+            + ", ".join(sorted(s)[:6]) + (" …" if len(s) > 6 else "") + ")"
+            for m, s in sorted(untrained.items())] + [""]
     if failed:
         out += ["## Failed or incomplete rows", ""]
         for m, why in sorted(failed.items()):

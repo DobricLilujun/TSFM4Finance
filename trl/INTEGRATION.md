@@ -55,12 +55,16 @@ run where.
 
 ## Open items carried over (not fixed by the move)
 
-- `models.yaml` points MOMENT at `Momonlp/MOMENT-1-*`, which 401s; the public org is
-  `AutonLab`. The registry id is wrong, the model is not gated.
-- MOMENT's forecasting head is not pretrained (only the reconstruction head is), the head
-  pins context=512 and one horizon per instance, and `init()` after loading re-randomises
-  it. See `probes/trux/README.md`.
-- Whether `tsfm_trl/model/adapters/timemoe.py` does per-context scale/restore is still
-  unverified; feeding raw price levels to TimeMoE produced MASE 169 vs 4.4 normalised.
+- **Corrected note (my own error, kept visible):** an earlier version of this file claimed
+  `models.yaml` pointed MOMENT at `Momonlp/MOMENT-1-*` and that the 401 was a wrong-org
+  bug in the registry. It is not: `models.yaml` already says `AutonLab/MOMENT-1-*`, which
+  is public and works. The 401 came from probing the `Momonlp/*` mirrors mentioned in the
+  older project, not from the registry. What *is* true: the released checkpoint carries
+  only a reconstruction head (see `probes/trux/README.md`), the head pins context=512 and
+  one horizon per instance, and `init()` after loading re-randomises it — all now recorded
+  per row via `head_from_checkpoint` / `head_trained_here` in `Pred.meta`.
+- Whether `tsfm_trl/model/adapters/timemoe.py` does per-context scale/restore: **checked
+  in pass 2 — it does**. TimeMoE scored MASE 2.7–17, not the raw-level 60–169 the probe
+  produced when levels were fed directly.
 - TiRex-2 kernel JIT failure and the VisionTS++ packaging gap remain `failed`, not
   `declined`.

@@ -19,7 +19,7 @@ git clone https://github.com/DobricLilujun/tsfm-trl.git /raid/yewei/projects_yew
 | probe envs | `/raid/yewei/envs/tsfm-trl/<name>` — kept **outside** the future repo dir so a repo rsync cannot clobber them (`envs/local.json` points at absolute paths anyway) |
 | HF cache | `/raid/yewei/.cache/huggingface` (447 GB) — already holds `amazon/chronos-2`, `amazon/chronos-bolt-base`, `google/timesfm-2.0-500m-pytorch`, `google/timesfm-2.5-200m-pytorch`, `google/timesfm-3.0-pytorch`; `Maple728/TimeMoE-50M` and the Tier-A set below were added by this session |
 | HF token | account `etamin` (not the GitHub account) |
-| **gated** | `Momonlp/MOMENT-1-small` / `-large` return HTTP 401 with this token → MOMENT rows cannot be produced on trux until a token with access is configured (`huggingface-cli login`). Not a model failure. |
+| **not gated, wrong mirror** | `Momonlp/MOMENT-1-small` / `-large` return HTTP 401 with the `etamin` token. They are third-party mirrors, **not** what `models.yaml` asks for: the registry already names `AutonLab/MOMENT-1-*`, which is public and loads. Nothing was blocked; my first probe queried the wrong repos and reported a gate that did not exist. |
 
 Prefetched for the run: chronos-t5-small/base, chronos-bolt-small/tiny,
 moirai-1.1-R-small/base, moirai-2.0-R-small, moirai-moe-1.0-R-base, ttm-r2, ttm-r3,
@@ -99,9 +99,11 @@ git clone https://huggingface.co/AutonLab/MOMENT-1-small     # 359 MB
 git clone https://huggingface.co/AutonLab/MOMENT-1-large     # 1.4 GB
 ```
 
-`Momonlp/MOMENT-1-*` (what `models.yaml` points at) returns 401 for the trux token;
-`AutonLab` is the real org and is public. Cloning over git also pins the commit the
-weights came from. Env: `/raid/yewei/envs/tsfm-trl/moment`, frozen at
+`Momonlp/MOMENT-1-*` returns 401 for the trux token — but those are third-party mirrors,
+not what `models.yaml` names. The registry already says `AutonLab/MOMENT-1-*`, which is
+public; the "MOMENT is gated" line in the table above was my own probing error, corrected
+there. Cloning over git also pins the commit the weights came from. Env:
+`/raid/yewei/envs/tsfm-trl/moment`, frozen at
 `/raid/yewei/envs/tsfm-trl/moment.trux.lock.txt` — `momentfm==0.1.4`,
 `transformers==4.33.3`, `torch==2.7.1+cu128`. (`momentfm` ships no pandas/pyarrow, so
 loading parquet data needs them added with `--no-deps` plus `pytz`/`python-dateutil`.)

@@ -78,9 +78,21 @@ def forecast_eval(model, dataset, *, horizons=(21,), spans=("test",), ctx: int |
                    "seconds": round(time.time() - t0, 2),
                    "no_leakage": True, "ctx_note": ctx_note,
                    **forecast_report(ys, pred, train, season=season)}
-            row["meta"] = {k: v for k, v in (pred.meta or {}).items() if isinstance(v, (int, float, str, bool))}
+            row["meta"] = _scalar_meta(pred.meta)
             rows.append(row)
     return rows
+
+
+def _scalar_meta(meta) -> dict:
+    """Adapter meta that is worth a row: scalars only.
+
+    This is how an adapter gets to state what it measured (MOMENT's `head_from_checkpoint`
+    / `head_trained_here`, a clamped context, a caller-constructed interval) instead of
+    leaving the table to infer it from the model name. Lists and arrays stay out because a
+    markdown cell is not a place for them.
+    """
+    return {k: v for k, v in (meta or {}).items()
+            if isinstance(v, (int, float, str, bool)) and not isinstance(v, type(None))}
 
 
 def classify_eval(model, cds, *, routes=("probe_stat", "probe_model"), kinds=("logistic",),

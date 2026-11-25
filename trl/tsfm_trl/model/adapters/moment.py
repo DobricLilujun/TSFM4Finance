@@ -85,8 +85,11 @@ class Moment(TSFMModel):
     def __init__(self, checkpoint: str = "AutonLab/MOMENT-1-large", **kw):
         super().__init__(**kw)
         self.checkpoint = checkpoint
-        self._pipe = None
-        self._key = None
+        # NOTE: `self._pipe` / `self._key` used to live here as a single-pipeline cache
+        # sentinel. They are gone because a method added later was called `_key`, and the
+        # dead attribute shadowed it into `None` — every zero-shot MOMENT row then died as
+        # `TypeError: 'NoneType' object is not callable` in the sweep, not at import. A
+        # name that is both an attribute and a method is a latent break: keep them apart.
         self._want_ctx, self._want_horizon = 0, 0
 
     # ------------------------------------------------------------------ plumbing
@@ -96,7 +99,7 @@ class Moment(TSFMModel):
         shape they are about to train before asking for the module."""
         self._want_ctx, self._want_horizon = int(ctx), int(horizon)
 
-    def _key(self, task: str, horizon: int, n_class: int, contexts=None):
+    def _pipe_key(self, task: str, horizon: int, n_class: int, contexts=None):
         """Pipeline cache key. Built in one place because the *prediction* has to name the
         same pipeline the *training* used, or the trained/untrained label is a guess."""
         return (task, int(horizon), self._ctx_for(horizon, contexts), int(n_class))
@@ -107,7 +110,7 @@ class Moment(TSFMModel):
         call would dominate any fine-tune."""
         from momentfm import MOMENTPipeline
         ctx = self._ctx_for(horizon, contexts)
-        key = self._key(task, horizon, n_class, contexts)
+        key = self._pipe_key(task, horizon, n_class, contexts)
         cache = getattr(self, "_pipes", None)
         if cache is None:
             cache = self._pipes = {}
@@ -191,7 +194,7 @@ class Moment(TSFMModel):
         # a green cell in the compatibility matrix only means the call returned. These
         # flags let an effectiveness table say whether the head it scored was ever
         # trained for this task (MOMENT's checkpoint ships only a reconstruction head).
-        key = self._key("forecasting", horizon, 2, contexts)
+        key = self._pipe_key("forecasting", horizon, 2, contexts)
         from_ckpt = getattr(self, "_head_state", {}).get(key)
         meta = {"heads": list(getattr(out, "head_names", []) or [])}
         if from_ckpt is not None:
@@ -276,7 +279,7 @@ class Moment(TSFMModel):
         # follows it is no longer an untrained-head row
         if not hasattr(self, "_trained_keys"):
             self._trained_keys = set()
-        self._trained_keys.add(self._key("forecasting", y.shape[1], 2, contexts))
+        self._trained_keys.add(self._pipe_key("forecasting", y.shape[1], 2, contexts))
         out = p(x_enc=self._x(contexts))
         pred = getattr(out, "forecast", None)
         if pred is None:

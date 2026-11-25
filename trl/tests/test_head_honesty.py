@@ -89,6 +89,34 @@ def test_pred_meta_reaches_the_row():
     assert got == {"head_from_checkpoint": False, "head_trained_here": False}, got
 
 
+def test_pipeline_key_helper_survives_the_adapter_constructor():
+    """Regression for a real breakage: the zero-shot sweep lost every MOMENT row as
+    `TypeError: 'NoneType' object is not callable`. The adapter's `__init__` set a dead
+    `self._key = None` (leftover from an older single-pipeline cache), and the method that
+    names a pipeline was also called `_key` — the attribute shadowed the method, and only
+    a call at inference time revealed it. Constructing the adapter needs no momentfm, so
+    this guard runs in the core environment.
+    """
+    from tsfm_trl.model.adapters.moment import Moment
+    m = Moment()
+    assert callable(m._pipe_key), "_pipe_key shadowed by an instance attribute again"
+    k = m._pipe_key("forecasting", 21, 2, [np.zeros(256)])
+    assert isinstance(k, tuple) and len(k) == 4 and k[0] == "forecasting"
+    # the trained/untrained label is only sound if prediction and training name the same
+    # pipeline, so the helper must be deterministic for identical inputs
+    assert m._pipe_key("forecasting", 21, 2, [np.zeros(256)]) == k
+
+
+def test_a_different_context_is_a_different_pipeline():
+    """MOMENT's head width is fixed by seq_len, so a 256-point fine-tune does not train
+    the head a 512-point prediction will use — the label has to reflect that."""
+    from tsfm_trl.model.adapters.moment import Moment
+    m = Moment()
+    k256 = m._pipe_key("forecasting", 21, 2, [np.zeros(256)])
+    k512 = m._pipe_key("forecasting", 21, 2, [np.zeros(512)])
+    assert k256 != k512, "different context lengths must not share a cached head"
+
+
 def test_report_surfaces_untrained_head_rows(tmp_path):
     """meta must survive evaluate -> JSONL -> merged markdown, or the label is decorative."""
     sw = _sweep()

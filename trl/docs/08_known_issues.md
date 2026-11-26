@@ -399,6 +399,14 @@ against a truth std ~8 on a volatile equity) - an approximate mean-forecaster on
 low-volatility price data. Finding and artifact are now separable; before, they were the
 same number.
 
+`min_context` is set only where the padding artifact was measured. A contract probe over the
+sweep models (one equity series, level ratio at ctx 256 versus the declared length) found
+FlowState declaring 2048 and PatchTST-FM 8192 while both score normally at 256 - FlowState
+actually gets *worse* at its declared length (level ratio 0.587 at 2048 against 1.135 at
+256). Those models accept short windows honestly, so raising their context would change the
+experiment rather than repair it. The rule is: measure the padding behavior, then declare
+the contract - do not read a config number and treat it as a requirement.
+
 ### NaN is a failed measurement, not a metric value
 
 TTM r3 also emits an all-NaN point head *intermittently*: the same 512-point window was

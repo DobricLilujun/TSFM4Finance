@@ -433,24 +433,27 @@ def report(args) -> int:
                 ""] + [f"- {m} (env {e}) ran with `{i}`" for m, e, i in mismatch] + [""]
     if dupes:
         spread, superseded, by_model, sup_gap = [], [], {}, []
-        for (model, _series, _span, _h), seen in dupes.items():
-            a, b, _t0, _t1, p0, p1 = seen[-1]    # the pair the merge actually resolved
-            if p0 != p1:
-                superseded.append(model)
+        for (model, _series, _span, _h), pairs in dupes.items():
+            # every recorded pair, not just the one the merge resolved last: a key can be
+            # measured three times (artifact run, retry, contract run), and the interesting
+            # gap is usually in the earlier pair
+            for a, b, _t0, _t1, p0, p1 in pairs:
+                if p0 != p1:
+                    superseded.append(model)
+                    if isinstance(a, (int, float)) and isinstance(b, (int, float)):
+                        sup_gap.append(abs(a - b) / max(abs(b), 1e-9))
+                    continue
                 if isinstance(a, (int, float)) and isinstance(b, (int, float)):
-                    sup_gap.append(abs(a - b) / max(abs(b), 1e-9))
-                continue
-            if isinstance(a, (int, float)) and isinstance(b, (int, float)):
-                rel = abs(a - b) / max(abs(b), 1e-9)
-                spread.append(rel)
-                by_model.setdefault(model, []).append(rel)
+                    rel = abs(a - b) / max(abs(b), 1e-9)
+                    spread.append(rel)
+                    by_model.setdefault(model, []).append(rel)
         sec = [f"## Repeated cell keys: {len(dupes)}", "",
-               "These `(model, series, span, horizon)` keys were measured more than once in "
-               "the merge inputs; the table keeps the newest. **{}** of them sit under a "
-               "*different* protocol signature (ctx, ctx_note, device, code_sha, torch): an "
-               "earlier measurement superseded by a fix, where the gap is the size of that "
-               "fix. The other **{}** share a signature, so their gap is run variance.".format(
-                   len(superseded), len(spread))]
+               f"These `(model, series, span, horizon)` keys were measured more than once in "
+               f"the merge inputs; the table keeps the newest. Classifying every measurement "
+               f"pair by protocol signature (ctx, ctx_note, device, code_sha, torch): "
+               f"**{len(superseded)}** pairs sit under a *different* signature - an earlier "
+               f"measurement superseded by a fix, where the gap is the size of that fix - "
+               f"and **{len(spread)}** share a signature, so their gap is run variance."]
         if superseded:
             cnt = collections.Counter(superseded)
             sec += ["", "Superseded by a protocol change: "

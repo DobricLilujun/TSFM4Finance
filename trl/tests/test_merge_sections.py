@@ -146,5 +146,5 @@ def test_a_repeated_key_under_a_changed_protocol_is_not_run_variance(tmp_path, c
     _report([a, b], md)
     text = md.read_text()
     assert "Superseded by a protocol change: ttm-r2 (1)" in text, text
-    assert "The other **0** share a signature" in text, text
+    assert "**0** share a signature" in text, text
     assert "appear more than once" in capsys.readouterr().err

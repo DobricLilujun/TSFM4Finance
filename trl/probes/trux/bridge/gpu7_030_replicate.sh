@@ -58,12 +58,35 @@ echo "-- device: $DEVICE (torch-selected, 4 GiB floor)"
 
 ARGS=()
 for s in $SERIES_LIST; do ARGS+=(--series "$DATA/$s"); done
+# --envs is not optional here. The resolver looks in the *cwd's* envs/ (plus
+# envs/local.json), and this clone has no venvs: without it every model comes back as
+# "no interpreter for env core on this machine" and the lane is 10 error records that
+# still count as rows in a `wc -l`. gpu7's environments live under \$ENVROOT.
 "$ENVROOT/core/bin/python" -u "$REPO/scripts/sweep_evaluate.py" \
   "${ARGS[@]}" \
+  --envs "$ENVROOT" \
   --models naive,seasonal_naive,arima,chronos-bolt-small,chronos-bolt-base,chronos-t5-small,chronos-2,timesfm-2.5-200m,ttm-r2 \
   --horizons 21,63 --max-windows 8 --ctx 256 --seed 0 \
   --out "$OUT" --device "$DEVICE" --fresh
 
 echo "rows=$(wc -l < "$OUT")"
-head -1 "$OUT" | tr ',' '\n' | grep -iE '"device|"torch|"machine|"code_sha|"interpreter' | head -6 | sed 's/^/  /'
+# a lane of error records has the same line count as a lane of measurements, so count the
+# scored cells instead of the records
+"$ENVROOT/core/bin/python" - "$OUT" <<'PY'
+import json, sys
+recs = [json.loads(l) for l in open(sys.argv[1]) if l.strip()]
+scored = [r for r in recs if r.get("rows")]
+print(f"  records={len(recs)} scored={len(scored)} "
+      f"cells={sum(len(r['rows']) for r in scored)} "
+      f"errors={[r['model'] for r in recs if not r.get('rows')]}")
+if scored:
+    # provenance from a scored record, not from recs[0]: the first line of a lane can be a
+    # skip record that carries no machine, sha, or torch build at all
+    r = scored[0]
+    row = r["rows"][0]
+    for k in ("model", "model_key", "machine", "device", "code_sha", "torch", "interpreter"):
+        v = row.get(k, r.get(k))
+        if v is not None:
+            print(f"  {k}={v}")
+PY
 cp "$OUT" "$HOME/spark_bridge/outbox/" 2>/dev/null || true

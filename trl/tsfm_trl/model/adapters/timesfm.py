@@ -43,14 +43,29 @@ class _TimesFMBase2(_TimesFMBase):
     """
 
     def _pin_device(self) -> None:
+        """Move the module *and* correct what the vendor model remembered.
+
+        `TimesFMModel.__init__` (timesfm_2p5_torch.py:72) sets
+        `self.device = torch.device("cuda:0")` whenever CUDA is visible and then calls
+        `self.to(self.device)`. `compile()` later sizes the batch as
+        `per_core_batch_size * self.model.device_count`, so a bare `.to("cpu")` after
+        loading still asks the vendor path for GPU-shaped work. Pin before compile, fix the
+        cached attributes, then verify placement.
+        """
         want = str(self.device)
+        module = getattr(self._wrapper, "model", None)
+        if module is None:
+            return
         try:
             got = self._dev()
         except Exception:                                     # noqa: BLE001
             return                                            # no parameters to move
         if got.type != want:
             try:
-                self._wrapper.model.to(want)
+                module.to(want)
+                module.device = want                          # what the model remembers
+                if want != "cuda":
+                    module.device_count = 1                   # what sizes the batch
             except Exception as e:                            # noqa: BLE001
                 raise UnavailableError(
                     self.key,
@@ -78,13 +93,13 @@ class TimesFM25(_TimesFMBase2):
         self.checkpoint = checkpoint or timesfm.TimesFM_2p5_200M_torch.DEFAULT_REPO_ID
         self._wrapper = timesfm.TimesFM_2p5_200M_torch.from_pretrained(
             self.checkpoint, torch_compile=torch_compile)
+        self._pin_device()          # before compile(): compile sizes batches off device_count
         self._wrapper.compile(timesfm.ForecastConfig(
             max_context=self.max_context, max_horizon=self.max_horizon,
             normalize_inputs=normalize_inputs, infer_is_positive=False,
             force_flip_invariance=True, per_core_batch_size=per_core_batch_size,
             use_continuous_quantile_head=False, fix_quantile_crossing=True))
         self._norm = normalize_inputs
-        self._pin_device()
 
     # ------------------------------------------------------------------ inference
     def predict(self, contexts, horizon, *, panels=None, future=None) -> Pred:

@@ -135,6 +135,13 @@ def forecast_eval(model, dataset, *, horizons=(21,), spans=("test",), ctx: int |
             row = {"model": getattr(model, "key", "?"), "adaptation":
                    getattr(model, "adaptation", "zero"), "series": ds.name, "span": span,
                    "horizon": int(h), "ctx": eff_ctx, "n_windows": len(kept),
+                   # which bytes and which split the cell was scored on. MASE is divided by
+                   # the naive error of the train split, so a CSV (synthetic 70/15/15) and
+                   # the arena directory of the same series give different numbers for the
+                   # identical forecast; without these two fields that reads as a model or
+                   # hardware difference.
+                   "data_kind": (ds.meta or {}).get("data_kind"),
+                   "data_hash": (ds.meta or {}).get("data_hash"),
                    "seconds": round(time.time() - t0, 2),
                    "no_leakage": True,
                    "ctx_note": "; ".join(x for x in (ctx_note, contract_note) if x),

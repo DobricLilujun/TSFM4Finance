@@ -621,3 +621,46 @@ the same lint as hand-written code. And `--models chronos2` died with `unknown m
 the registry *key* is `chronos-2` while the *family* is `chronos2`; the sweep validating
 model names at startup, rather than defaulting to a substring match, is what made that a
 five-second failure instead of a silently empty lane.
+
+## The same series name can be two different measurements: CSV vs arena directory
+
+The GB10 replication lane was the first real overlap between machines: 12 series watson had
+already scored, 216 shared cells. `probes/trux/cross_machine_check.py` called 212 of them
+disagreements, with MASE off by 14.98%, 37.68%, 30.80% — up to 122.9%. None of it was
+hardware. The signature of the bug was in what *agreed*: RMSE matched to about the eighth
+decimal, directional accuracy was identical, and both horizons of one series were off by
+exactly the same ratio.
+
+`mase(y, p, train)` is `mean|y-p| / mean|diff(train)|`. The numerator is the forecast; the
+denominator is a property of **which split the loader invented**. trux and gpu7 read the
+arena directory `std_equity_1d_10104` (publisher's train/validation/test parquets, train
+n=1510, naive MAE 0.375671). Watson's pass-3 job read `~/pass3_csv/std_equity_1d_10104.csv`,
+a flat file, so `SeriesDataset` synthesized a 70/15/15 split (train n=1937, naive MAE
+0.431936). Their ratio is 0.8697; its reciprocal 1.1498 is the observed MASE ratio for that
+series to four decimals. The forecasts were the same numbers.
+
+What that does to the published table:
+
+* **Survives**: `beats naive` per cell (the naive baseline in the same lane shares the
+  denominator), and the unscaled metrics — `rmse`, `mae`, `dir_acc`. Cross-machine on those:
+  bit-exact.
+* **Does not survive**: any absolute MASE comparison between the watson block (35 series,
+  CSV) and the trux block (66 series, arena dirs). They are two scales of the same quantity,
+  differing per series by 1.0x–2.2x depending on where the publisher's train boundary sits
+  relative to 70%.
+
+The fix is a fingerprint, not a rule to remember. `SeriesDataset` now stamps
+`data_hash` — sha1 over the loaded values *and* the split boundaries, 12 hex chars — and
+`data_kind` (`arena_dir` / `csv` / `parquet_file` / `in-memory` / `frame`) into `meta`, and
+`forecast_eval` copies both onto every scored row. `scripts/sweep_evaluate.py` adds the lane
+meta field `data_kinds`, and both consumers use it: the merge's protocol signature includes
+the data path, so a CSV/arena repeat of one cell is filed under *superseded* rather than
+*run variance*; `cross_machine_check.py` refuses to call it a machine disagreement and exits
+2 (inconclusive), with a fallback for legacy lanes that predate the row-level stamp — their
+meta line still lists the input names, and `.csv` versus a bare directory name is enough to
+tell which split was loaded.
+
+The general form: **a series name identifies a file, not a measurement.** Anything scaled by
+a quantity derived from the data (MASE by the train-split naive error, any z-scored metric,
+any "beat baseline by X%" claim) silently changes when the data path changes, and the only
+durable defence is to write down the bytes and the split next to the number.

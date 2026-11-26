@@ -148,3 +148,39 @@ def test_a_repeated_key_under_a_changed_protocol_is_not_run_variance(tmp_path, c
     assert "Superseded by a protocol change: ttm-r2 (1)" in text, text
     assert "**0** share a signature" in text, text
     assert "appear more than once" in capsys.readouterr().err
+
+
+def test_a_cell_read_from_another_data_path_is_a_supersession_not_run_variance(tmp_path, capsys):
+    """Same model, same series name, same ctx: the CSV lane and the arena lane are not the
+    same measurement.
+
+    The cross-machine check found watson's cells 15% off trux's on MASE while RMSE matched
+    to eight decimals. Both lanes read "the same series", but one loaded a flat CSV (whose
+    train split is the synthetic 70%) and the other an arena directory (whose train split is
+    the publisher's), and MASE is divided by the naive error of whichever one was loaded. The
+    fingerprint on the row is what lets the merge file that under "superseded" instead of
+    "noise".
+    """
+    def row(kind, h, mase):
+        return {"model": "chronos-bolt-small", "adaptation": "zero", "series": "s1",
+                "span": "all", "horizon": 21, "ctx": 256, "n_windows": 8, "mase": mase,
+                "no_leakage": True, "ctx_note": "",
+                "data_kind": kind, "data_hash": h}
+
+    def rec(kind, h, mase):
+        return {"model": "chronos-bolt-small", "env": "core", "device": "cuda",
+                "interpreter": "/x/core/bin/python", "torch": {"torch": "2.7.1+cu128"},
+                "rows": [row(kind, h, mase)]}
+
+    a = tmp_path / "csv_lane.jsonl"
+    b = tmp_path / "arena_lane.jsonl"
+    a.write_text("\n".join([json.dumps(_meta("watson")),
+                            json.dumps(rec("csv", "aaaa11112222", 5.3916))]) + "\n")
+    b.write_text("\n".join([json.dumps(_meta("gpu7")),
+                            json.dumps(rec("arena_dir", "bbbb33334444", 6.1991))]) + "\n")
+
+    md = tmp_path / "out.md"
+    _report([a, b], md)
+    text = md.read_text()
+    assert "Superseded by a protocol change: chronos-bolt-small (1)" in text, text
+    assert "**0** share a signature" in text, text

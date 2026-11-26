@@ -88,6 +88,14 @@ def sweep(args) -> int:
             "started": time.strftime("%Y-%m-%d %H:%M:%S"), "machine": socket.gethostname(),
             "code_sha": _sha(), "python": sys.version.split()[0],
             "series": [os.path.basename(x) for x in series],
+            # which data path this lane read. MASE is divided by the naive error of the
+            # train split, and a flat CSV gets a synthesized 70/15/15 split while an arena
+            # directory carries the publisher's: two lanes on different paths are not
+            # comparable on any scaled metric, so the lane says up front which it used.
+            "data_kinds": sorted({("csv" if x.endswith(".csv") else
+                                   "parquet_file" if x.endswith((".parquet", ".pq")) else
+                                   "arena_dir" if os.path.isdir(x) else "in-memory")
+                                  for x in series}),
             "horizons": [int(h) for h in args.horizons.split(",")],
             "spans": args.spans, "max_windows": int(args.max_windows),
             "ctx": int(args.ctx), "batch": int(args.batch), "seed": int(args.seed),
@@ -215,7 +223,10 @@ def proto(row: dict) -> tuple:
     the fix, not noise."""
     pr = row.get("_prov") or {}
     return (row.get("ctx"), row.get("ctx_note") or "", pr.get("device"),
-            pr.get("code_sha"), str(pr.get("torch")))
+            pr.get("code_sha"), str(pr.get("torch")),
+            # the data path is part of the protocol: the same forecast on a CSV and on the
+            # arena directory of the same series differs by the MASE denominator alone
+            row.get("data_kind"), row.get("data_hash"))
 
 
 def stamp_rows(rows: list, key: str) -> list:

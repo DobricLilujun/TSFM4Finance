@@ -233,14 +233,23 @@ where the model beat naive:
   33 CUDA cells plus 33 CPU cells after a shared-card OOM. `ctx` and device are per-row
   facts, not footnotes.
 
-* **These numbers are reproducible - across machines and across re-runs.** gpu7 (DGX Spark,
-  GB10) re-scored three series trux had already scored and every overlapping cell matched
-  to 0.000% (`probes/trux/cross_machine_check.py`), baselines and neural models alike. On
-  one machine, 254 repeated cell comparisons - including pass-3 lanes recorded at code sha
-  `1d2f3ae` re-scored today at `28fd7e7` - agree to within 0.143%. That is the first time
-  this benchmark has had a consistency check rather than an assumption, and it is the
-  reason the earlier "chronos-bolt moves 3-40% between machines" note in the lab journal is
-  wrong: see the next bullet, it was a key collision.
+* **These numbers are reproducible - across machines and across re-runs.** On unscaled
+  metrics the machines agree bit-for-bit: RMSE matched to ~1e-8 and directional accuracy was
+  identical when gpu7 (DGX Spark, GB10) re-scored watson's series (`probes/trux/
+  cross_machine_check.py`), and 254 repeated cell comparisons on one machine - pass-3 lanes
+  at code sha `1d2f3ae` re-scored at `28fd7e7` - agree to within 0.143%. That is the first
+  time this benchmark has had a consistency check rather than an assumption.
+* **Scaled metrics are only comparable within a data path.** The 12-series GB10 overlap
+  looked like 212 machine disagreements: MASE off by 15%-123% while RMSE agreed to the
+  eighth decimal. Cause: watson's pass-3 lane read exported CSVs (so `SeriesDataset`
+  synthesized a 70/15/15 split) and the trux/gpu7 lanes read arena directories (the
+  publisher's split), and MASE is divided by the naive error of whichever train split was
+  loaded. For `std_equity_1d_10104`: 0.375671 vs 0.431936, reciprocal ratio 1.1498 - exactly
+  the observed MASE ratio, to four decimals. Rows now carry `data_hash` (values + split
+  boundaries) and `data_kind`, the lane meta carries `data_kinds`, the merge files such a
+  repeat under supersessions, and the cross-machine check exits "inconclusive" instead of
+  "disagreement". `beats naive` per cell survives this (the baseline shares the denominator);
+  absolute MASE columns across the watson block (CSV) and the trux block (arena dirs) do not.
 * **Repeated cell keys are mostly a protocol being replaced, not noise.** The pass-3 merge
   inputs carry 404 `(model, series, span, horizon)` keys measured more than once. Scored by
   protocol signature (ctx, ctx_note, device, code_sha, torch), they are overwhelmingly

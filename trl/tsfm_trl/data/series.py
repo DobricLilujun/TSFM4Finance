@@ -13,6 +13,7 @@ restricted to a split, so a fine-tune can be proven to have seen only train rows
 """
 from __future__ import annotations
 
+import hashlib
 import json
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -23,6 +24,23 @@ import pandas as pd
 from ..errors import DataError
 
 FREQS = ("tick", "second", "minute", "hour", "day", "week", "month", "quarter", "year")
+
+
+def _data_fingerprint(values, splits) -> str:
+    """12 hex chars over the loaded values *and* the split boundaries.
+
+    A metric like MASE is scaled by the naive error of the *train split*, so the same
+    forecast can score 1.15x worse on one data path than another: a directory in arena
+    layout carries a real train/validation/test split, while a flat CSV gets the synthetic
+    70/15/15 one. The numbers are not comparable across those paths, and the only way a
+    reader can tell is if the row says which bytes and which split produced them.
+    """
+    h = hashlib.sha1()
+    arr = np.ascontiguousarray(np.asarray(values, dtype="<f8").reshape(-1))
+    h.update(arr.tobytes())
+    h.update(repr(sorted((k, tuple(v)) for k, v in (splits or {}).items())).encode())
+    return h.hexdigest()[:12]
+
 
 
 @dataclass
@@ -49,7 +67,9 @@ class SeriesDataset:
             arr = np.asarray(source, dtype=float).reshape(-1)
             ds = SeriesDataset(name=name or "array", target=target or "value",
                                values=arr, splits=_even_split(arr))
-            ds.meta = {"n_obs": int(len(arr)), "source": "in-memory", "frequency": freq}
+            ds.meta = {"n_obs": int(len(arr)), "source": "in-memory", "frequency": freq,
+                       "data_kind": "in-memory",
+                       "data_hash": _data_fingerprint(arr, ds.splits)}
             return ds
         p = Path(str(source)).expanduser()
         if p.is_dir():
@@ -96,15 +116,26 @@ class SeriesDataset:
                              values=np.asarray(full[target], float), index=idx, panel=panel,
                              splits=splits,
                              meta={**meta, "n_obs": int(len(full)), "dir": str(d),
+                                   # the arena split is the publisher's, not ours: this is
+                                   # the denominator every MASE in the table silently depends on
+                                   "data_kind": "arena_dir",
+                                   "data_hash": _data_fingerprint(
+                                       np.asarray(full[target], float), splits),
                                    "panel_cols": list(panel.columns)})
 
     @staticmethod
     def _from_file(f: Path, target: str | None, name: str | None) -> "SeriesDataset":
-        df = pd.read_parquet(f) if f.suffix in (".parquet", ".pq") else pd.read_csv(f)
+        parquet = f.suffix in (".parquet", ".pq")
+        df = pd.read_parquet(f) if parquet else pd.read_csv(f)
         cand = [c for c in df.columns if c.lower() in
                 ("close", "target", "value", "y", "price")]
         target = target or (cand[0] if cand else df.columns[-1])
-        return SeriesDataset._from_frame(df, target, name or f.stem)
+        ds = SeriesDataset._from_frame(df, target, name or f.stem)
+        # a flat file is a *different experiment* from the arena directory of the same
+        # series: the split is synthesized, and every scaled metric moves with it
+        ds.meta["data_kind"] = "parquet_file" if parquet else "csv"
+        ds.meta["data_hash"] = _data_fingerprint(ds.values, ds.splits)
+        return ds
 
     @staticmethod
     def _from_frame(df: pd.DataFrame, target: str, name: str) -> "SeriesDataset":
@@ -119,6 +150,9 @@ class SeriesDataset:
                              index=idx, panel=df.drop(columns=[target], errors="ignore"),
                              splits=splits,
                              meta={"n_obs": n, "source": "dataframe",
+                                   "data_kind": "frame",
+                                   "data_hash": _data_fingerprint(
+                                       np.asarray(df[target], float), splits),
                                    "panel_cols": [c for c in df.columns if c != target]})
 
     # ------------------------------------------------------------------ access

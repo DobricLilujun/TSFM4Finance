@@ -375,6 +375,73 @@ The lesson generalises: **a benchmark row is its environment.** A CPU row and a 
 the same model are different experiments, and "it ran" is not evidence about which one you
 got.
 
+## Seventh pass: 101 series, and three ways a number can be wrong without any code erroring
+
+### A checkpoint's context length is an interface, not a suggestion
+
+`granite-timeseries-ttm-r3` declares `context_length = 512`. Fed the protocol window of 256
+it pads its own input with zeros, and the whole forecast comes back scaled by the fraction
+of real history: measured on one equity series, the mean prediction is 0.25x the context at
+ctx 128, **0.50x at ctx 256**, 0.99x at 512. In the first pass-3 ranking that read as
+"median MASE 13x naive, 0% of series beaten" for a model whose weights are fine. The
+artifact was our window.
+
+Fix: `TSFMModel.min_context` (read by the Granite adapter from the checkpoint config).
+`forecast_eval` raises the benchmark context to it when the span allows and writes
+`context raised 256->512 (checkpoint contract)` into the row's `ctx_note`; when the span
+cannot supply it the adapter pads on the left with the oldest observation instead of letting
+vendor code feed zeros, and says so in `Pred.meta`. The row's `ctx` column then shows 512
+for those models, which is why the effectiveness table has a `ctx` column per row at all.
+
+The honest residual: with the contract honoured, TTM r2 behaves normally (MASE ~3-9) and
+**r3 still loses badly on financial series** because its forecast is nearly flat (std ~0.8
+against a truth std ~8 on a volatile equity) - an approximate mean-forecaster on
+low-volatility price data. Finding and artifact are now separable; before, they were the
+same number.
+
+### NaN is a failed measurement, not a metric value
+
+TTM r3 also emits an all-NaN point head *intermittently*: the same 512-point window was
+clean in one process and NaN in the next. Two wrongs were hiding in the old path: the
+vendor model returned NaN without raising, and `forecast_report` is nan-safe, so it scored
+the surviving 3 of 4 windows while the row still claimed `n_windows: 4`. My own ranking
+script then aggregated a column containing NaN and printed "median MASE nan" for the
+model - which looks like a joke and reads like one.
+
+Now: retry each affected window alone (a batch can poison a model's own per-instance
+normalisation), drop whatever is still non-finite from the scoring set, record
+`pred_nan_windows` plus an `error` string, set `n_windows` to the number actually scored,
+and emit `None` rather than NaN in metric columns.
+
+### Report sections that iterate the wrong collection under-count across lanes
+
+`report()` merges cells per `(model, series, span, horizon)` but keeps one *raw record* per
+model in `rec_by_model`. The tables read the merged cells; the "Not scoreable on some
+series" section and the new untrained-head section read `recs`. With two GPU lanes each
+carrying half the corpus, the flag list showed 33 of 66 flagged MOMENT series, and the
+covariate-panel section was under-counted in pass 2 the same way. Both now read the merged
+rows, and a model that scored anywhere is no longer listed as dataset-unscoreable.
+Symptom to remember: a summary section whose count is exactly one lane's worth.
+
+### Shared cards: free at launch is not free during
+
+`chronos-t5-base` lost 33 of 66 series to `torch.OutOfMemoryError` with the error reporting
+44.94 MiB free, minutes after `nvidia-smi` showed ~10 GiB - another user's process grew to
+26 GiB mid-run, and our own peak was 7.09 GiB. The lane runner's `--min-free-mib` guard is
+necessary, not sufficient. Two operational rules follow: pin `CUDA_VISIBLE_DEVICES` to the
+index you chose (a retry that picked "cuda" from a free-memory total landed on the
+contended GPU 0 anyway), and treat a mid-run OOM as an environment event to re-run, never
+as a model result. Where the cards stay full, the retry runs on CPU lanes and the rows
+carry `device: cpu`.
+
+### Two small tooling facts from this pass
+
+- `--md path/to/report.md` now creates the parent directory; before, the first invocation
+  into a fresh run directory died on `FileNotFoundError` after doing all the merge work.
+- The trux `core` env has no ruff, so `scripts/check.sh` stops at the lint stage there.
+  Tests, registry consistency and the mini matrix are run on trux; lint stays a laptop
+  gate. That is a real gap in the multi-machine story, not a covered one.
+
 ## Sixth pass: moving the harness onto other machines
 
 The same code went to trux (2× RTX 6000 Ada) and watson (SLURM, A6000). What broke was not

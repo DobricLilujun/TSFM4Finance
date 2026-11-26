@@ -45,6 +45,31 @@ def _load_keep_info(cls, checkpoint: str, kw: dict | None = None):
 
 
 # the target kwarg name differs across transformers releases
+def pad_left_to(contexts, n: int):
+    """Extend each context on the left to at least ``n`` points, repeating the oldest
+    observation. Returns (contexts, points_added).
+
+    TTM-class checkpoints normalise over their declared context and pad a short window with
+    zeros themselves, which scales the whole forecast by the fraction of real history - an
+    untrained-looking model that is really a protocol artifact. Repeating the oldest value
+    is the least inventive fill: flat, monotone-free, and it leaves the recent dynamics -
+    the part the head reads - untouched. The count is returned so the caller can say so in
+    Pred.meta rather than quietly inventing history.
+    """
+    if n <= 0:
+        return list(contexts), 0
+    out, added = [], 0
+    for c in contexts:
+        c = np.asarray(c, dtype=float)
+        if c.shape[0] >= n:
+            out.append(c)
+        else:
+            pad = n - c.shape[0]
+            out.append(np.concatenate([np.repeat(c[:1], pad, axis=0), c]))
+            added = pad
+    return out, added
+
+
 _FUTURE_KW = ("future_values", "future_patches", "target_patches", "future_target",
               "target_values", "labels")
 
@@ -69,6 +94,12 @@ class _GraniteBase(TSFMModel):
                              if any(t in k.lower() for t in ("head", "quantile", "decoder"))]
         self._fwd_params = set(inspect.signature(self.model.forward).parameters)
         self._wants_loss = "return_loss" in self._fwd_params
+        # the declared context is part of the interface, not a hint
+        for name in ("context_length", "context_window", "adapter_context_length"):
+            v = int(getattr(cfg, name, 0) or 0)
+            if v > 0:
+                self.min_context = v
+                break
         pl = int(getattr(cfg, "prediction_length", 96) or -1)
         if pl > 0:
             self.pred_len = pl
@@ -103,6 +134,7 @@ class _GraniteBase(TSFMModel):
     def _past(self, contexts):
         import torch
         cs = self.trim(contexts)
+        cs, self._pad = pad_left_to(cs, self.min_context)
         return torch.tensor(np.stack(cs)[:, :, None], dtype=torch.float32, device=self.device)
 
     def _fwd(self, past, future=None):
@@ -178,7 +210,9 @@ class _GraniteBase(TSFMModel):
                 if got < horizon:
                     cur = torch.cat([cur, mean[:, :take, None]], dim=1)[:, -self.max_context:]
         point = torch.cat(P, dim=1).cpu().numpy()[:, :horizon]
+        pad = int(getattr(self, "_pad", 0) or 0)
         pred = Pred(point=point, meta={"pred_len": self.pred_len, "ar_chunks": len(P),
+                                       "ctx_padded_to": self.min_context if pad else None,
                                        "head": ("quantile" if self._head_levels
                                                 else "mean/distribution parameters "
                                                      "(checkpoint declares no quantile levels)")})

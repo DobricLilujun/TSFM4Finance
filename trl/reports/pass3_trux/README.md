@@ -31,6 +31,36 @@ A model absent from a machine's table is an environment fact, not a verdict. The
 | `../pass3_watson_src/csv/` | the 35 watson CSVs, generated on trux and relayed through the laptop (trux has no route to watson) |
 | `csv/`, `csv/MANIFEST.json` | flattened series + per-series split diagnostics |
 
+## The context-length contract: a Tier-A model that looked 13x worse than naive
+
+`ttm-r3` declares `context_length = 512`. Under the protocol window (ctx 256) the Granite
+checkpoint pads its own input with zeros, and the forecast level comes back scaled by the
+fraction of real history - measured on one equity series: 0.25x at ctx 128, **0.50x at ctx
+256**, 0.99x at its declared 512. That is what produced a median MASE of 13x naive in the
+first pass-3 ranking, and it was our window, not the model.
+
+The harness now carries the contract (`TSFMModel.min_context`, read from the checkpoint
+config by the Granite adapter): `forecast_eval` raises the protocol context to the declared
+one when the span allows, the adapter left-pads with the oldest observation instead of
+trusting vendor zero-padding when it does not, and the row's `ctx` column records what was
+actually scored. So TTM rows in this table say `ctx 512` while everyone else says `ctx 256`,
+and the table says so rather than pretending the windows were uniform.
+
+With the contract honoured, TTM r2 lands at MASE ~3-9 (normal) and **r3 still loses badly on
+financial series** - its forecast is nearly flat (std ~0.8 against a truth std of ~8), i.e.
+an approximate mean-forecaster on low-volatility price series. That is a real finding about
+the model, kept distinct from the artifact that hid it.
+
+## NaN is a measurement failure, not a metric value
+
+r3 also intermittently emits an all-NaN point head: the same 512-point window was clean in
+one process and NaN in the next. `forecast_eval` now retries each affected window alone (a
+batch can poison a model's own per-instance normalisation), and if it is still non-finite
+the window leaves the scoring set: the row records `pred_nan_windows` plus an error, and
+`n_windows` becomes the number actually scored. Metrics are emitted as `None`, never as
+NaN - a NaN in a metric column is silently coerced or skipped by whatever aggregates it, and
+a hand-written ranking script (mine) reported a median of NaN for exactly that reason.
+
 ## What the shared cards did to the run
 
 - trux `chronos-t5-base`: 33 of 66 series failed with `torch.OutOfMemoryError`. The error
@@ -43,7 +73,8 @@ A model absent from a machine's table is an environment fact, not a verdict. The
   lane needs `CUDA_VISIBLE_DEVICES` pinned to the chosen index, not just a free-memory
   check. Second retry pins it and lowers `--batch`.
 - MOMENT's 132 pairs therefore come from CPU lanes and carry `device: cpu`; they are
-  comparable to each other, and the provenance table separates them from the GPU rows.
+  comparable to each other, and the provenance table separates them from the GPU rows. The
+  TTM contract re-run is on CPU lanes too for the same reason (cards held at ~1.4 GiB).
 
 ## Verification that the new labels work
 

@@ -146,6 +146,14 @@ class TSFMModel:
     caps: frozenset[str] = frozenset({"forecast"})
     max_context: int = MAX_CONTEXT
     max_horizon: int = 512
+    # Some checkpoints normalise over a context of a *fixed* declared length: fed a shorter
+    # window they pad internally with zeros, and the forecast level comes back scaled by
+    # the fraction of real history (measured on granite-timeseries-ttm-r3: 0.25x at 128,
+    # 0.50x at 256, 0.99x at its declared 512). Adapters that know the number set this and
+    # the harness respects it: the benchmark window is raised to it, and if the span is too
+    # short the adapter pads with the oldest observation instead of letting the vendor code
+    # feed zeros. 0 = the model accepts any context up to max_context.
+    min_context = 0
     ctx_step: int = 1                        # patch-based models: context % ctx_step == 0
     needs: tuple[str, ...] = ("close",)      # dataset columns required
     # training contract: "quantile" (pinball on a quantile head), "token"

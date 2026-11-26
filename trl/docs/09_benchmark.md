@@ -43,7 +43,10 @@ The library fixes the parts of a protocol that would otherwise differ per family
   and the model's own scaler is never re-implemented outside the adapter;
 * **context handling** — `ctx_step`/`max_context` per adapter, left-padding with the
   model's own pad mask instead of zeros (Moirai, FlowState) — a silent zero-pad changes
-  the score for patch models;
+  the score for patch models; and `min_context` for checkpoints that declare a fixed
+  input length (Granite/TTM): the evaluation window is raised to it, or padded with the
+  oldest observation when the span cannot supply it, because feeding a shorter window
+  makes those models pad themselves and scale the answer by the padded fraction;
 * **split discipline** — `SeriesDataset.splits`, and any checkpoint carries
   `split_end` so `load_finetuned` can refuse an evaluation window that overlaps training.
 
@@ -175,6 +178,65 @@ zero-shot, one seed, 12 windows per pass, on three daily series.
 What this does **not** license: any statement about a family being better in general
 (12 windows, one seed, three daily series), anything about *adapted* checkpoints (not
 run), or the word "significant" (no variance estimate exists for a forecast row).
+
+## What pass 3 shows (the whole `standard/` corpus: 101 series, 3,628 cells)
+
+Scope: every one of the 101 independent per-instrument series in `standard/`, 19 models,
+horizons 21 and 63, 8 windows per series, one seed, zero-shot. Series were split 66/35
+between trux (2× RTX 6000 Ada, `core`+`moment`+`timemoe` envs) and watson (one A6000 via
+SLURM, `core` only), disjoint, allocated 2:1 inside every dataset family so neither
+machine's table is confounded with one family. Merged per `(model, series, span, horizon)`.
+
+Median MASE relative to the naive scaler on the same cell (1.00 = equal), share of cells
+where the model beat naive:
+
+| model | cells | beat naive | med MASE/naive | med MASE | cov@40 | ctx |
+|---|---:|---:|---:|---:|---:|---:|
+| `arima` | 202 | **55%** | 1.00 | 4.50 | 0.47 | 256 |
+| `chronos-2` | 202 | 40% | 1.02 | 4.66 | 0.38 | 256 |
+| `chronos-bolt-small` | 202 | 41% | 1.03 | 4.73 | 0.38 | 256 |
+| `theta` | 202 | 30% | 1.04 | 4.79 | — | 256 |
+| `chronos-bolt-base` | 202 | 32% | 1.04 | 4.99 | 0.39 | 256 |
+| `chronos-t5-base` | 202 | 35% | 1.05 | 4.99 | 0.33 | 256 |
+| `chronos-t5-small` | 202 | 35% | 1.05 | 4.90 | 0.33 | 256 |
+| `timesfm-2.5-200m` | 202 | 29% | 1.06 | 4.89 | 0.36 | 256 |
+| `timesfm-3.0` | 202 | 29% | 1.07 | 4.95 | 0.35 | 256 |
+| `seasonal_naive` | 202 | 19% | 1.08 | 4.82 | — | 256 |
+| `flowstate-r1` | 202 | 20% | 1.10 | 5.01 | 0.21 | 256 |
+| `patchtst-fm-r2` | 202 | 20% | 1.14 | 5.37 | — | 256 |
+| `moving_average` | 202 | 13% | 1.21 | 5.42 | — | 256 |
+| `ttm-r2` | 202 | 27% | 1.25 | 5.70 | — | **512** |
+| `timemoe-50m` | 132 | 6% | 1.47 | 6.56 | 0.38 | 256 |
+| `moment-1-small` | 132 | 1% | 2.64 | 12.13 | — | 256 (head untrained) |
+| `moment-1-large` | 132 | 1% | 2.66 | 12.02 | — | 256 (head untrained) |
+| `ttm-r3` | 168 | 1% | 3.75 | 17.60 | — | **512** |
+
+* **On 101 financial series, no foundation model beats a well-tuned ARIMA at h=21/63.**
+  ARIMA leads the corpus (55% of cells better than naive, median ratio 1.00); the strongest
+  transformers are at parity or slightly worse (Chronos-2 40%, Chronos-Bolt-small 41%,
+  TimesFM 29%). This is the headline of the benchmark, and it is a statement about
+  *zero-shot* weights on *daily/hourly price data at three-week and quarter horizons*.
+* **A green matrix cell and a correct number are different things, twice over.** MOMENT
+  scored because we rebuild its task head, but the checkpoint never trained one (flagged,
+  `head_from_checkpoint: false`). TTM was scored at ctx 256 while its checkpoint declares
+  512 and pads shorter input with zeros, which scaled its whole forecast by the fraction of
+  real history and produced a median MASE of 13x naive. Honouring the contract moved r2
+  from 1.51 to 1.25 and made r3's real weakness visible instead of hiding it behind the
+  artifact.
+* **`ttm-r3` is unstable on this corpus, and the harness now says so in the row.** 272 of
+  3,232 forecast windows came back non-finite (416 on CPU lanes, 272 on CUDA - so not a
+  device artifact), and 34 of 202 cells scored nothing. Those cells report
+  `pred_nan_windows` and an `error`, `n_windows` counts only what was scored, and no metric
+  column carries a NaN.
+* **Model coverage differs across the corpus and the table shows it**: MOMENT and TimeMoE
+  ran only on trux's 66 series (no `moment`/`timemoe` env on watson), `chronos-t5-base` has
+  33 CUDA cells plus 33 CPU cells after a shared-card OOM. `ctx` and device are per-row
+  facts, not footnotes.
+
+What this does **not** license: any variance claim (one seed, 8 windows per cell), any
+statement about fine-tuned checkpoints, or cross-context comparison of TTM against the
+256-point models without reading the `ctx` column. Reproduce the table with
+`probes/trux/rank_pass3.py` over the merged JSONL files.
 
 ## What is *not* done yet (so nobody reads it in)
 

@@ -5,6 +5,7 @@ zero-shot and adapted models, so a delta is a delta.
 """
 from __future__ import annotations
 
+import math
 import sys
 import time
 
@@ -32,11 +33,37 @@ def _fit_ctx(model, ctx: int, span_len: int, h: int) -> tuple[int, str]:
     return int(fit), f"clamped from {ctx} to {fit} (span {span_len}, horizon {h})"
 
 
+def _finite_or_none(v):
+    """Metrics go out as ``None``, never as ``float('nan')``.
+
+    A NaN metric is worse than a blank one: ``json.dumps`` writes a bare ``NaN`` that a
+    strict JSON reader rejects, pandas skips it silently while a hand-written ranking
+    script (mine, once) treats it as a number and reports a median of NaN, and it hides
+    *why* the cell is empty. ``None`` says "no measurement here" and the row's error field
+    says why.
+    """
+    if v is None:
+        return None
+    f = float(v)
+    return f if math.isfinite(f) else None
+
+
 def forecast_eval(model, dataset, *, horizons=(21,), spans=("test",), ctx: int | None = None,
                   stride: int | None = None, max_windows: int | None = 64,
                   batch: int = 16, seed: int = 0, season: int = 1) -> list[dict]:
     ds = dataset if isinstance(dataset, SeriesDataset) else SeriesDataset.load(dataset)
     ctx = int(ctx or min(model.max_context, 256))
+    # Honour a checkpoint's declared context. TTM r3 (declared 512) fed 256 padded itself
+    # with zeros and returned a forecast at half the level: an honest-looking MASE of 13x
+    # naive that was purely our window choice. The protocol says "ctx 256"; for a model
+    # that cannot represent 256 the contract wins, and the row records the ctx it was
+    # actually scored at in the same column every other row reports.
+    mn = int(getattr(model, "min_context", 0) or 0)
+    contract_note = ""
+    if mn and ctx < mn:
+        want = min(mn, int(getattr(model, "max_context", mn) or mn))
+        contract_note = f"context raised {ctx}->{want} (checkpoint contract)"
+        ctx = want
     rows = []
     for span in spans:
         a, b = ds.splits.get(span, (0, len(ds.values)))
@@ -72,12 +99,54 @@ def forecast_eval(model, dataset, *, horizons=(21,), spans=("test",), ctx: int |
             panels = [ds.panel_window(a + o, a + o + eff_ctx) for o in offs] if want_panel else None
             t0 = time.time()
             pred = model.predict(cs, h, panels=panels)
+            # A model can emit NaN/Inf for some windows without raising. TTM r3 does this
+            # intermittently: the same window was clean in one process and all-NaN in the
+            # next. Retry the affected windows singly (a batch can poison a model's own
+            # per-instance normalisation), then count what is still broken.
+            point = np.asarray(pred.point, dtype=float).reshape(len(cs), -1)
+            bad = [i for i in range(len(cs)) if not np.isfinite(point[i]).all()]
+            for i in bad:
+                try:
+                    one = model.predict([cs[i]], h, panels=[panels[i]] if panels else None)
+                    cand = np.asarray(one.point, dtype=float).reshape(1, -1)[0]
+                    if np.isfinite(cand).all():
+                        point[i] = cand
+                except Exception:  # noqa: BLE001 - a retry that raises is still a NaN window
+                    pass
+            if bad:
+                pred.point = point
+            # A NaN window must not silently shrink the denominator. forecast_report is
+            # nan-safe: it would score the surviving 3 of 4 windows while the row still
+            # claimed n_windows=4. So the broken windows leave the scoring set, the row
+            # reports the denominator that was actually used, and what was dropped is said
+            # out loud.
+            point = np.asarray(pred.point, dtype=float).reshape(len(cs), -1)
+            kept = [i for i in range(len(cs)) if np.isfinite(point[i]).all()]
+            dropped = len(cs) - len(kept)
+            if dropped:
+                ys = np.asarray(ys)[kept]
+                pred.point = point[kept]
+                for name in ("quantiles", "samples"):
+                    arr = getattr(pred, name, None)
+                    if arr is not None:
+                        setattr(pred, name, np.asarray(arr, dtype=float)[kept])
+                pred.meta = {**(pred.meta or {}), "windows_dropped_nonfinite": dropped}
+            rep = forecast_report(ys, pred, train, season=season)
             row = {"model": getattr(model, "key", "?"), "adaptation":
                    getattr(model, "adaptation", "zero"), "series": ds.name, "span": span,
-                   "horizon": int(h), "ctx": eff_ctx, "n_windows": len(w),
+                   "horizon": int(h), "ctx": eff_ctx, "n_windows": len(kept),
                    "seconds": round(time.time() - t0, 2),
-                   "no_leakage": True, "ctx_note": ctx_note,
-                   **forecast_report(ys, pred, train, season=season)}
+                   "no_leakage": True,
+                   "ctx_note": "; ".join(x for x in (ctx_note, contract_note) if x),
+                   # a NaN in a metric column reads like a number; None plus an error reads
+                   # like the missing cell it is
+                   **{k: (_finite_or_none(v) if isinstance(v, (int, float)) and
+                          not isinstance(v, bool) else v) for k, v in rep.items()}}
+            if dropped:
+                row["pred_nan_windows"] = dropped
+                row["error"] = (f"model emitted non-finite forecasts in {dropped}/{len(cs)} "
+                                "windows (after a single-window retry); those windows are "
+                                "excluded, so n_windows is the scored count")
             row["meta"] = _scalar_meta(pred.meta)
             rows.append(row)
     return rows

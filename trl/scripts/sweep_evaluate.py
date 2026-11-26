@@ -53,6 +53,10 @@ def sweep(args) -> int:
     keys = _models(reg, args.models, args.tier)
     done = set()
     out = Path(args.out)
+    # A run directory does not exist until this line, and the sweep only opens it at the
+    # end: discovering that with FileNotFoundError after a lane has scored every series
+    # wastes machine minutes that a shared cluster will not give back.
+    out.parent.mkdir(parents=True, exist_ok=True)
     if out.exists() and not args.fresh:
         for line in out.read_text().splitlines():
             try:
@@ -427,6 +431,9 @@ def report(args) -> int:
         out += [f"## No rows (attempted, nothing scored): {', '.join(notrun)}", ""]
     text = "\n".join(out) + "\n"
     if args.md:
+        # a report path names a run directory that does not exist until this line; making
+        # it here means --md runs/new-dir/report.md is not a footgun on first use
+        Path(args.md).expanduser().parent.mkdir(parents=True, exist_ok=True)
         Path(args.md).write_text(text)
         print(f"wrote {args.md}")
     if args.stdout:

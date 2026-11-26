@@ -50,20 +50,61 @@ def sh(cmd: list[str], timeout: int = 60) -> str:
         return f"<error {type(e).__name__}: {e}>"
 
 
-def gpu_free() -> list[dict]:
-    """Physical GPU index -> free/total MiB. None if nvidia-smi is missing."""
-    if not shutil.which("nvidia-smi"):
-        return []
-    out = sh(["nvidia-smi", "--query-gpu=index,memory.free,memory.total",
-              "--format=csv,noheader,nounits"])
+def parse_gpu_rows(out: str) -> list[dict]:
+    """nvidia-smi csv -> rows.
+
+    Rows whose memory column is not a number are dropped, not guessed. On the DGX
+    Spark (GB10, unified memory) nvidia-smi prints `[N/A]` for memory.free and
+    memory.total while the device works fine under CUDA, so an N/A row must not be
+    read as 0 MiB free — it means "this tool cannot see this card's memory".
+    gpu_free() asks torch in that case.
+    """
     gpus = []
     for line in out.splitlines():
+        parts = [x.strip() for x in line.split(",")]
+        if len(parts) < 3:
+            continue
         try:
-            i, free, total = (x.strip() for x in line.split(","))
-            gpus.append({"index": int(i), "free_mib": int(free), "total_mib": int(total)})
+            # the query fixes the column order (index, free, total); extra trailing
+            # columns from a newer driver are ignored rather than making the row
+            # disappear, which is what a strict unpack did here
+            gpus.append({"index": int(parts[0]), "free_mib": int(parts[1]),
+                         "total_mib": int(parts[2]), "reported_by": "nvidia-smi"})
         except ValueError:
             continue
     return gpus
+
+
+def gpu_free_torch() -> list[dict]:
+    """Same shape as gpu_free(), from torch.cuda.mem_get_info.
+
+    Only reached when nvidia-smi cannot report memory (unified-memory devices), so it
+    tags the row: a free-memory number used for scheduling should say where it came
+    from, the same way a benchmark row says which device produced it.
+    """
+    try:
+        import torch
+    except ImportError:
+        return []
+    rows = []
+    for i in range(torch.cuda.device_count()):
+        try:
+            free, total = torch.cuda.mem_get_info(i)
+        except Exception:
+            continue
+        rows.append({"index": i, "free_mib": free // (1 << 20),
+                     "total_mib": total // (1 << 20), "reported_by": "torch"})
+    return rows
+
+
+def gpu_free() -> list[dict]:
+    """Physical GPU index -> free/total MiB. [] if neither source can say."""
+    if shutil.which("nvidia-smi"):
+        gpus = parse_gpu_rows(sh(["nvidia-smi", "--query-gpu=index,memory.free,memory.total",
+                                  "--format=csv,noheader,nounits"]))
+        if gpus:
+            return gpus
+    return gpu_free_torch()
 
 
 def gpu_context() -> dict:

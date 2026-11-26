@@ -470,6 +470,20 @@ when one checkout feeds another, list what may move (`git ls-files`, plus the pr
 report text manifests) and copy *that*, or keep `--delete` off and let git show what is
 missing. A working tree that holds installed environments is never a safe rsync target.
 
+### A GPU that answers `[N/A]` for memory is a scheduler bug waiting to happen
+
+The DGX Spark (GB10, aarch64, unified memory) reports `memory.free` and `memory.total`
+as `[N/A]` while `torch.cuda.is_available()` is true and the device works. The lane
+scheduler parsed those rows away, so `gpu_free()` returned an empty pool and *every* lane
+fell back to CPU on a machine with a working GPU — the row would still have been written,
+just labelled `device: cpu`, which is how a new arm of the benchmark would have produced a
+table of CPU numbers under a GPU heading. `parse_gpu_rows` now drops only non-numeric
+memory rows and tolerates extra trailing columns; `gpu_free()` falls back to
+`torch.cuda.mem_get_info()` and tags the row `reported_by: torch`, because a number used
+for scheduling should say where it came from. Two facts to keep straight: `nvidia-smi`
+knowing the GPU exists is not the same as knowing its free memory, and strict unpacking of
+a tool's csv turns a column change into silently empty output.
+
 Because the two checkouts drift, the standalone repo is now pushed (`master` @ the sync
 commit, plus a `pre-sync-2026-11-26` branch holding the state before it), and this tree
 stays the source the machines clone. Docs edits are meant to land in both; where they

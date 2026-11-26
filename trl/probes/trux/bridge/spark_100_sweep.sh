@@ -3,13 +3,14 @@
 # instead of duplicating work. Results stay in JSONL; the harness merges per
 # (model, series, span, horizon) and groups provenance by (interpreter, machine, device).
 set -euo pipefail
-REPO=${REPO:-$HOME/tsfm-trl}
+REPO=${REPO:-}
 # The harness is either the repo root (standalone tsfm-trl) or the vendored subtree
-# (TSFM4Finance/trl). Accept either so one clone serves both, instead of failing with
-# "code not pulled yet" on a machine that pulled it correctly.
-if [ ! -f "$REPO/scripts/sweep_evaluate.py" ] && [ -f "$REPO/trl/scripts/sweep_evaluate.py" ]; then
-  REPO="$REPO/trl"
-fi
+# (TSFM4Finance/trl), and the clone directory name differs per machine. Scan for the
+# entry point instead of hardcoding one path, so a correct clone never reads as
+# "code not pulled yet".
+for c in "$HOME/TSFM4Finance-trl/trl" "$HOME/TSFM4Finance-trl" "$HOME/tsfm-trl" "$HOME/projects/TSFM4Finance-trl/trl"; do
+  [ -f "$c/scripts/sweep_evaluate.py" ] && { REPO=$c; break; }
+done
 ENVROOT=${ENVROOT:-$HOME/envs/tsfm-trl}
 # the series list is embedded, so the job is one self-contained file: a worker that
 # cannot fetch extra inputs still runs exactly the intended subset

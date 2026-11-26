@@ -6,11 +6,35 @@
 # without it is not reproducible.
 REPO=${REPO:-$HOME/tsfm-trl}
 ENVROOT=${ENVROOT:-$HOME/envs/tsfm-trl}
+# The clone is either the standalone harness or vendored as trl/ inside TSFM4Finance, and
+# the directory name differs per machine. Guessing one path produced an empty code_sha in
+# the first gpu7 audit, which reads as "clean tree, unknown commit" — worse than an error.
+if [ ! -d "$REPO/.git" ]; then
+  for c in "$HOME/TSFM4Finance-trl" "$HOME/trl" "$HOME/projects/TSFM4Finance-trl" "$HOME/tsfm-trl"; do
+    if [ -f "$c/scripts/sweep_evaluate.py" ]; then REPO="$c"; break; fi
+    if [ -f "$c/trl/scripts/sweep_evaluate.py" ]; then REPO="$c/trl"; break; fi
+  done
+fi
 echo "host=$(hostname) arch=$(uname -m) kernel=$(uname -r)"
 echo "date=$(date -u +%FT%TZ)"
 echo "uptime: $(uptime)"
-[ -d "$REPO/.git" ] && echo "code_sha=$(git -C "$REPO" rev-parse HEAD) branch=$(git -C "$REPO" rev-parse --abbrev-ref HEAD) dirty=$(git -C "$REPO" status --porcelain | wc -l)" || echo "MISSING REPO at $REPO"
-echo "--- GPUs:"; nvidia-smi --query-gpu=index,name,memory.free,memory.total,utilization.gpu --format=csv,noheader 2>&1 | sed 's/^/  /'
+if [ -d "$REPO/.git" ]; then
+  echo "repo=$REPO code_sha=$(git -C "$REPO" rev-parse HEAD) branch=$(git -C "$REPO" rev-parse --abbrev-ref HEAD) dirty=$(git -C "$REPO" status --porcelain | wc -l)"
+else
+  echo "MISSING REPO (looked at $REPO and the usual vendored paths)"
+fi
+echo "--- GPUs (nvidia-smi):"; nvidia-smi --query-gpu=index,name,driver_version,memory.free,memory.total,utilization.gpu --format=csv,noheader 2>&1 | sed 's/^/  /'
+# Unified-memory cards (DGX Spark / GB10) answer [N/A] for memory.free and memory.total
+# while CUDA works normally. Ask torch for what the scheduler actually needs.
+if [ -x "$ENVROOT/core/bin/python" ]; then
+  echo "--- GPUs (torch, core env):"
+  "$ENVROOT/core/bin/python" -c '
+import torch
+for i in range(torch.cuda.device_count()):
+    free, total = torch.cuda.mem_get_info(i)
+    print(f"  {i} {torch.cuda.get_device_name(i)} free={free>>20}MiB total={total>>20}MiB")
+' 2>&1 | sed 's/^/  /'
+fi
 echo "--- family envs under $ENVROOT:"
 for e in "$ENVROOT"/*/; do
   [ -x "$e/bin/python" ] || continue

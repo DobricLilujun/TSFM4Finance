@@ -25,9 +25,25 @@ RDEST() { if [ "${TRANSPORT:-remote}" = local ]; then printf '%s' "$BRIDGE_DIR/$
           else printf '%s' "$BRIDGE_USER@$BRIDGE_HOST:$BRIDGE_DIR/$1"; fi; }
 mkdir -p "$LOCAL/inbox" "$LOCAL/outbox/results"
 beat() {                                   # machine facts = provenance, not decoration
-  { echo "host=$(hostname)"; echo "arch=$(uname -m)"; echo "when=$(date -u +%FT%TZ)";
-    [ -d "${REPO:-$HOME/tsfm-trl}/.git" ] && echo "code_sha=$(git -C "$REPO" rev-parse HEAD)"
-    echo "gpu_free=$(nvidia-smi --query-gpu=memory.free --format=csv,noheader,nounits 2>/dev/null | tr '\n' ',')"
+  { echo "host=$(hostname)"; echo "arch=$(uname -m)"; echo "when=$(date -u +%FT%TZ)"
+    # REPO differs per machine (standalone clone vs vendored trl/ inside TSFM4Finance);
+    # an unresolved path used to leave code_sha blank, which is worse than absent because
+    # it looks like a clean tree at an unknown commit.
+    r="${REPO:-}"
+    [ -d "$r/.git" ] || r="$(for c in "$HOME/TSFM4Finance-trl" "$HOME/tsfm-trl" "$HOME/projects/TSFM4Finance-trl"; do
+        [ -d "$c/.git" ] && { echo "$c"; break; }; done)"
+    [ -n "$r" ] && [ -d "$r/.git" ] &&
+      echo "code_sha=$(git -C "$r" rev-parse --short HEAD) branch=$(git -C "$r" rev-parse --abbrev-ref HEAD) dirty=$(git -C "$r" status --porcelain | wc -l)"
+    free=$(nvidia-smi --query-gpu=memory.free --format=csv,noheader,nounits 2>/dev/null | tr '\n' ',')
+    case "${free//[[:space:]]/}" in
+      *[N/]*|"")
+        # GB10/DGX Spark reports [N/A] for memory under unified memory; torch still sees
+        # the device, so schedule from torch rather than treating the card as absent.
+        free=$("${PY:-python3}" -c 'import torch;print(",".join(str(torch.cuda.mem_get_info(i)[0]>>20) for i in range(torch.cuda.device_count())))' 2>/dev/null | tr '\n' ',')
+        echo "gpu_free=${free} gpu_free_source=torch"
+        ;;
+      *) echo "gpu_free=${free} gpu_free_source=nvidia-smi" ;;
+    esac
     [ -n "${PY:-}" ] && "$PY" -c 'import torch;print("torch",torch.__version__,"cuda",torch.cuda.is_available())' 2>/dev/null
   } > "$LOCAL/outbox/heartbeat" 2>/dev/null
   RS "$LOCAL/outbox/heartbeat" "$(RDEST outbox)/" 2>/dev/null

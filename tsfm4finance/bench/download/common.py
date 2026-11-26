@@ -53,34 +53,38 @@ def retry(times: int = 3, base_delay: float = 2.0, exceptions=(Exception,)):
 
 
 def http_get(url: str, timeout: int = 90, headers: dict | None = None) -> bytes:
-    """GET with curl first, requests as the fallback.
+    """GET with curl first, python-requests only as a fallback.
 
-    Several finance data hosts (FRED sits behind Akamai) answer plain curl in
-    50 ms while python-requests hangs until the read timeout - a TLS-fingerprint
-    filter.  curl is therefore the primary path here; requests remains as a
-    fallback for hosts that behave the other way round.  A short backoff avoids
-    tripping the throttle twice in a row.
+    Several finance data hosts (FRED sits behind Akamai) answer plain curl in 50 ms
+    while python-requests hangs until the read timeout - a TLS-fingerprint filter.
+    curl is therefore the primary path.  The ALPN pin ``--http1.1`` is kept as a
+    *second* variant because it is exactly what hangs on some CDNs, and every variant
+    gets a short cap so one dead series cannot cost minutes of retries.
     """
     import subprocess
     ua = (headers or {}).get("User-Agent", "Mozilla/5.0 tsfm4finance-bench/1.0")
-    cmd = ["curl", "-sSL", "--http1.1", "--compressed", "-A", ua,
-           "--max-time", str(timeout), url]
+    extra = []
     for k, v in (headers or {}).items():
         if k.lower() != "user-agent":
-            cmd += ["-H", f"{k}: {v}"]
-    last = None
+            extra += ["-H", f"{k}: {v}"]
+    variants = [["curl", "-sSL", "--compressed", "-A", ua, "--max-time", str(timeout)],
+                ["curl", "-sSL", "--http1.1", "--compressed", "-A", ua,
+                 "--max-time", str(min(timeout, 30))],
+                ["curl", "-sS", "-A", ua, "--max-time", str(min(timeout, 30))]]
+    last: Exception | None = None
     for attempt in range(3):
-        try:
-            out = subprocess.run(cmd, capture_output=True)
-            if out.returncode == 0 and out.stdout:
-                return out.stdout
-            last = RuntimeError(f"curl rc={out.returncode}: {out.stderr[:200]!r} for {url}")
-        except Exception as e:                                     # noqa: BLE001
-            last = e
-        time.sleep(1.5 * (2**attempt))
+        for cmd in variants:
+            try:
+                out = subprocess.run(cmd + extra + [url], capture_output=True)
+                if out.returncode == 0 and out.stdout:
+                    return out.stdout
+                last = RuntimeError(f"curl rc={out.returncode}: {out.stderr[:200]!r} for {url}")
+            except Exception as e:                                     # noqa: BLE001
+                last = e
+        time.sleep(1.0 * (2**attempt))
     try:
         import requests
-        r = requests.get(url, timeout=timeout, headers={"User-Agent": ua})
+        r = requests.get(url, timeout=min(timeout, 45), headers={"User-Agent": ua})
         r.raise_for_status()
         return r.content
     except Exception as e:                                         # noqa: BLE001

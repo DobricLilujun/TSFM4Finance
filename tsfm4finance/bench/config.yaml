@@ -80,19 +80,54 @@ series_groups:
   - sector_financials
   - gold_etf
   - commodity_index_etf
+  fred:
+  - fred_10y2y_spread
+  - fred_10y3m_spread
+  - fred_10y_breakeven
+  - fred_cpi
+  - fred_dgs10
+  - fred_dgs2
+  - fred_dgs30
+  - fred_dgs5
+  - fred_dollar_broad_index
+  - fred_effr
+  - fred_fed_balance_sheet
+  - fred_fed_funds_daily
+  - fred_gdp_nominal
+  - fred_gdp_real
+  - fred_housing_starts
+  - fred_hy_oas
+  - fred_ig_oas
+  - fred_m2
+  - fred_nfcI
+  - fred_pce_price
+  - fred_sofr
+  - fred_stlfsi
+  - fred_unemployment
+  - fred_vix
   intraday:
   - cx_adausdt_1h
+  - cx_adausdt_5m_fresh
   - cx_avaxusdt_1h
+  - cx_avaxusdt_5m_fresh
   - cx_bnbusdt_1h
+  - cx_bnbusdt_5m_fresh
   - cx_btcusdt_1h
+  - cx_btcusdt_5m_fresh
   - cx_dogeusdt_1h
+  - cx_dogeusdt_5m_fresh
   - cx_dotusdt_1h
   - cx_ethusdt_1h
+  - cx_ethusdt_5m_fresh
   - cx_linkusdt_1h
+  - cx_linkusdt_5m_fresh
   - cx_ltcusdt_1h
+  - cx_ltcusdt_5m_fresh
   - cx_solusdt_1h
+  - cx_solusdt_5m_fresh
   - cx_trxusdt_1h
   - cx_xrpusdt_1h
+  - cx_xrpusdt_5m_fresh
   crypto_1h:
   - cx_adausdt_1h
   - cx_avaxusdt_1h
@@ -162,6 +197,7 @@ series_groups:
   - cx_grtusdt_1d
   - cx_hbarusdt_1d
   - cx_icpusdt_1d
+  - cx_initusdt_1d
   - cx_injusdt_1d
   - cx_linkusdt_1d
   - cx_linkusdt_1h
@@ -170,6 +206,7 @@ series_groups:
   - cx_manausdt_1d
   - cx_minausdt_1d
   - cx_nearusdt_1d
+  - cx_ondousdt_1d
   - cx_opusdt_1d
   - cx_rndrusdt_1d
   - cx_sandusdt_1d
@@ -182,6 +219,7 @@ series_groups:
   - cx_trxusdt_1d
   - cx_trxusdt_1h
   - cx_uniusdt_1d
+  - cx_usd1usdt_1d
   - cx_usdcusdt_1d
   - cx_vetusdt_1d
   - cx_xlmusdt_1d
@@ -220,6 +258,19 @@ series_groups:
   - cf_solusdt_1h
   - cf_trxusdt_1h
   - cf_xrpusdt_1h
+  - cx_adausdt_5m_fresh
+  - cx_avaxusdt_5m_fresh
+  - cx_bnbusdt_5m_fresh
+  - cx_btcusdt_5m_fresh
+  - cx_dogeusdt_5m_fresh
+  - cx_ethusdt_5m_fresh
+  - cx_initusdt_1d
+  - cx_linkusdt_5m_fresh
+  - cx_ltcusdt_5m_fresh
+  - cx_ondousdt_1d
+  - cx_solusdt_5m_fresh
+  - cx_usd1usdt_1d
+  - cx_xrpusdt_5m_fresh
   crypto_deriv:
   - cd_adausdt_funding
   - cd_aptusdt_funding
@@ -248,6 +299,17 @@ series_groups:
   - cf_solusdt_1h
   - cf_trxusdt_1h
   - cf_xrpusdt_1h
+  crypto_fresh:
+  - cx_adausdt_5m_fresh
+  - cx_avaxusdt_5m_fresh
+  - cx_bnbusdt_5m_fresh
+  - cx_btcusdt_5m_fresh
+  - cx_dogeusdt_5m_fresh
+  - cx_ethusdt_5m_fresh
+  - cx_linkusdt_5m_fresh
+  - cx_ltcusdt_5m_fresh
+  - cx_solusdt_5m_fresh
+  - cx_xrpusdt_5m_fresh
   crypto_pegs:
   - peg_busdusdt_1d
   - peg_fdusdusdt_1d
@@ -276,12 +338,14 @@ series_groups:
   - cx_grtusdt_1d
   - cx_hbarusdt_1d
   - cx_icpusdt_1d
+  - cx_initusdt_1d
   - cx_injusdt_1d
   - cx_linkusdt_1d
   - cx_ltcusdt_1d
   - cx_manausdt_1d
   - cx_minausdt_1d
   - cx_nearusdt_1d
+  - cx_ondousdt_1d
   - cx_opusdt_1d
   - cx_rndrusdt_1d
   - cx_sandusdt_1d
@@ -292,6 +356,7 @@ series_groups:
   - cx_tiausdt_1d
   - cx_trxusdt_1d
   - cx_uniusdt_1d
+  - cx_usd1usdt_1d
   - cx_usdcusdt_1d
   - cx_vetusdt_1d
   - cx_xlmusdt_1d

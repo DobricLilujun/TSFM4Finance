@@ -59,7 +59,45 @@ def _load_source(name: str) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
             pd.read_parquet(d / "test.parquet"))
 
 
+_FREQ_MAP = {"tick": Frequency.TICK, "second": Frequency.SECOND, "1m": Frequency.MINUTE,
+             "5m": Frequency.MINUTE, "15m": Frequency.MINUTE, "30m": Frequency.MINUTE,
+             "minute": Frequency.MINUTE, "1h": Frequency.HOUR, "8h": Frequency.HOUR,
+             "hour": Frequency.HOUR, "1d": Frequency.DAY, "day": Frequency.DAY,
+             "daily": Frequency.DAY, "weekly": Frequency.WEEK, "week": Frequency.WEEK,
+             "monthly": Frequency.MONTH, "month": Frequency.MONTH,
+             "quarterly": Frequency.QUARTER, "quarter": Frequency.QUARTER}
+
+
+def _source_profile(name: str) -> tuple[str, Frequency]:
+    """The source dataset's target column and its frequency.
+
+    Crypto derivatives series target ``funding_rate``, macro series target ``close`` (a
+    level).  The task views always write the modelled column as ``close`` because that is
+    what the harness scores, so a non-close target is renamed and the note says so.
+    """
+    import json
+    meta_path = _source_dir(name) / "meta.json"
+    meta = json.loads(meta_path.read_text()) if meta_path.exists() else {}
+    freq = _FREQ_MAP.get(str(meta.get("frequency", "")).lower(), Frequency.DAY)
+    return str(meta.get("target") or "close"), freq
+
+
+def _is_price(close: np.ndarray) -> bool:
+    """True when a log return is defined, i.e. every observation is strictly positive.
+
+    Funding rates, spreads and OAS levels cross zero, so "return" has to mean the first
+    difference there - otherwise np.log produces NaNs and the labels silently degrade.
+    """
+    c = close[~np.isnan(close)]
+    return bool(c.size) and float(np.min(c)) > 0
+
+
 def _logret(close: np.ndarray) -> np.ndarray:
+    if not _is_price(close):                     # rates / spreads: level change
+        r = np.empty_like(close, dtype=float)
+        r[0] = 0.0
+        r[1:] = close[1:] - close[:-1]
+        return r
     r = np.empty_like(close, dtype=float)
     r[0] = 0.0
     r[1:] = np.log(close[1:] / close[:-1])
@@ -67,8 +105,11 @@ def _logret(close: np.ndarray) -> np.ndarray:
 
 
 def _fwd_ret(close: np.ndarray, h: int) -> np.ndarray:
-    """log return from t to t+h (NaN where the future window runs off the end)."""
+    """forward change from t to t+h: log return for prices, level change for rates."""
     out = np.full(len(close), np.nan)
+    if not _is_price(close):
+        out[:-h] = close[h:] - close[:-h]
+        return out
     out[:-h] = np.log(close[h:] / close[:-h])
     return out
 
@@ -123,6 +164,11 @@ def build_for_series(base: str, domain: str) -> list[str]:
     """Create the 4 task datasets for one real series. Returns the new dataset names."""
     tr, va, te = _load_source(base)
     full = pd.concat([tr, va, te], ignore_index=True)
+    target, freq = _source_profile(base)
+    renamed = ""
+    if target != "close" and target in full.columns:
+        full = full.rename(columns={target: "close"})
+        renamed = f" modelled column is the source target {target!r} renamed to close;"
     close = full["close"].to_numpy(dtype=float)
     n_train, n_val = len(tr), len(va)
     src = full["timestamp"] if "timestamp" in full.columns else None
@@ -133,11 +179,13 @@ def build_for_series(base: str, domain: str) -> list[str]:
     dir_df = pd.DataFrame({"timestamp": src, "close": close,
                            "label": np.where(np.isnan(fr), np.nan, (fr > 0).astype(float))})
     m = DatasetMeta(name=f"{base}_dir5", domain=Domain(domain), task=TaskType.CLASSIFY,
-                    frequency=Frequency.DAY, n_features=3, feature_names=[],
+                    frequency=freq, n_features=3, feature_names=[],
                     source=f"{base} (real) + derived label", open=True, target="close",
                     lookback=512, horizon=_DIR_H, n_classes=2, labels=["down", "up"],
-                    notes=f"sign of the {_DIR_H}-business-day forward log return; "
-                          f"label is the target (uses the future), features use prices <= t")
+                    notes=(f"sign of the {_DIR_H}-bar forward "
+                           f"{'log return' if _is_price(close) else 'change'}{renamed}; "
+                           f"label is the target (uses the future), "
+                           "features use prices <= t"))
     created.append(_write_dataset(f"{base}_dir5", dir_df, n_train, n_val, m).name)
 
     # ---- 2) volatility-regime classification (next 21-day realized vol tercile) ----
@@ -151,7 +199,7 @@ def build_for_series(base: str, domain: str) -> list[str]:
     vol_df = pd.DataFrame({"timestamp": src, "close": close, "label": reg})
     name = f"{base}_volreg"
     m = DatasetMeta(name=name, domain=Domain(domain), task=TaskType.CLASSIFY,
-                    frequency=Frequency.DAY, n_features=3, feature_names=[],
+                    frequency=freq, n_features=3, feature_names=[],
                     source=f"{base} (real) + derived label", open=True, target="close",
                     lookback=512, horizon=_VOLREG_H, n_classes=3,
                     labels=["calm", "normal", "turbulent"],
@@ -165,7 +213,7 @@ def build_for_series(base: str, domain: str) -> list[str]:
     ext_df = pd.DataFrame({"timestamp": src, "close": close, "label": ext})
     name = f"{base}_extreme"
     m = DatasetMeta(name=name, domain=Domain(domain), task=TaskType.ANOMALY,
-                    frequency=Frequency.DAY, n_features=3, feature_names=[],
+                    frequency=freq, n_features=3, feature_names=[],
                     source=f"{base} (real) + derived label", open=True, target="close",
                     lookback=512, horizon=1, n_classes=2, labels=["normal", "extreme_move"],
                     notes=f"|daily return| beyond expanding median +/- {_EXTREME_Z} MAD "
@@ -178,7 +226,7 @@ def build_for_series(base: str, domain: str) -> list[str]:
     trd_df = pd.DataFrame({"timestamp": src, "close": close})
     name = f"{base}_trade"
     m = DatasetMeta(name=name, domain=Domain(domain), task=TaskType.TRADING,
-                    frequency=Frequency.DAY, n_features=2, feature_names=[],
+                    frequency=freq, n_features=2, feature_names=[],
                     source=f"{base} (real)", open=True, target="close",
                     lookback=512, horizon=_DIR_H, cost_bps=10.0,
                     labels=["long", "flat", "short"],

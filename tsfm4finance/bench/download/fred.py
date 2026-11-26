@@ -1,5 +1,8 @@
 """T1 macro/rates/credit panel from FRED (no API key: fredgraph.csv).
 
+Note: FRED retires ids silently, so the list below is verified against the live endpoint
+(2026-11); a retired id now fails loudly instead of producing a bogus one-column frame.
+
 Why macro belongs in a finance TSFM benchmark: macro series are exactly where
 TSFM papers claim zero-shot strength (monthly/quarterly, long history, many
 related variates), while the finance-market series are where they fail.  Running
@@ -24,7 +27,7 @@ SERIES: list[tuple[str, str, str, str]] = [
     ("T10Y2Y", "fred_10y2y_spread", "rates", "daily"),
     ("T10Y3M", "fred_10y3m_spread", "rates", "daily"),
     ("T10YIE", "fred_10y_breakeven", "inflation", "daily"),
-    ("AFSEFTA", "fred_10y_tips_real", "inflation", "daily"),
+    ("DFII10", "fred_10y_tips_real", "inflation", "daily"),
     ("DFF", "fred_fed_funds_daily", "rates", "daily"),
     ("EFFR", "fred_effr", "rates", "daily"),
     ("SOFR", "fred_sofr", "rates", "daily"),
@@ -33,28 +36,31 @@ SERIES: list[tuple[str, str, str, str]] = [
     ("VIXCLS", "fred_vix", "volatility", "daily"),
     ("NFCI", "fred_nfcI", "financial_conditions", "weekly"),
     ("STLFSI4", "fred_stlfsi", "financial_conditions", "weekly"),
-    ("WPSFD495", "fred_ppi_financial", "prices", "monthly"),
+    ("BAMLH0A0HYM2", "fred_high_yield_oas", "credit", "daily"),
     ("UNRATE", "fred_unemployment", "macro", "monthly"),
     ("CPIAUCSL", "fred_cpi", "inflation", "monthly"),
     ("PCEPI", "fred_pce_price", "inflation", "monthly"),
     ("M2SL", "fred_m2", "macro", "monthly"),
-    ("ICBO", "fred_industrial_production", "macro", "monthly"),
+    ("INDPRO", "fred_industrial_production", "macro", "monthly"),
     ("HOUST", "fred_housing_starts", "macro", "monthly"),
-    ("FHFAST", "fred_house_price_index", "macro", "monthly"),
-    ("CSHPI10", "fred_case_shiller_10", "macro", "monthly"),
-    ("CCCPIAR", "fred_consumer_credit", "credit", "monthly"),
+    ("HSN1F", "fred_house_price_index", "macro", "monthly"),
+    ("DTWEXBGS", "fred_usd_broad_index", "fx", "daily"),
+    ("TOTCI", "fred_ci_loans", "credit", "weekly"),
     ("WALCL", "fred_fed_balance_sheet", "macro", "weekly"),
     ("DTWEXBGS", "fred_dollar_broad_index", "fx", "daily"),
-    ("BOPBPA", "fred_current_account_balance", "macro", "quarterly"),
+    ("NFCI", "fred_financial_conditions", "macro", "weekly"),
     ("GDP", "fred_gdp_nominal", "macro", "quarterly"),
     ("GDPC1", "fred_gdp_real", "macro", "quarterly"),
 ]
 
 
 @retry(times=3, base_delay=2.0)
-def _fred_csv(fid: str, start: str = "2004-01-01") -> pd.DataFrame:
+def _fred_csv(fid: str, start: str = "2004-01-01", min_obs: int = 100) -> pd.DataFrame:
     url = f"https://fred.stlouisfed.org/graph/fredgraph.csv?id={fid}&cosd={start}"
     body = http_get(url, timeout=90).decode("utf-8", "replace")
+    if body.lstrip().startswith(("<", "{")):
+        raise RuntimeError(f"FRED id {fid!r} is not available (HTML/JSON error page) - "
+                           "FRED retires series ids without notice")
     df = pd.read_csv(io.StringIO(body))
     if df.shape[1] < 2:
         raise RuntimeError(f"unexpected FRED response for {fid}: {df.columns.tolist()}")
@@ -62,9 +68,12 @@ def _fred_csv(fid: str, start: str = "2004-01-01") -> pd.DataFrame:
     out = pd.DataFrame({"timestamp": pd.to_datetime(df[date_col], errors="coerce"),
                         "close": pd.to_numeric(df[val_col], errors="coerce")})
     out = out.dropna().reset_index(drop=True)
-    if len(out) < 100:
+    if len(out) < min_obs:      # quarterly series legitimately have ~90 rows since 2004
         raise RuntimeError(f"too few observations for {fid}: {len(out)}")
     return out
+
+
+_MIN_OBS = {"quarterly": 40, "monthly": 90, "weekly": 150, "daily": 400}
 
 
 def fetch_one(fid: str, name: str, domain: str, freq: str, *,
@@ -72,7 +81,8 @@ def fetch_one(fid: str, name: str, domain: str, freq: str, *,
     if dataset_exists(name) and not force:
         return "exists"
     try:
-        df = _fred_csv(fid, start)
+        # a quarterly series since 2004 has ~90 rows, which is plenty for h<=12 forecasts
+        df = _fred_csv(fid, start, min_obs=_MIN_OBS.get(freq, 100))
     except Exception as e:                                   # noqa: BLE001
         record_failure("fred", name, str(e))
         return f"failed:{e}"

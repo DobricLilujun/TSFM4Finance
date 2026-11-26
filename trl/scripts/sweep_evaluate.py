@@ -432,11 +432,13 @@ def report(args) -> int:
                 "names for that model (usually a venv alias — verify before quoting):",
                 ""] + [f"- {m} (env {e}) ran with `{i}`" for m, e, i in mismatch] + [""]
     if dupes:
-        spread, superseded, by_model = [], [], {}
+        spread, superseded, by_model, sup_gap = [], [], {}, []
         for (model, _series, _span, _h), seen in dupes.items():
             a, b, _t0, _t1, p0, p1 = seen[-1]    # the pair the merge actually resolved
             if p0 != p1:
                 superseded.append(model)
+                if isinstance(a, (int, float)) and isinstance(b, (int, float)):
+                    sup_gap.append(abs(a - b) / max(abs(b), 1e-9))
                 continue
             if isinstance(a, (int, float)) and isinstance(b, (int, float)):
                 rel = abs(a - b) / max(abs(b), 1e-9)
@@ -453,6 +455,13 @@ def report(args) -> int:
             cnt = collections.Counter(superseded)
             sec += ["", "Superseded by a protocol change: "
                         + ", ".join(f"{m} ({n})" for m, n in cnt.most_common(6))]
+            if sup_gap:
+                sec += ["", f"Gap between a superseded cell and the one that replaced it: "
+                            f"median {100*sorted(sup_gap)[len(sup_gap)//2]:.2f}%, max "
+                            f"{100*max(sup_gap):.1f}%. Some of these only differ by a code "
+                            f"sha (gap ~0.0002%) and are plain re-runs; the large ones are "
+                            f"a protocol fix, which is why the number is quoted and not "
+                            f"averaged away."]
         if spread:
             sec += ["", f"Run variance under an identical protocol: median "
                         f"{100*sorted(spread)[len(spread)//2]:.2f}%, max "

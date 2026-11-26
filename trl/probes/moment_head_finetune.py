@@ -69,7 +69,9 @@ def main() -> int:
     ap.add_argument("--series", action="append", required=True, help="CSV/parquet series")
     ap.add_argument("--models", default="moment-1-small,moment-1-large")
     ap.add_argument("--configs", default="heads_only:fs16,heads_only:fs64,full:fs64",
-                    help="comma list of peft:budget")
+                    help="comma list of peft:budget[:lr] — the lr field overrides the budget "
+                         "lr; a fine-tune whose loss *rises* is a broken optimisation, not a "
+                         "negative result, and lr is the first knob to prove that out")
     ap.add_argument("--horizons", default="21,63")
     ap.add_argument("--ctx", type=int, default=256)
     ap.add_argument("--max-windows", type=int, default=8)
@@ -78,16 +80,46 @@ def main() -> int:
     ap.add_argument("--device", default="cuda")
     ap.add_argument("--lr", type=float, default=None, help="override the budget lr")
     ap.add_argument("--out", required=True)
+    ap.add_argument("--baseline-models", default="naive,seasonal_naive,arima",
+                    help="scored zero-shot with no fit, so the fine-tune comparison has a "
+                         "local reference in the same file (pass-3 naive rows live in a "
+                         "different tree and cover a different series split)")
     ap.add_argument("--out-dir", default="reports/moment_ft/ckpts")
     a = ap.parse_args()
 
     series = list(dict.fromkeys(a.series))
     models = [m.strip() for m in a.models.split(",") if m.strip()]
-    configs = [tuple(c.split(":")) for c in a.configs.split(",") if c.strip()]
+    def split_cfg(spec: str):
+        parts = [x.strip() for x in spec.split(":")]
+        peft, budget = parts[0], parts[1]
+        lr = float(parts[2]) if len(parts) > 2 and parts[2] else None
+        return peft, budget, lr
+
+    configs = [split_cfg(c) for c in a.configs.split(",") if c.strip()]
     hz = tuple(int(h) for h in a.horizons.split(","))
 
     out = open(a.out, "w")
     t_start = time.time()
+
+    # references first: they cost nothing and every fine-tune delta is meaningless without
+    # the same-series naive/ARIMA row measured under the identical protocol
+    for mk in [m.strip() for m in a.baseline_models.split(",") if m.strip()]:
+        for path in series:
+            ds = SeriesDataset.load(path)
+            r = dict(base_row(mk, ds.name, "zero-shot", argparse.Namespace(
+                ctx=a.ctx, max_windows=a.max_windows, seed=a.seed, budget=None, peft=None)))
+            try:
+                m = ModelHub.load(mk, device=a.device, batch=a.batch)
+                r["rows"] = evaluate(m, ds, horizons=hz, ctx=a.ctx, max_windows=a.max_windows,
+                                     seed=a.seed, batch=a.batch)
+                r["status"] = "ok"
+            except Exception as e:  # noqa: BLE001
+                r["status"], r["rows"] = "failed", []
+                r["error"] = f"{type(e).__name__}: {e}"[:300]
+            out.write(json.dumps(r) + "\n")
+            out.flush()
+        log(f"== baseline {mk} done")
+
     for mk in models:
         log(f"== {mk}")
         for path in series:
@@ -111,10 +143,12 @@ def main() -> int:
                 log(f"  {name} zero-shot FAILED {type(e).__name__}: {str(e)[:90]}")
                 continue
 
-            for peft, budget in configs:
+            for peft, budget, lr_ov in configs:
+                lr = lr_ov if lr_ov is not None else a.lr
                 r = dict(base_row(mk, name, f"finetuned:{peft}", argparse.Namespace(
                     ctx=a.ctx, max_windows=a.max_windows, seed=a.seed, budget=budget,
                     peft=peft)))
+                r["lr"] = lr
                 t0 = time.time()
                 try:
                     m2 = ModelHub.load(mk, device=a.device, batch=a.batch)
@@ -122,8 +156,9 @@ def main() -> int:
                     fits = []
                     for h in hz:
                         cfg = TrainingConfig(ctx=a.ctx, horizon=h, budget=budget, bs=a.batch,
-                                             peft=peft, seed=a.seed, lr=a.lr,
-                                             out_dir=a.out_dir, tag=f"{mk}_{name}_{peft}_{budget}_h{h}")
+                                             peft=peft, seed=a.seed, lr=lr,
+                                             out_dir=a.out_dir,
+                                             tag=f"{mk}_{name}_{peft}_{budget}_lr{lr}_h{h}")
                         res = ForecastTrainer(m2, cfg).fit(ds)
                         fits.append({"horizon": h, "status": res.status, "steps": res.steps,
                                      "n_windows": res.n_windows,

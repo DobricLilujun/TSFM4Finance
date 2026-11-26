@@ -48,12 +48,12 @@ done
 wc -l "$CSVROOT"/*.csv 2>/dev/null | sed 's/^/  /'
 
 run() {
-  local models=$1 out=$2
+  local models=$1 out=$2; shift 2
   local args=()
   for f in $SERIES_FILES; do args+=(--series "$CSVROOT/$f"); done
   "$ENVROOT/core/bin/python" -u "$REPO/scripts/sweep_evaluate.py" \
     "${args[@]}" --models "$models" --horizons 21,63 --max-windows 8 --ctx 256 \
-    --seed 0 --device cuda --out "$out" --fresh
+    --seed 0 --out "$out" --fresh "$@"
 }
 
 # baselines ride along so a CUDA-scored row exists even if the Hugging Face download is

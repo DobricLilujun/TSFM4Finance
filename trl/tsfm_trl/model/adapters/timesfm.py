@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import numpy as np
 
+from ...errors import UnavailableError
 from ..base import LEVELS, Pred, TSFMModel, to_levels
 
 POINT_CHANNEL = 5                     # median channel of the 2.5 head
@@ -30,7 +31,41 @@ class _TimesFMBase(TSFMModel):
     levels = list(LEVELS)
 
 
-class TimesFM25(_TimesFMBase):
+class _TimesFMBase2(_TimesFMBase):
+    """Device pinning for the wrappers whose vendor loader has no ``device`` argument.
+
+    ``TimesFM_2p5_200M_torch.from_pretrained`` takes no device: it lands on CUDA whenever
+    torch sees a GPU. A sweep asked for ``--device cpu``, recorded ``device: cpu`` on its
+    rows, and then died with ``CUDA out of memory`` on a card it was never supposed to
+    touch - which is also how a CPU lane quietly becomes a GPU experiment on a shared
+    machine. Move the weights to what was asked for, and refuse rather than write a row
+    that misstates where it ran.
+    """
+
+    def _pin_device(self) -> None:
+        want = str(self.device)
+        try:
+            got = self._dev()
+        except Exception:                                     # noqa: BLE001
+            return                                            # no parameters to move
+        if got.type != want:
+            try:
+                self._wrapper.model.to(want)
+            except Exception as e:                            # noqa: BLE001
+                raise UnavailableError(
+                    self.key,
+                    f"weights are on {got} and could not be moved to device={want!r} "
+                    f"({str(e)[:80]}); refusing to record a row that names a device it "
+                    "did not run on") from e
+            got = self._dev()
+            if got.type != want:
+                raise UnavailableError(
+                    self.key,
+                    f"still on {got} after .to({want}); the vendor loader pins placement "
+                    "itself - do not trust the device column for this model")
+
+
+class TimesFM25(_TimesFMBase2):
     key, family = "timesfm-2.5-200m", "timesfm25"
     caps = frozenset({"forecast", "quantiles", "finetune"})
     loss_kind = "quantile"
@@ -49,6 +84,7 @@ class TimesFM25(_TimesFMBase):
             force_flip_invariance=True, per_core_batch_size=per_core_batch_size,
             use_continuous_quantile_head=False, fix_quantile_crossing=True))
         self._norm = normalize_inputs
+        self._pin_device()
 
     # ------------------------------------------------------------------ inference
     def predict(self, contexts, horizon, *, panels=None, future=None) -> Pred:
@@ -144,6 +180,10 @@ class TimesFM25(_TimesFMBase):
         a full checkpoint directory (the vendor format), not as a state dict."""
         import timesfm
         self._wrapper = timesfm.TimesFM_2p5_200M_torch.from_pretrained(path, torch_compile=False)
+        # same trap as __init__: a freshly loaded checkpoint lands wherever the vendor
+        # loader likes, not where the row will claim it ran
+        if hasattr(self, "_pin_device"):
+            self._pin_device()
         self._wrapper.compile(timesfm.ForecastConfig(
             max_context=self.max_context, max_horizon=self.max_horizon,
             normalize_inputs=self._norm, infer_is_positive=False, force_flip_invariance=True,

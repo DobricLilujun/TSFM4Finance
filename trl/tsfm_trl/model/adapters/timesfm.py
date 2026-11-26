@@ -42,6 +42,25 @@ class _TimesFMBase2(_TimesFMBase):
     that misstates where it ran.
     """
 
+    def _load_off_gpu(self, construct):
+        """Construct the vendor model without it noticing a GPU.
+
+        Pinning after the fact is not enough: `TimesFMModel.__init__` selects cuda:0 and
+        calls `self.to(...)` inside the constructor, so on a saturated card the *load* is
+        what dies - `--device cpu` still produced `CUDA out of memory: GPU 0 ... 14.94 MiB
+        is free`. While the row is meant to say cpu, hide the device for the duration of
+        construction, then hand it back.
+        """
+        if str(self.device) == "cpu":
+            import torch
+            orig_avail, orig_count = torch.cuda.is_available, torch.cuda.device_count
+            torch.cuda.is_available, torch.cuda.device_count = (lambda: False), (lambda: 0)
+            try:
+                return construct()
+            finally:
+                torch.cuda.is_available, torch.cuda.device_count = orig_avail, orig_count
+        return construct()
+
     def _pin_device(self) -> None:
         """Move the module *and* correct what the vendor model remembered.
 
@@ -91,8 +110,9 @@ class TimesFM25(_TimesFMBase2):
         super().__init__(**kw)
         import timesfm
         self.checkpoint = checkpoint or timesfm.TimesFM_2p5_200M_torch.DEFAULT_REPO_ID
-        self._wrapper = timesfm.TimesFM_2p5_200M_torch.from_pretrained(
-            self.checkpoint, torch_compile=torch_compile)
+        self._wrapper = self._load_off_gpu(
+            lambda: timesfm.TimesFM_2p5_200M_torch.from_pretrained(
+                self.checkpoint, torch_compile=torch_compile))
         self._pin_device()          # before compile(): compile sizes batches off device_count
         self._wrapper.compile(timesfm.ForecastConfig(
             max_context=self.max_context, max_horizon=self.max_horizon,
@@ -194,7 +214,9 @@ class TimesFM25(_TimesFMBase2):
         """A fine-tuned 2.5 saved by ``finetune``/``save_pretrained`` is reloaded as
         a full checkpoint directory (the vendor format), not as a state dict."""
         import timesfm
-        self._wrapper = timesfm.TimesFM_2p5_200M_torch.from_pretrained(path, torch_compile=False)
+        loader = getattr(self, "_load_off_gpu", lambda f: f())
+        self._wrapper = loader(
+            lambda: timesfm.TimesFM_2p5_200M_torch.from_pretrained(path, torch_compile=False))
         # same trap as __init__: a freshly loaded checkpoint lands wherever the vendor
         # loader likes, not where the row will claim it ran
         if hasattr(self, "_pin_device"):

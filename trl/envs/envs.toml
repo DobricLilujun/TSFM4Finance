@@ -31,8 +31,9 @@ transformers==5.10.1 (Toto 2.0 needs it), torchmetrics (Moirai-free but the shar
 backbone imports it), setuptools<81 for pkg_resources, toto-ts for Toto 1.0.
 On aarch64 do NOT install the x86 lock file: build from this machine's core lock and
 add those pins, otherwise the venv ends up without transformers at all and every row
-reports 'missing package'."""
-notes = "family envs pin numpy 1.26, so the parquet engine is pyarrow 16 (pyarrow >=18 needs numpy 2 and fails to import here); needed to read fev-style train/validation/test directories"
+reports 'missing package'.
+Family envs pin numpy 1.26, so the parquet engine is pyarrow 16 (pyarrow >=18 needs numpy 2
+and fails to import here); needed to read fev-style train/validation/test directories."""
 
 [env.tirex]
 python = "3.11"
@@ -48,8 +49,10 @@ env = { USE_TRITON_KERNELS = "0" }
 [env.timemoe]
 python = "3.11"
 lock = "timemoe.lock.txt"
-notes = "transformers==4.40.2 and numpy<2 — 4.42 introduced Cache objects, 4.44 removed standardize_cache_format; the released remote code only runs on 4.40.x"
-notes = "family envs pin numpy 1.26, so the parquet engine is pyarrow 16 (pyarrow >=18 needs numpy 2 and fails to import here); needed to read fev-style train/validation/test directories"
+notes = """transformers==4.40.2 and numpy<2 - 4.42 introduced Cache objects, 4.44 removed
+standardize_cache_format; the released remote code only runs on 4.40.x. Family envs pin numpy
+1.26, so the parquet engine is pyarrow 16 (pyarrow >=18 needs numpy 2 and fails to import
+here); needed to read fev-style train/validation/test directories."""
 
 [env.kronos]
 python = "3.11"
@@ -87,8 +90,9 @@ generate() takes raw values. Fine-tune needs no third-party checkout: the object
 ``flow_loss.FlowLoss`` imported from the checkpoint's own repo files (the snapshot
 directory is put on ``sys.path``), rebuilt at ``input_token_len`` because the shipped
 ``output_token_lens=[720]`` is a generation setting that cannot supervise a short
-window. The trunk transfers; that head does not."""
-notes = "family envs pin numpy 1.26, so the parquet engine is pyarrow 16 (pyarrow >=18 needs numpy 2 and fails to import here); needed to read fev-style train/validation/test directories"
+window. The trunk transfers; that head does not.
+Family envs pin numpy 1.26, so the parquet engine is pyarrow 16 (pyarrow >=18 needs numpy 2
+and fails to import here); needed to read fev-style train/validation/test directories."""
 
 [env.vendor]
 python = "3.11"

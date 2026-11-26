@@ -43,7 +43,9 @@ PY
 echo "-- corpus: pulling ${SERIES_FILES// /, } from $TRUX"
 mkdir -p "$CSVROOT"
 for f in $SERIES_FILES; do
-  rsync -e "$TRUX_SSH" -a "$TRUX_CSV/$f" "$CSVROOT/" || { echo "FATAL: corpus pull failed for $f"; exit 5; }
+  # the $TRUX: prefix is the whole point of this line; without it rsync reads the trux
+  # path as a local one and the failure looks like a missing remote directory
+  rsync -e "$TRUX_SSH" -a "$TRUX:$TRUX_CSV/$f" "$CSVROOT/" || { echo "FATAL: corpus pull failed for $f"; exit 5; }
 done
 wc -l "$CSVROOT"/*.csv 2>/dev/null | sed 's/^/  /'
 

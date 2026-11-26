@@ -56,17 +56,33 @@ run() {
     --seed 0 --out "$out" --fresh "$@"
 }
 
-# baselines ride along so a CUDA-scored row exists even if the Hugging Face download is
-# blocked on this machine; losing the TSFM cell is then visible, not silent
-if run "naive,seasonal_naive,chronos-bolt-small" "$OUT"; then
+# The Spark is shared too: the audit saw 1.4 GiB free and this same probe read 7.9 GiB
+# minutes later. nvidia-smi cannot size a GB10 at all, so the device choice comes from
+# torch, and it is printed before the run. A CPU row is acceptable; a CPU row filed under
+# a GPU heading is not.
+DEVICE=${DEVICE:-}
+if [ -z "$DEVICE" ]; then
+  DEVICE=$("$ENVROOT/core/bin/python" -c '
+import sys, torch
+if not torch.cuda.is_available():
+    print("cpu"); sys.exit()
+free_mb = torch.cuda.mem_get_info(0)[0] >> 20
+print("cuda" if free_mb >= 4000 else "cpu")
+' 2>/dev/null || echo cpu)
+  echo "-- device chosen from torch free memory: $DEVICE (4 GiB floor for this model set)"
+fi
+
+# baselines ride along so a scored row exists even if the Hugging Face download is blocked
+# on this machine; losing the TSFM cell is then visible, not silent
+if run "naive,seasonal_naive,chronos-bolt-small" "$OUT" --device "$DEVICE"; then
   final=$OUT
 else
   echo "WARN: weights run failed (weights blocked?); re-running baselines only"
   final=${OUT%.jsonl}_baselines.jsonl
-  run "naive,seasonal_naive" "$final"
+  run "naive,seasonal_naive" "$final" --device "$DEVICE"
 fi
 
 echo "rows=$(wc -l < "$final")"
-echo "-- first row (provenance is the point of this smoke):"
-head -1 "$final" | cut -c1-500 | sed 's/^/  /'
+echo "-- provenance of the first row (device must match the heading):"
+head -1 "$final" | tr ',' '\n' | grep -iE '"device|torch|machine|code_sha|python"' | head -6 | sed 's/^/  /'
 cp "$final" "$HOME/spark_bridge/outbox/" 2>/dev/null || true

@@ -450,6 +450,31 @@ carry `device: cpu`.
   Tests, registry consistency and the mini matrix are run on trux; lint stays a laptop
   gate. That is a real gap in the multi-machine story, not a covered one.
 
+### Syncing a checkout with `rsync --delete` deletes the environments living inside it
+
+The harness exists twice on the laptop: the standalone repo and `trl/` in this checkout,
+which is what the other machines fetch. Bringing the standalone repo up to date with
+`rsync -a --delete` overwrote more than the code. Two things were gone before I looked at
+the file list:
+
+- **`.github/workflows/docs.yml`** — this tree has no `.github/`, so `--delete` removed the
+  Pages build. Nothing in the harness test suite notices a missing CI file.
+- **Every family venv under `envs/`** (several GB, built over days) — same reason: they are
+  in the destination and not in the source. The locks and `envs.toml` survived, so the fix
+  is `scripts/make_envs.sh`, not an archaeology hunt, but the run I was mid-way through on
+  the laptop was over.
+
+Nothing tracked by git was lost (`git status` showed 89 modified/added paths, 0 deletions),
+which is the only reason this was an afternoon and not a data-loss incident. The rule now:
+when one checkout feeds another, list what may move (`git ls-files`, plus the probe and
+report text manifests) and copy *that*, or keep `--delete` off and let git show what is
+missing. A working tree that holds installed environments is never a safe rsync target.
+
+Because the two checkouts drift, the standalone repo is now pushed (`master` @ the sync
+commit, plus a `pre-sync-2026-11-26` branch holding the state before it), and this tree
+stays the source the machines clone. Docs edits are meant to land in both; where they
+haven't yet, this file is the one to trust.
+
 ## Sixth pass: moving the harness onto other machines
 
 The same code went to trux (2× RTX 6000 Ada) and watson (SLURM, A6000). What broke was not

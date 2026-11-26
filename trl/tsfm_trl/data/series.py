@@ -43,6 +43,8 @@ class SeriesDataset:
              freq: str = "day") -> "SeriesDataset":
         if isinstance(source, SeriesDataset):
             return source
+        if isinstance(source, pd.DataFrame):
+            return SeriesDataset._from_frame(source, target or source.columns[-1], name or "frame")
         if isinstance(source, (pd.Series, np.ndarray, list)) and not isinstance(source, str):
             arr = np.asarray(source, dtype=float).reshape(-1)
             ds = SeriesDataset(name=name or "array", target=target or "value",
@@ -54,15 +56,12 @@ class SeriesDataset:
             return SeriesDataset._from_dir(p, target, name)
         if p.is_file():
             return SeriesDataset._from_file(p, target, name)
-        if isinstance(source, pd.DataFrame):
-            return SeriesDataset._from_frame(source, target or source.columns[-1], name or "frame")
-        if isinstance(source, (pd.Series, np.ndarray, list)):
-            arr = np.asarray(source, dtype=float).reshape(-1)
-            ds = SeriesDataset(name=name or "array", target=target or "value",
-                               values=arr, splits=_even_split(arr))
-            ds.meta = {"n_obs": int(len(arr)), "source": "in-memory", "frequency": freq}
-            return ds
-        raise DataError(f"cannot read a series from {type(source).__name__}")
+        # A mistyped or un-flattened path is the single most common way to call this wrong,
+        # and the old fallthrough blamed the *type* ("cannot read a series from str") while
+        # the type was fine and the file was missing. It sent me hunting through the CLI and
+        # an adapter before I checked the obvious thing.
+        raise DataError(f"no such series: {p} — expected a CSV/parquet file, a dataset "
+                        "directory, or an in-memory array/frame")
 
     @staticmethod
     def _from_dir(d: Path, target: str | None, name: str | None) -> "SeriesDataset":

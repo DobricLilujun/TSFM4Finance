@@ -114,7 +114,7 @@ def main() -> int:
     ap.add_argument("--quick", action="store_true")
     a = ap.parse_args()
     w = Path(a.weights)
-    import momentfm
+    import momentfm  # noqa: F401 - side-effect: registers the model classes
     print(f"torch {torch.__version__} cuda={torch.cuda.is_available()} "
           f"dev={torch.cuda.get_device_name(0) if torch.cuda.is_available() else '-'}",
           flush=True)

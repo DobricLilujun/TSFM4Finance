@@ -24,6 +24,18 @@ def test_series_from_array_and_csv(tmp_path):
     assert ds2.split("test")[-1] == df["close"].iloc[-1]
 
 
+def test_a_missing_path_names_the_path_not_the_type():
+    """The old message blamed the type (`cannot read a series from str`) for a mistyped path,
+    which is the most common way to call this wrong in a sweep; it cost two detours through
+    the CLI and an adapter before checking whether the file existed."""
+    from tsfm_trl.errors import DataError
+    with pytest.raises(DataError) as e:
+        SeriesDataset.load("reports/pass3_trux/csv/definitely_not_there.csv")
+    msg = str(e.value)
+    assert "definitely_not_there.csv" in msg, msg
+    assert "from str" not in msg, msg
+
+
 def test_windows_are_ordered_and_disjoint_from_truth():
     y = np.arange(300.0)
     w = windows(y, horizon=10, ctx=50, stride=10)

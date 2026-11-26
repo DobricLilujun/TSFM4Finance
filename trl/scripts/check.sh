@@ -6,7 +6,7 @@ PY=${PY:-envs/core/bin/python}
 [ -x "$PY" ] || PY=${VIRTUAL_ENV:-.venv2}/bin/python
 
 echo "== lint"
-$PY -m ruff check tsfm_trl tests examples scripts --select F,E9 --ignore F841 || exit 1
+$PY -m ruff check tsfm_trl tests examples scripts probes --select F,E9 --ignore F841 || exit 1
 echo "== tests"
 $PY -m pytest -q tests || exit 1
 echo "== registry consistency (46 rows, adapters importable in this env)"

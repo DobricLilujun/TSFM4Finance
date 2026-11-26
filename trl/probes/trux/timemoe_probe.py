@@ -27,7 +27,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 import torch
-from transformers import AutoModelForCausalLM, GenerationConfig
+from transformers import AutoModelForCausalLM, GenerationConfig  # noqa: F401 - imported for the remote-code path it registers
 
 DATA = Path("/raid/yewei/projects_yewei/TSFM4Finance/assets/data")
 SERIES = {

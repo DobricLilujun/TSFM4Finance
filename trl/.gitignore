@@ -23,3 +23,8 @@ docs/matrix.md
 .venv-docs/
 envs/local.json
 docs/effectiveness.md
+
+# Flattened series CSVs are derived from assets/data in the parent repo. Ignore the bytes,
+# never the directory: reports/*/csv/MANIFEST.json records what was scored and must stay
+# tracked, and a gitignored *directory* pattern would silently drop it too.
+reports/**/*.csv

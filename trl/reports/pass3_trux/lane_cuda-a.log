@@ -1,0 +1,647 @@
+== arima (env core, /raid/yewei/envs/tsfm-trl/core/bin/python, torch 2.7.1+cu128, cuda=True)
+  arima                std_fx_1h_euraud ok 2     5.0s 
+  arima                std_fx_1h_gbpusd ok 2     1.8s 
+  arima                std_fx_1h_usdjpy ok 2     1.7s 
+  arima                std_fx_1d_usdinr ok 2     1.6s 
+  arima                std_fi_1d_uk_20y ok 2     1.8s 
+  arima                std_fx_1d_eurgbp ok 2     1.8s 
+  arima                std_fx_1d_gbpjpy ok 2     1.6s 
+  arima                std_fx_1d_usdchf ok 2     1.9s 
+  arima                std_fx_1d_audusd ok 2     1.7s 
+  arima                std_fx_1d_usdjpy ok 2     1.3s 
+  arima                std_fx_1d_usdtry ok 2     1.7s 
+  arima                std_equity_1d_12490 ok 2     1.7s 
+  arima                std_equity_1d_83443 ok 2     1.3s 
+  arima                std_equity_1d_91233 ok 2     1.7s 
+  arima                std_equity_1d_22111 ok 2     1.7s 
+  arima                std_equity_1d_66181 ok 2     1.3s 
+  arima                std_equity_1d_48725 ok 2     1.7s 
+  arima                std_equity_1d_26403 ok 2     1.3s 
+  arima                std_equity_1d_17830 ok 2     1.5s 
+  arima                std_equity_1d_50876 ok 2     1.2s 
+  arima                std_equity_1d_77178 ok 2     1.2s 
+  arima                std_equity_1d_13928 ok 2     1.2s 
+  arima                std_equity_1d_22752 ok 2     1.3s 
+  arima                std_equity_1d_14277 ok 2     1.5s 
+  arima                std_equity_1d_86356 ok 2     1.2s 
+  arima                std_equity_1d_21936 ok 2     1.2s 
+  arima                std_equity_1d_65875 ok 2     1.4s 
+  arima                std_equity_1d_70519 ok 2     1.3s 
+  arima                std_fi_1d_de_2y ok 2     1.4s 
+  arima                std_fi_1d_jp_10y ok 2     1.4s 
+  arima                std_fi_1d_us_10y ok 2     1.3s 
+  arima                std_fi_1d_us_20y ok 2     1.3s 
+  arima                std_fi_1d_us_3y ok 2     1.4s 
+== moving_average (env core, /raid/yewei/envs/tsfm-trl/core/bin/python, torch 2.7.1+cu128, cuda=True)
+  moving_average       std_fx_1h_euraud ok 2     1.0s 
+  moving_average       std_fx_1h_gbpusd ok 2     0.9s 
+  moving_average       std_fx_1h_usdjpy ok 2     1.0s 
+  moving_average       std_fx_1d_usdinr ok 2     0.9s 
+  moving_average       std_fi_1d_uk_20y ok 2     1.0s 
+  moving_average       std_fx_1d_eurgbp ok 2     0.9s 
+  moving_average       std_fx_1d_gbpjpy ok 2     1.0s 
+  moving_average       std_fx_1d_usdchf ok 2     1.0s 
+  moving_average       std_fx_1d_audusd ok 2     1.0s 
+  moving_average       std_fx_1d_usdjpy ok 2     1.2s 
+  moving_average       std_fx_1d_usdtry ok 2     1.0s 
+  moving_average       std_equity_1d_12490 ok 2     1.1s 
+  moving_average       std_equity_1d_83443 ok 2     1.0s 
+  moving_average       std_equity_1d_91233 ok 2     1.0s 
+  moving_average       std_equity_1d_22111 ok 2     0.9s 
+  moving_average       std_equity_1d_66181 ok 2     1.0s 
+  moving_average       std_equity_1d_48725 ok 2     1.0s 
+  moving_average       std_equity_1d_26403 ok 2     1.0s 
+  moving_average       std_equity_1d_17830 ok 2     1.0s 
+  moving_average       std_equity_1d_50876 ok 2     0.9s 
+  moving_average       std_equity_1d_77178 ok 2     1.0s 
+  moving_average       std_equity_1d_13928 ok 2     1.0s 
+  moving_average       std_equity_1d_22752 ok 2     1.0s 
+  moving_average       std_equity_1d_14277 ok 2     1.0s 
+  moving_average       std_equity_1d_86356 ok 2     1.0s 
+  moving_average       std_equity_1d_21936 ok 2     1.1s 
+  moving_average       std_equity_1d_65875 ok 2     1.0s 
+  moving_average       std_equity_1d_70519 ok 2     1.0s 
+  moving_average       std_fi_1d_de_2y ok 2     1.0s 
+  moving_average       std_fi_1d_jp_10y ok 2     1.0s 
+  moving_average       std_fi_1d_us_10y ok 2     1.0s 
+  moving_average       std_fi_1d_us_20y ok 2     1.0s 
+  moving_average       std_fi_1d_us_3y ok 2     1.0s 
+== naive (env core, /raid/yewei/envs/tsfm-trl/core/bin/python, torch 2.7.1+cu128, cuda=True)
+  naive                std_fx_1h_euraud ok 2     1.1s 
+  naive                std_fx_1h_gbpusd ok 2     1.1s 
+  naive                std_fx_1h_usdjpy ok 2     1.1s 
+  naive                std_fx_1d_usdinr ok 2     1.1s 
+  naive                std_fi_1d_uk_20y ok 2     1.1s 
+  naive                std_fx_1d_eurgbp ok 2     1.1s 
+  naive                std_fx_1d_gbpjpy ok 2     1.1s 
+  naive                std_fx_1d_usdchf ok 2     1.0s 
+  naive                std_fx_1d_audusd ok 2     1.1s 
+  naive                std_fx_1d_usdjpy ok 2     1.0s 
+  naive                std_fx_1d_usdtry ok 2     1.1s 
+  naive                std_equity_1d_12490 ok 2     1.1s 
+  naive                std_equity_1d_83443 ok 2     1.1s 
+  naive                std_equity_1d_91233 ok 2     1.1s 
+  naive                std_equity_1d_22111 ok 2     1.1s 
+  naive                std_equity_1d_66181 ok 2     1.1s 
+  naive                std_equity_1d_48725 ok 2     1.1s 
+  naive                std_equity_1d_26403 ok 2     1.1s 
+  naive                std_equity_1d_17830 ok 2     1.1s 
+  naive                std_equity_1d_50876 ok 2     1.0s 
+  naive                std_equity_1d_77178 ok 2     1.0s 
+  naive                std_equity_1d_13928 ok 2     1.0s 
+  naive                std_equity_1d_22752 ok 2     1.0s 
+  naive                std_equity_1d_14277 ok 2     1.0s 
+  naive                std_equity_1d_86356 ok 2     1.0s 
+  naive                std_equity_1d_21936 ok 2     1.0s 
+  naive                std_equity_1d_65875 ok 2     1.0s 
+  naive                std_equity_1d_70519 ok 2     1.0s 
+  naive                std_fi_1d_de_2y ok 2     1.0s 
+  naive                std_fi_1d_jp_10y ok 2     0.9s 
+  naive                std_fi_1d_us_10y ok 2     1.0s 
+  naive                std_fi_1d_us_20y ok 2     1.0s 
+  naive                std_fi_1d_us_3y ok 2     1.0s 
+== seasonal_naive (env core, /raid/yewei/envs/tsfm-trl/core/bin/python, torch 2.7.1+cu128, cuda=True)
+  seasonal_naive       std_fx_1h_euraud ok 2     1.1s 
+  seasonal_naive       std_fx_1h_gbpusd ok 2     1.0s 
+  seasonal_naive       std_fx_1h_usdjpy ok 2     1.0s 
+  seasonal_naive       std_fx_1d_usdinr ok 2     1.1s 
+  seasonal_naive       std_fi_1d_uk_20y ok 2     1.1s 
+  seasonal_naive       std_fx_1d_eurgbp ok 2     1.1s 
+  seasonal_naive       std_fx_1d_gbpjpy ok 2     1.0s 
+  seasonal_naive       std_fx_1d_usdchf ok 2     1.3s 
+  seasonal_naive       std_fx_1d_audusd ok 2     1.1s 
+  seasonal_naive       std_fx_1d_usdjpy ok 2     1.1s 
+  seasonal_naive       std_fx_1d_usdtry ok 2     1.1s 
+  seasonal_naive       std_equity_1d_12490 ok 2     1.0s 
+  seasonal_naive       std_equity_1d_83443 ok 2     1.0s 
+  seasonal_naive       std_equity_1d_91233 ok 2     1.0s 
+  seasonal_naive       std_equity_1d_22111 ok 2     1.0s 
+  seasonal_naive       std_equity_1d_66181 ok 2     0.9s 
+  seasonal_naive       std_equity_1d_48725 ok 2     1.0s 
+  seasonal_naive       std_equity_1d_26403 ok 2     1.0s 
+  seasonal_naive       std_equity_1d_17830 ok 2     1.0s 
+  seasonal_naive       std_equity_1d_50876 ok 2     1.0s 
+  seasonal_naive       std_equity_1d_77178 ok 2     1.0s 
+  seasonal_naive       std_equity_1d_13928 ok 2     1.0s 
+  seasonal_naive       std_equity_1d_22752 ok 2     1.0s 
+  seasonal_naive       std_equity_1d_14277 ok 2     1.0s 
+  seasonal_naive       std_equity_1d_86356 ok 2     1.0s 
+  seasonal_naive       std_equity_1d_21936 ok 2     1.0s 
+  seasonal_naive       std_equity_1d_65875 ok 2     1.0s 
+  seasonal_naive       std_equity_1d_70519 ok 2     0.9s 
+  seasonal_naive       std_fi_1d_de_2y ok 2     1.0s 
+  seasonal_naive       std_fi_1d_jp_10y ok 2     1.0s 
+  seasonal_naive       std_fi_1d_us_10y ok 2     1.0s 
+  seasonal_naive       std_fi_1d_us_20y ok 2     1.1s 
+  seasonal_naive       std_fi_1d_us_3y ok 2     1.0s 
+== theta (env core, /raid/yewei/envs/tsfm-trl/core/bin/python, torch 2.7.1+cu128, cuda=True)
+  theta                std_fx_1h_euraud ok 2     1.1s 
+  theta                std_fx_1h_gbpusd ok 2     1.1s 
+  theta                std_fx_1h_usdjpy ok 2     1.1s 
+  theta                std_fx_1d_usdinr ok 2     1.0s 
+  theta                std_fi_1d_uk_20y ok 2     1.0s 
+  theta                std_fx_1d_eurgbp ok 2     1.0s 
+  theta                std_fx_1d_gbpjpy ok 2     1.1s 
+  theta                std_fx_1d_usdchf ok 2     1.3s 
+  theta                std_fx_1d_audusd ok 2     1.0s 
+  theta                std_fx_1d_usdjpy ok 2     1.0s 
+  theta                std_fx_1d_usdtry ok 2     1.0s 
+  theta                std_equity_1d_12490 ok 2     1.0s 
+  theta                std_equity_1d_83443 ok 2     1.0s 
+  theta                std_equity_1d_91233 ok 2     1.0s 
+  theta                std_equity_1d_22111 ok 2     1.0s 
+  theta                std_equity_1d_66181 ok 2     1.0s 
+  theta                std_equity_1d_48725 ok 2     1.0s 
+  theta                std_equity_1d_26403 ok 2     1.0s 
+  theta                std_equity_1d_17830 ok 2     1.0s 
+  theta                std_equity_1d_50876 ok 2     1.0s 
+  theta                std_equity_1d_77178 ok 2     1.0s 
+  theta                std_equity_1d_13928 ok 2     1.0s 
+  theta                std_equity_1d_22752 ok 2     1.0s 
+  theta                std_equity_1d_14277 ok 2     1.1s 
+  theta                std_equity_1d_86356 ok 2     1.0s 
+  theta                std_equity_1d_21936 ok 2     1.0s 
+  theta                std_equity_1d_65875 ok 2     1.0s 
+  theta                std_equity_1d_70519 ok 2     1.0s 
+  theta                std_fi_1d_de_2y ok 2     1.0s 
+  theta                std_fi_1d_jp_10y ok 2     1.0s 
+  theta                std_fi_1d_us_10y ok 2     1.0s 
+  theta                std_fi_1d_us_20y ok 2     1.0s 
+  theta                std_fi_1d_us_3y ok 2     1.0s 
+== chronos-2 (env core, /raid/yewei/envs/tsfm-trl/core/bin/python, torch 2.7.1+cu128, cuda=True)
+  chronos-2            std_fx_1h_euraud ok 2    17.6s 
+  chronos-2            std_fx_1h_gbpusd ok 2     6.1s 
+  chronos-2            std_fx_1h_usdjpy ok 2     5.5s 
+  chronos-2            std_fx_1d_usdinr ok 2     5.7s 
+  chronos-2            std_fi_1d_uk_20y ok 2     6.1s 
+  chronos-2            std_fx_1d_eurgbp ok 2     6.6s 
+  chronos-2            std_fx_1d_gbpjpy ok 2     6.8s 
+  chronos-2            std_fx_1d_usdchf ok 2     6.0s 
+  chronos-2            std_fx_1d_audusd ok 2     7.5s 
+  chronos-2            std_fx_1d_usdjpy ok 2     5.9s 
+  chronos-2            std_fx_1d_usdtry ok 2     5.2s 
+  chronos-2            std_equity_1d_12490 ok 2     5.2s 
+  chronos-2            std_equity_1d_83443 ok 2     5.2s 
+  chronos-2            std_equity_1d_91233 ok 2     5.8s 
+  chronos-2            std_equity_1d_22111 ok 2     5.9s 
+  chronos-2            std_equity_1d_66181 ok 2     6.0s 
+  chronos-2            std_equity_1d_48725 ok 2     6.0s 
+  chronos-2            std_equity_1d_26403 ok 2     5.4s 
+  chronos-2            std_equity_1d_17830 ok 2     5.3s 
+  chronos-2            std_equity_1d_50876 ok 2     5.8s 
+  chronos-2            std_equity_1d_77178 ok 2     5.3s 
+  chronos-2            std_equity_1d_13928 ok 2     5.7s 
+  chronos-2            std_equity_1d_22752 ok 2     5.6s 
+  chronos-2            std_equity_1d_14277 ok 2     6.0s 
+  chronos-2            std_equity_1d_86356 ok 2     6.3s 
+  chronos-2            std_equity_1d_21936 ok 2     5.8s 
+  chronos-2            std_equity_1d_65875 ok 2     6.1s 
+  chronos-2            std_equity_1d_70519 ok 2     5.6s 
+  chronos-2            std_fi_1d_de_2y ok 2     5.3s 
+  chronos-2            std_fi_1d_jp_10y ok 2     5.9s 
+  chronos-2            std_fi_1d_us_10y ok 2     5.6s 
+  chronos-2            std_fi_1d_us_20y ok 2     5.3s 
+  chronos-2            std_fi_1d_us_3y ok 2     6.0s 
+== chronos-bolt-small (env core, /raid/yewei/envs/tsfm-trl/core/bin/python, torch 2.7.1+cu128, cuda=True)
+  chronos-bolt-small   std_fx_1h_euraud ok 2     6.0s 
+  chronos-bolt-small   std_fx_1h_gbpusd ok 2     5.2s 
+  chronos-bolt-small   std_fx_1h_usdjpy ok 2     6.6s 
+  chronos-bolt-small   std_fx_1d_usdinr ok 2     5.2s 
+  chronos-bolt-small   std_fi_1d_uk_20y ok 2     5.3s 
+  chronos-bolt-small   std_fx_1d_eurgbp ok 2     4.9s 
+  chronos-bolt-small   std_fx_1d_gbpjpy ok 2     5.6s 
+  chronos-bolt-small   std_fx_1d_usdchf ok 2     5.5s 
+  chronos-bolt-small   std_fx_1d_audusd ok 2     4.9s 
+  chronos-bolt-small   std_fx_1d_usdjpy ok 2     5.4s 
+  chronos-bolt-small   std_fx_1d_usdtry ok 2     5.7s 
+  chronos-bolt-small   std_equity_1d_12490 ok 2     5.5s 
+  chronos-bolt-small   std_equity_1d_83443 ok 2     5.2s 
+  chronos-bolt-small   std_equity_1d_91233 ok 2     5.3s 
+  chronos-bolt-small   std_equity_1d_22111 ok 2     5.8s 
+  chronos-bolt-small   std_equity_1d_66181 ok 2     5.0s 
+  chronos-bolt-small   std_equity_1d_48725 ok 2     5.3s 
+  chronos-bolt-small   std_equity_1d_26403 ok 2     4.9s 
+  chronos-bolt-small   std_equity_1d_17830 ok 2     4.9s 
+  chronos-bolt-small   std_equity_1d_50876 ok 2     5.1s 
+  chronos-bolt-small   std_equity_1d_77178 ok 2     5.4s 
+  chronos-bolt-small   std_equity_1d_13928 ok 2     5.2s 
+  chronos-bolt-small   std_equity_1d_22752 ok 2     5.7s 
+  chronos-bolt-small   std_equity_1d_14277 ok 2     5.3s 
+  chronos-bolt-small   std_equity_1d_86356 ok 2     6.2s 
+  chronos-bolt-small   std_equity_1d_21936 ok 2     5.6s 
+  chronos-bolt-small   std_equity_1d_65875 ok 2     7.0s 
+  chronos-bolt-small   std_equity_1d_70519 ok 2     6.8s 
+  chronos-bolt-small   std_fi_1d_de_2y ok 2     5.3s 
+  chronos-bolt-small   std_fi_1d_jp_10y ok 2     6.1s 
+  chronos-bolt-small   std_fi_1d_us_10y ok 2     7.8s 
+  chronos-bolt-small   std_fi_1d_us_20y ok 2     5.5s 
+  chronos-bolt-small   std_fi_1d_us_3y ok 2     6.2s 
+== chronos-t5-small (env core, /raid/yewei/envs/tsfm-trl/core/bin/python, torch 2.7.1+cu128, cuda=True)
+  chronos-t5-small     std_fx_1h_euraud ok 2     7.3s 
+  chronos-t5-small     std_fx_1h_gbpusd ok 2     7.6s 
+  chronos-t5-small     std_fx_1h_usdjpy ok 2     6.5s 
+  chronos-t5-small     std_fx_1d_usdinr ok 2     7.4s 
+  chronos-t5-small     std_fi_1d_uk_20y ok 2     6.6s 
+  chronos-t5-small     std_fx_1d_eurgbp ok 2     7.1s 
+  chronos-t5-small     std_fx_1d_gbpjpy ok 2     6.4s 
+  chronos-t5-small     std_fx_1d_usdchf ok 2     6.2s 
+  chronos-t5-small     std_fx_1d_audusd ok 2     7.9s 
+  chronos-t5-small     std_fx_1d_usdjpy ok 2     6.2s 
+  chronos-t5-small     std_fx_1d_usdtry ok 2     7.0s 
+  chronos-t5-small     std_equity_1d_12490 ok 2     6.3s 
+  chronos-t5-small     std_equity_1d_83443 ok 2     6.1s 
+  chronos-t5-small     std_equity_1d_91233 ok 2     8.1s 
+  chronos-t5-small     std_equity_1d_22111 ok 2     6.7s 
+  chronos-t5-small     std_equity_1d_66181 ok 2     6.9s 
+  chronos-t5-small     std_equity_1d_48725 ok 2     7.2s 
+  chronos-t5-small     std_equity_1d_26403 ok 2     8.0s 
+  chronos-t5-small     std_equity_1d_17830 ok 2     6.3s 
+  chronos-t5-small     std_equity_1d_50876 ok 2     5.8s 
+  chronos-t5-small     std_equity_1d_77178 ok 2     7.3s 
+  chronos-t5-small     std_equity_1d_13928 ok 2     7.0s 
+  chronos-t5-small     std_equity_1d_22752 ok 2     7.3s 
+  chronos-t5-small     std_equity_1d_14277 ok 2     7.8s 
+  chronos-t5-small     std_equity_1d_86356 ok 2     6.4s 
+  chronos-t5-small     std_equity_1d_21936 ok 2     6.5s 
+  chronos-t5-small     std_equity_1d_65875 ok 2     6.0s 
+  chronos-t5-small     std_equity_1d_70519 ok 2     6.7s 
+  chronos-t5-small     std_fi_1d_de_2y ok 2     7.0s 
+  chronos-t5-small     std_fi_1d_jp_10y ok 2     7.2s 
+  chronos-t5-small     std_fi_1d_us_10y ok 2     6.7s 
+  chronos-t5-small     std_fi_1d_us_20y ok 2     6.5s 
+  chronos-t5-small     std_fi_1d_us_3y ok 2     7.3s 
+== flowstate-r1 (env core, /raid/yewei/envs/tsfm-trl/core/bin/python, torch 2.7.1+cu128, cuda=True)
+  flowstate-r1         std_fx_1h_euraud ok 2     9.6s 
+  flowstate-r1         std_fx_1h_gbpusd ok 2     7.6s 
+  flowstate-r1         std_fx_1h_usdjpy ok 2     6.2s 
+  flowstate-r1         std_fx_1d_usdinr ok 2     5.3s 
+  flowstate-r1         std_fi_1d_uk_20y ok 2     5.4s 
+  flowstate-r1         std_fx_1d_eurgbp ok 2     5.8s 
+  flowstate-r1         std_fx_1d_gbpjpy ok 2     6.0s 
+  flowstate-r1         std_fx_1d_usdchf ok 2     5.5s 
+  flowstate-r1         std_fx_1d_audusd ok 2     5.7s 
+  flowstate-r1         std_fx_1d_usdjpy ok 2     5.3s 
+  flowstate-r1         std_fx_1d_usdtry ok 2     6.0s 
+  flowstate-r1         std_equity_1d_12490 ok 2     5.6s 
+  flowstate-r1         std_equity_1d_83443 ok 2     6.2s 
+  flowstate-r1         std_equity_1d_91233 ok 2     5.4s 
+  flowstate-r1         std_equity_1d_22111 ok 2     5.4s 
+  flowstate-r1         std_equity_1d_66181 ok 2     5.4s 
+  flowstate-r1         std_equity_1d_48725 ok 2     5.5s 
+  flowstate-r1         std_equity_1d_26403 ok 2     5.7s 
+  flowstate-r1         std_equity_1d_17830 ok 2     6.2s 
+  flowstate-r1         std_equity_1d_50876 ok 2     5.4s 
+  flowstate-r1         std_equity_1d_77178 ok 2     6.6s 
+  flowstate-r1         std_equity_1d_13928 ok 2     6.6s 
+  flowstate-r1         std_equity_1d_22752 ok 2     6.5s 
+  flowstate-r1         std_equity_1d_14277 ok 2     5.4s 
+  flowstate-r1         std_equity_1d_86356 ok 2     5.3s 
+  flowstate-r1         std_equity_1d_21936 ok 2     5.3s 
+  flowstate-r1         std_equity_1d_65875 ok 2     5.6s 
+  flowstate-r1         std_equity_1d_70519 ok 2     5.6s 
+  flowstate-r1         std_fi_1d_de_2y ok 2     6.0s 
+  flowstate-r1         std_fi_1d_jp_10y ok 2     5.4s 
+  flowstate-r1         std_fi_1d_us_10y ok 2     5.4s 
+  flowstate-r1         std_fi_1d_us_20y ok 2     5.4s 
+  flowstate-r1         std_fi_1d_us_3y ok 2     6.6s 
+== moment-1-large (env moment, /raid/yewei/envs/tsfm-trl/moment/bin/python, torch 2.7.1+cu128, cuda=True)
+  moment-1-large       std_fx_1h_euraud FAIL     4.5s TypeError: 'NoneType' object is not callable
+  moment-1-large       std_fx_1h_gbpusd FAIL     2.1s TypeError: 'NoneType' object is not callable
+  moment-1-large       std_fx_1h_usdjpy FAIL     2.0s TypeError: 'NoneType' object is not callable
+  moment-1-large       std_fx_1d_usdinr FAIL     2.1s TypeError: 'NoneType' object is not callable
+  moment-1-large       std_fi_1d_uk_20y FAIL     2.0s TypeError: 'NoneType' object is not callable
+  moment-1-large       std_fx_1d_eurgbp FAIL     2.0s TypeError: 'NoneType' object is not callable
+  moment-1-large       std_fx_1d_gbpjpy FAIL     2.3s TypeError: 'NoneType' object is not callable
+  moment-1-large       std_fx_1d_usdchf FAIL     2.1s TypeError: 'NoneType' object is not callable
+  moment-1-large       std_fx_1d_audusd FAIL     2.2s TypeError: 'NoneType' object is not callable
+  moment-1-large       std_fx_1d_usdjpy FAIL     2.0s TypeError: 'NoneType' object is not callable
+  moment-1-large       std_fx_1d_usdtry FAIL     2.1s TypeError: 'NoneType' object is not callable
+  moment-1-large       std_equity_1d_12490 FAIL     2.1s TypeError: 'NoneType' object is not callable
+  moment-1-large       std_equity_1d_83443 FAIL     2.1s TypeError: 'NoneType' object is not callable
+  moment-1-large       std_equity_1d_91233 FAIL     2.7s TypeError: 'NoneType' object is not callable
+  moment-1-large       std_equity_1d_22111 FAIL     2.4s TypeError: 'NoneType' object is not callable
+  moment-1-large       std_equity_1d_66181 FAIL     2.4s TypeError: 'NoneType' object is not callable
+  moment-1-large       std_equity_1d_48725 FAIL     2.4s TypeError: 'NoneType' object is not callable
+  moment-1-large       std_equity_1d_26403 FAIL     3.1s TypeError: 'NoneType' object is not callable
+  moment-1-large       std_equity_1d_17830 FAIL     2.2s TypeError: 'NoneType' object is not callable
+  moment-1-large       std_equity_1d_50876 FAIL     2.6s TypeError: 'NoneType' object is not callable
+  moment-1-large       std_equity_1d_77178 FAIL     2.3s TypeError: 'NoneType' object is not callable
+  moment-1-large       std_equity_1d_13928 FAIL     2.6s TypeError: 'NoneType' object is not callable
+  moment-1-large       std_equity_1d_22752 FAIL     2.2s TypeError: 'NoneType' object is not callable
+  moment-1-large       std_equity_1d_14277 FAIL     2.4s TypeError: 'NoneType' object is not callable
+  moment-1-large       std_equity_1d_86356 FAIL     2.2s TypeError: 'NoneType' object is not callable
+  moment-1-large       std_equity_1d_21936 FAIL     2.5s TypeError: 'NoneType' object is not callable
+  moment-1-large       std_equity_1d_65875 FAIL     2.4s TypeError: 'NoneType' object is not callable
+  moment-1-large       std_equity_1d_70519 FAIL     2.0s TypeError: 'NoneType' object is not callable
+  moment-1-large       std_fi_1d_de_2y FAIL     2.0s TypeError: 'NoneType' object is not callable
+  moment-1-large       std_fi_1d_jp_10y FAIL     2.1s TypeError: 'NoneType' object is not callable
+  moment-1-large       std_fi_1d_us_10y FAIL     2.1s TypeError: 'NoneType' object is not callable
+  moment-1-large       std_fi_1d_us_20y FAIL     2.1s TypeError: 'NoneType' object is not callable
+  moment-1-large       std_fi_1d_us_3y FAIL     2.3s TypeError: 'NoneType' object is not callable
+== timemoe-50m (env timemoe, /raid/yewei/envs/tsfm-trl/timemoe/bin/python, torch 2.7.1+cu128, cuda=True)
+  timemoe-50m          std_fx_1h_euraud ok 2    14.3s 
+  timemoe-50m          std_fx_1h_gbpusd ok 2    12.0s 
+  timemoe-50m          std_fx_1h_usdjpy ok 2    11.8s 
+  timemoe-50m          std_fx_1d_usdinr ok 2    12.1s 
+  timemoe-50m          std_fi_1d_uk_20y ok 2    13.1s 
+  timemoe-50m          std_fx_1d_eurgbp ok 2    11.4s 
+  timemoe-50m          std_fx_1d_gbpjpy ok 2    12.2s 
+  timemoe-50m          std_fx_1d_usdchf ok 2    12.4s 
+  timemoe-50m          std_fx_1d_audusd ok 2    11.7s 
+  timemoe-50m          std_fx_1d_usdjpy ok 2    10.5s 
+  timemoe-50m          std_fx_1d_usdtry ok 2    12.9s 
+  timemoe-50m          std_equity_1d_12490 ok 2    11.4s 
+  timemoe-50m          std_equity_1d_83443 ok 2    11.7s 
+  timemoe-50m          std_equity_1d_91233 ok 2    10.7s 
+  timemoe-50m          std_equity_1d_22111 ok 2    12.1s 
+  timemoe-50m          std_equity_1d_66181 ok 2    12.4s 
+  timemoe-50m          std_equity_1d_48725 ok 2    13.6s 
+  timemoe-50m          std_equity_1d_26403 ok 2    12.5s 
+  timemoe-50m          std_equity_1d_17830 ok 2    12.5s 
+  timemoe-50m          std_equity_1d_50876 ok 2    11.3s 
+  timemoe-50m          std_equity_1d_77178 ok 2    11.1s 
+  timemoe-50m          std_equity_1d_13928 ok 2    10.8s 
+  timemoe-50m          std_equity_1d_22752 ok 2    11.5s 
+  timemoe-50m          std_equity_1d_14277 ok 2    11.6s 
+  timemoe-50m          std_equity_1d_86356 ok 2    11.3s 
+  timemoe-50m          std_equity_1d_21936 ok 2    10.7s 
+  timemoe-50m          std_equity_1d_65875 ok 2    12.6s 
+  timemoe-50m          std_equity_1d_70519 ok 2    10.5s 
+  timemoe-50m          std_fi_1d_de_2y ok 2    11.1s 
+  timemoe-50m          std_fi_1d_jp_10y ok 2    10.2s 
+  timemoe-50m          std_fi_1d_us_10y ok 2    11.1s 
+  timemoe-50m          std_fi_1d_us_20y ok 2    10.6s 
+  timemoe-50m          std_fi_1d_us_3y ok 2    12.4s 
+== timesfm-2.5-200m (env core, /raid/yewei/envs/tsfm-trl/core/bin/python, torch 2.7.1+cu128, cuda=True)
+  timesfm-2.5-200m     std_fx_1h_euraud ok 2     8.3s 
+  timesfm-2.5-200m     std_fx_1h_gbpusd ok 2     5.3s 
+  timesfm-2.5-200m     std_fx_1h_usdjpy ok 2     6.0s 
+  timesfm-2.5-200m     std_fx_1d_usdinr ok 2     5.3s 
+  timesfm-2.5-200m     std_fi_1d_uk_20y ok 2     4.9s 
+  timesfm-2.5-200m     std_fx_1d_eurgbp ok 2     4.6s 
+  timesfm-2.5-200m     std_fx_1d_gbpjpy ok 2     4.4s 
+  timesfm-2.5-200m     std_fx_1d_usdchf ok 2     4.7s 
+  timesfm-2.5-200m     std_fx_1d_audusd ok 2     4.4s 
+  timesfm-2.5-200m     std_fx_1d_usdjpy ok 2     4.5s 
+  timesfm-2.5-200m     std_fx_1d_usdtry ok 2     5.0s 
+  timesfm-2.5-200m     std_equity_1d_12490 ok 2     4.4s 
+  timesfm-2.5-200m     std_equity_1d_83443 ok 2     4.6s 
+  timesfm-2.5-200m     std_equity_1d_91233 ok 2     4.6s 
+  timesfm-2.5-200m     std_equity_1d_22111 ok 2     5.9s 
+  timesfm-2.5-200m     std_equity_1d_66181 ok 2     4.9s 
+  timesfm-2.5-200m     std_equity_1d_48725 ok 2     4.6s 
+  timesfm-2.5-200m     std_equity_1d_26403 ok 2     4.9s 
+  timesfm-2.5-200m     std_equity_1d_17830 ok 2     4.3s 
+  timesfm-2.5-200m     std_equity_1d_50876 ok 2     4.3s 
+  timesfm-2.5-200m     std_equity_1d_77178 ok 2     5.3s 
+  timesfm-2.5-200m     std_equity_1d_13928 ok 2     4.4s 
+  timesfm-2.5-200m     std_equity_1d_22752 ok 2     4.7s 
+  timesfm-2.5-200m     std_equity_1d_14277 ok 2     4.8s 
+  timesfm-2.5-200m     std_equity_1d_86356 ok 2     8.6s 
+  timesfm-2.5-200m     std_equity_1d_21936 ok 2     6.4s 
+  timesfm-2.5-200m     std_equity_1d_65875 ok 2     5.3s 
+  timesfm-2.5-200m     std_equity_1d_70519 ok 2     4.8s 
+  timesfm-2.5-200m     std_fi_1d_de_2y ok 2     5.5s 
+  timesfm-2.5-200m     std_fi_1d_jp_10y ok 2     5.6s 
+  timesfm-2.5-200m     std_fi_1d_us_10y ok 2     6.3s 
+  timesfm-2.5-200m     std_fi_1d_us_20y ok 2     4.9s 
+  timesfm-2.5-200m     std_fi_1d_us_3y ok 2     5.4s 
+== ttm-r2 (env core, /raid/yewei/envs/tsfm-trl/core/bin/python, torch 2.7.1+cu128, cuda=True)
+  ttm-r2               std_fx_1h_euraud ok 2     5.9s 
+  ttm-r2               std_fx_1h_gbpusd ok 2     5.9s 
+  ttm-r2               std_fx_1h_usdjpy ok 2     5.4s 
+  ttm-r2               std_fx_1d_usdinr ok 2     5.0s 
+  ttm-r2               std_fi_1d_uk_20y ok 2     6.0s 
+  ttm-r2               std_fx_1d_eurgbp ok 2     5.6s 
+  ttm-r2               std_fx_1d_gbpjpy ok 2     4.9s 
+  ttm-r2               std_fx_1d_usdchf ok 2     6.0s 
+  ttm-r2               std_fx_1d_audusd ok 2     5.3s 
+  ttm-r2               std_fx_1d_usdjpy ok 2     5.4s 
+  ttm-r2               std_fx_1d_usdtry ok 2     5.0s 
+  ttm-r2               std_equity_1d_12490 ok 2     5.2s 
+  ttm-r2               std_equity_1d_83443 ok 2    14.3s 
+  ttm-r2               std_equity_1d_91233 ok 2     5.6s 
+  ttm-r2               std_equity_1d_22111 ok 2     5.6s 
+  ttm-r2               std_equity_1d_66181 ok 2     5.9s 
+  ttm-r2               std_equity_1d_48725 ok 2     5.7s 
+  ttm-r2               std_equity_1d_26403 ok 2     5.3s 
+  ttm-r2               std_equity_1d_17830 ok 2     6.0s 
+  ttm-r2               std_equity_1d_50876 ok 2     5.7s 
+  ttm-r2               std_equity_1d_77178 ok 2     6.3s 
+  ttm-r2               std_equity_1d_13928 ok 2     5.5s 
+  ttm-r2               std_equity_1d_22752 ok 2     6.0s 
+  ttm-r2               std_equity_1d_14277 ok 2     5.4s 
+  ttm-r2               std_equity_1d_86356 ok 2     5.5s 
+  ttm-r2               std_equity_1d_21936 ok 2     6.1s 
+  ttm-r2               std_equity_1d_65875 ok 2     5.2s 
+  ttm-r2               std_equity_1d_70519 ok 2     5.3s 
+  ttm-r2               std_fi_1d_de_2y ok 2     5.5s 
+  ttm-r2               std_fi_1d_jp_10y ok 2     5.2s 
+  ttm-r2               std_fi_1d_us_10y ok 2     6.1s 
+  ttm-r2               std_fi_1d_us_20y ok 2     6.0s 
+  ttm-r2               std_fi_1d_us_3y ok 2     5.4s 
+== ttm-r3 (env core, /raid/yewei/envs/tsfm-trl/core/bin/python, torch 2.7.1+cu128, cuda=True)
+  ttm-r3               std_fx_1h_euraud ok 2     6.0s 
+  ttm-r3               std_fx_1h_gbpusd ok 2     6.0s 
+  ttm-r3               std_fx_1h_usdjpy ok 2     5.8s 
+  ttm-r3               std_fx_1d_usdinr ok 2     5.9s 
+  ttm-r3               std_fi_1d_uk_20y ok 2     5.8s 
+  ttm-r3               std_fx_1d_eurgbp ok 2     6.5s 
+  ttm-r3               std_fx_1d_gbpjpy ok 2     7.2s 
+  ttm-r3               std_fx_1d_usdchf ok 2     6.6s 
+  ttm-r3               std_fx_1d_audusd ok 2     6.7s 
+  ttm-r3               std_fx_1d_usdjpy ok 2     5.4s 
+  ttm-r3               std_fx_1d_usdtry ok 2     5.9s 
+  ttm-r3               std_equity_1d_12490 ok 2     6.4s 
+  ttm-r3               std_equity_1d_83443 ok 2     5.9s 
+  ttm-r3               std_equity_1d_91233 ok 2     6.0s 
+  ttm-r3               std_equity_1d_22111 ok 2     5.4s 
+  ttm-r3               std_equity_1d_66181 ok 2     5.9s 
+  ttm-r3               std_equity_1d_48725 ok 2     5.8s 
+  ttm-r3               std_equity_1d_26403 ok 2     6.4s 
+  ttm-r3               std_equity_1d_17830 ok 2     6.8s 
+  ttm-r3               std_equity_1d_50876 ok 2     5.5s 
+  ttm-r3               std_equity_1d_77178 ok 2     6.1s 
+  ttm-r3               std_equity_1d_13928 ok 2     6.6s 
+  ttm-r3               std_equity_1d_22752 ok 2     6.5s 
+  ttm-r3               std_equity_1d_14277 ok 2     6.8s 
+  ttm-r3               std_equity_1d_86356 ok 2     5.7s 
+  ttm-r3               std_equity_1d_21936 ok 2     5.8s 
+  ttm-r3               std_equity_1d_65875 ok 2     5.9s 
+  ttm-r3               std_equity_1d_70519 ok 2     6.2s 
+  ttm-r3               std_fi_1d_de_2y ok 2     6.1s 
+  ttm-r3               std_fi_1d_jp_10y ok 2     6.1s 
+  ttm-r3               std_fi_1d_us_10y ok 2     5.6s 
+  ttm-r3               std_fi_1d_us_20y ok 2     5.7s 
+  ttm-r3               std_fi_1d_us_3y ok 2     6.2s 
+== chronos-bolt-base (env core, /raid/yewei/envs/tsfm-trl/core/bin/python, torch 2.7.1+cu128, cuda=True)
+  chronos-bolt-base    std_fx_1h_euraud ok 2     8.1s 
+  chronos-bolt-base    std_fx_1h_gbpusd ok 2     6.2s 
+  chronos-bolt-base    std_fx_1h_usdjpy ok 2     5.6s 
+  chronos-bolt-base    std_fx_1d_usdinr ok 2     5.8s 
+  chronos-bolt-base    std_fi_1d_uk_20y ok 2     6.4s 
+  chronos-bolt-base    std_fx_1d_eurgbp ok 2     5.1s 
+  chronos-bolt-base    std_fx_1d_gbpjpy ok 2     6.3s 
+  chronos-bolt-base    std_fx_1d_usdchf ok 2     6.3s 
+  chronos-bolt-base    std_fx_1d_audusd ok 2     7.1s 
+  chronos-bolt-base    std_fx_1d_usdjpy ok 2     6.9s 
+  chronos-bolt-base    std_fx_1d_usdtry ok 2     6.2s 
+  chronos-bolt-base    std_equity_1d_12490 ok 2     7.3s 
+  chronos-bolt-base    std_equity_1d_83443 ok 2     5.5s 
+  chronos-bolt-base    std_equity_1d_91233 ok 2     5.4s 
+  chronos-bolt-base    std_equity_1d_22111 ok 2     5.2s 
+  chronos-bolt-base    std_equity_1d_66181 ok 2     5.0s 
+  chronos-bolt-base    std_equity_1d_48725 ok 2     5.1s 
+  chronos-bolt-base    std_equity_1d_26403 ok 2     6.2s 
+  chronos-bolt-base    std_equity_1d_17830 ok 2     5.4s 
+  chronos-bolt-base    std_equity_1d_50876 ok 2     5.8s 
+  chronos-bolt-base    std_equity_1d_77178 ok 2     5.8s 
+  chronos-bolt-base    std_equity_1d_13928 ok 2     6.3s 
+  chronos-bolt-base    std_equity_1d_22752 ok 2     5.6s 
+  chronos-bolt-base    std_equity_1d_14277 ok 2     5.4s 
+  chronos-bolt-base    std_equity_1d_86356 ok 2     5.2s 
+  chronos-bolt-base    std_equity_1d_21936 ok 2     5.5s 
+  chronos-bolt-base    std_equity_1d_65875 ok 2     5.7s 
+  chronos-bolt-base    std_equity_1d_70519 ok 2     6.0s 
+  chronos-bolt-base    std_fi_1d_de_2y ok 2     5.3s 
+  chronos-bolt-base    std_fi_1d_jp_10y ok 2     6.0s 
+  chronos-bolt-base    std_fi_1d_us_10y ok 2     5.3s 
+  chronos-bolt-base    std_fi_1d_us_20y ok 2     5.1s 
+  chronos-bolt-base    std_fi_1d_us_3y ok 2     5.0s 
+== chronos-t5-base (env core, /raid/yewei/envs/tsfm-trl/core/bin/python, torch 2.7.1+cu128, cuda=True)
+  chronos-t5-base      std_fx_1h_euraud ok 2     9.8s 
+  chronos-t5-base      std_fx_1h_gbpusd ok 2     9.2s 
+  chronos-t5-base      std_fx_1h_usdjpy ok 2     7.9s 
+  chronos-t5-base      std_fx_1d_usdinr ok 2     7.5s 
+  chronos-t5-base      std_fi_1d_uk_20y ok 2     8.4s 
+  chronos-t5-base      std_fx_1d_eurgbp ok 2     7.3s 
+  chronos-t5-base      std_fx_1d_gbpjpy ok 2     7.3s 
+  chronos-t5-base      std_fx_1d_usdchf ok 2     7.8s 
+  chronos-t5-base      std_fx_1d_audusd ok 2     8.9s 
+  chronos-t5-base      std_fx_1d_usdjpy ok 2     7.9s 
+  chronos-t5-base      std_fx_1d_usdtry ok 2     7.5s 
+  chronos-t5-base      std_equity_1d_12490 ok 2     8.1s 
+  chronos-t5-base      std_equity_1d_83443 ok 2     8.7s 
+  chronos-t5-base      std_equity_1d_91233 ok 2     8.1s 
+  chronos-t5-base      std_equity_1d_22111 ok 2     7.2s 
+  chronos-t5-base      std_equity_1d_66181 ok 2     7.9s 
+  chronos-t5-base      std_equity_1d_48725 ok 2     7.5s 
+  chronos-t5-base      std_equity_1d_26403 ok 2     6.9s 
+  chronos-t5-base      std_equity_1d_17830 ok 2     7.4s 
+  chronos-t5-base      std_equity_1d_50876 ok 2     7.4s 
+  chronos-t5-base      std_equity_1d_77178 ok 2     8.3s 
+  chronos-t5-base      std_equity_1d_13928 ok 2     8.4s 
+  chronos-t5-base      std_equity_1d_22752 ok 2     8.3s 
+  chronos-t5-base      std_equity_1d_14277 ok 2     7.5s 
+  chronos-t5-base      std_equity_1d_86356 ok 2     7.4s 
+  chronos-t5-base      std_equity_1d_21936 ok 2     8.1s 
+  chronos-t5-base      std_equity_1d_65875 ok 2     8.5s 
+  chronos-t5-base      std_equity_1d_70519 ok 2     7.7s 
+  chronos-t5-base      std_fi_1d_de_2y ok 2     7.3s 
+  chronos-t5-base      std_fi_1d_jp_10y ok 2     9.6s 
+  chronos-t5-base      std_fi_1d_us_10y ok 2     8.2s 
+  chronos-t5-base      std_fi_1d_us_20y ok 2     8.1s 
+  chronos-t5-base      std_fi_1d_us_3y ok 2     8.7s 
+== moment-1-small (env moment, /raid/yewei/envs/tsfm-trl/moment/bin/python, torch 2.7.1+cu128, cuda=True)
+  moment-1-small       std_fx_1h_euraud FAIL     2.6s TypeError: 'NoneType' object is not callable
+  moment-1-small       std_fx_1h_gbpusd FAIL     2.9s TypeError: 'NoneType' object is not callable
+  moment-1-small       std_fx_1h_usdjpy FAIL     3.2s TypeError: 'NoneType' object is not callable
+  moment-1-small       std_fx_1d_usdinr FAIL     3.4s TypeError: 'NoneType' object is not callable
+  moment-1-small       std_fi_1d_uk_20y FAIL     2.4s TypeError: 'NoneType' object is not callable
+  moment-1-small       std_fx_1d_eurgbp FAIL     2.1s TypeError: 'NoneType' object is not callable
+  moment-1-small       std_fx_1d_gbpjpy FAIL     2.1s TypeError: 'NoneType' object is not callable
+  moment-1-small       std_fx_1d_usdchf FAIL     2.6s TypeError: 'NoneType' object is not callable
+  moment-1-small       std_fx_1d_audusd FAIL     2.5s TypeError: 'NoneType' object is not callable
+  moment-1-small       std_fx_1d_usdjpy FAIL     2.5s TypeError: 'NoneType' object is not callable
+  moment-1-small       std_fx_1d_usdtry FAIL     2.6s TypeError: 'NoneType' object is not callable
+  moment-1-small       std_equity_1d_12490 FAIL     2.3s TypeError: 'NoneType' object is not callable
+  moment-1-small       std_equity_1d_83443 FAIL     2.4s TypeError: 'NoneType' object is not callable
+  moment-1-small       std_equity_1d_91233 FAIL     3.0s TypeError: 'NoneType' object is not callable
+  moment-1-small       std_equity_1d_22111 FAIL     2.2s TypeError: 'NoneType' object is not callable
+  moment-1-small       std_equity_1d_66181 FAIL     3.3s TypeError: 'NoneType' object is not callable
+  moment-1-small       std_equity_1d_48725 FAIL     2.2s TypeError: 'NoneType' object is not callable
+  moment-1-small       std_equity_1d_26403 FAIL     2.8s TypeError: 'NoneType' object is not callable
+  moment-1-small       std_equity_1d_17830 FAIL     2.3s TypeError: 'NoneType' object is not callable
+  moment-1-small       std_equity_1d_50876 FAIL     2.6s TypeError: 'NoneType' object is not callable
+  moment-1-small       std_equity_1d_77178 FAIL     2.6s TypeError: 'NoneType' object is not callable
+  moment-1-small       std_equity_1d_13928 FAIL     2.7s TypeError: 'NoneType' object is not callable
+  moment-1-small       std_equity_1d_22752 FAIL     2.1s TypeError: 'NoneType' object is not callable
+  moment-1-small       std_equity_1d_14277 FAIL     2.9s TypeError: 'NoneType' object is not callable
+  moment-1-small       std_equity_1d_86356 FAIL     3.2s TypeError: 'NoneType' object is not callable
+  moment-1-small       std_equity_1d_21936 FAIL     2.4s TypeError: 'NoneType' object is not callable
+  moment-1-small       std_equity_1d_65875 FAIL     2.2s TypeError: 'NoneType' object is not callable
+  moment-1-small       std_equity_1d_70519 FAIL     2.0s TypeError: 'NoneType' object is not callable
+  moment-1-small       std_fi_1d_de_2y FAIL     1.9s TypeError: 'NoneType' object is not callable
+  moment-1-small       std_fi_1d_jp_10y FAIL     1.9s TypeError: 'NoneType' object is not callable
+  moment-1-small       std_fi_1d_us_10y FAIL     2.0s TypeError: 'NoneType' object is not callable
+  moment-1-small       std_fi_1d_us_20y FAIL     2.1s TypeError: 'NoneType' object is not callable
+  moment-1-small       std_fi_1d_us_3y FAIL     2.3s TypeError: 'NoneType' object is not callable
+== timesfm-3.0 (env core, /raid/yewei/envs/tsfm-trl/core/bin/python, torch 2.7.1+cu128, cuda=True)
+  timesfm-3.0          std_fx_1h_euraud ok 2    11.2s 
+  timesfm-3.0          std_fx_1h_gbpusd ok 2     8.2s 
+  timesfm-3.0          std_fx_1h_usdjpy ok 2     5.5s 
+  timesfm-3.0          std_fx_1d_usdinr ok 2     5.6s 
+  timesfm-3.0          std_fi_1d_uk_20y ok 2     5.4s 
+  timesfm-3.0          std_fx_1d_eurgbp ok 2     5.3s 
+  timesfm-3.0          std_fx_1d_gbpjpy ok 2     5.6s 
+  timesfm-3.0          std_fx_1d_usdchf ok 2     6.0s 
+  timesfm-3.0          std_fx_1d_audusd ok 2     5.8s 
+  timesfm-3.0          std_fx_1d_usdjpy ok 2     4.8s 
+  timesfm-3.0          std_fx_1d_usdtry ok 2     6.2s 
+  timesfm-3.0          std_equity_1d_12490 ok 2     6.0s 
+  timesfm-3.0          std_equity_1d_83443 ok 2     5.4s 
+  timesfm-3.0          std_equity_1d_91233 ok 2     5.3s 
+  timesfm-3.0          std_equity_1d_22111 ok 2     5.2s 
+  timesfm-3.0          std_equity_1d_66181 ok 2     5.4s 
+  timesfm-3.0          std_equity_1d_48725 ok 2     5.8s 
+  timesfm-3.0          std_equity_1d_26403 ok 2     5.4s 
+  timesfm-3.0          std_equity_1d_17830 ok 2     6.4s 
+  timesfm-3.0          std_equity_1d_50876 ok 2     7.2s 
+  timesfm-3.0          std_equity_1d_77178 ok 2     6.1s 
+  timesfm-3.0          std_equity_1d_13928 ok 2     5.8s 
+  timesfm-3.0          std_equity_1d_22752 ok 2     5.0s 
+  timesfm-3.0          std_equity_1d_14277 ok 2     7.8s 
+  timesfm-3.0          std_equity_1d_86356 ok 2     5.2s 
+  timesfm-3.0          std_equity_1d_21936 ok 2     6.5s 
+  timesfm-3.0          std_equity_1d_65875 ok 2     5.1s 
+  timesfm-3.0          std_equity_1d_70519 ok 2     5.1s 
+  timesfm-3.0          std_fi_1d_de_2y ok 2     5.1s 
+  timesfm-3.0          std_fi_1d_jp_10y ok 2     4.9s 
+  timesfm-3.0          std_fi_1d_us_10y ok 2     6.2s 
+  timesfm-3.0          std_fi_1d_us_20y ok 2     5.0s 
+  timesfm-3.0          std_fi_1d_us_3y ok 2     4.9s 
+== patchtst-fm-r2 (env core, /raid/yewei/envs/tsfm-trl/core/bin/python, torch 2.7.1+cu128, cuda=True)
+  patchtst-fm-r2       std_fx_1h_euraud ok 2    10.3s 
+  patchtst-fm-r2       std_fx_1h_gbpusd ok 2     6.5s 
+  patchtst-fm-r2       std_fx_1h_usdjpy ok 2     7.2s 
+  patchtst-fm-r2       std_fx_1d_usdinr ok 2     6.7s 
+  patchtst-fm-r2       std_fi_1d_uk_20y ok 2     6.4s 
+  patchtst-fm-r2       std_fx_1d_eurgbp ok 2     7.1s 
+  patchtst-fm-r2       std_fx_1d_gbpjpy ok 2     9.8s 
+  patchtst-fm-r2       std_fx_1d_usdchf ok 2     6.0s 
+  patchtst-fm-r2       std_fx_1d_audusd ok 2     7.0s 
+  patchtst-fm-r2       std_fx_1d_usdjpy ok 2     6.7s 
+  patchtst-fm-r2       std_fx_1d_usdtry ok 2     6.1s 
+  patchtst-fm-r2       std_equity_1d_12490 ok 2     6.0s 
+  patchtst-fm-r2       std_equity_1d_83443 ok 2     6.7s 
+  patchtst-fm-r2       std_equity_1d_91233 ok 2     6.6s 
+  patchtst-fm-r2       std_equity_1d_22111 ok 2     6.5s 
+  patchtst-fm-r2       std_equity_1d_66181 ok 2     7.1s 
+  patchtst-fm-r2       std_equity_1d_48725 ok 2     6.8s 
+  patchtst-fm-r2       std_equity_1d_26403 ok 2     8.1s 
+  patchtst-fm-r2       std_equity_1d_17830 ok 2     7.3s 
+  patchtst-fm-r2       std_equity_1d_50876 ok 2     6.7s 
+  patchtst-fm-r2       std_equity_1d_77178 ok 2     6.9s 
+  patchtst-fm-r2       std_equity_1d_13928 ok 2     6.3s 
+  patchtst-fm-r2       std_equity_1d_22752 ok 2     5.9s 
+  patchtst-fm-r2       std_equity_1d_14277 ok 2     6.4s 
+  patchtst-fm-r2       std_equity_1d_86356 ok 2     6.3s 
+  patchtst-fm-r2       std_equity_1d_21936 ok 2     6.3s 
+  patchtst-fm-r2       std_equity_1d_65875 ok 2     6.1s 
+  patchtst-fm-r2       std_equity_1d_70519 ok 2     6.2s 
+  patchtst-fm-r2       std_fi_1d_de_2y ok 2     6.0s 
+  patchtst-fm-r2       std_fi_1d_jp_10y ok 2     7.3s 
+  patchtst-fm-r2       std_fi_1d_us_10y ok 2     6.8s 
+  patchtst-fm-r2       std_fi_1d_us_20y ok 2     6.5s 
+  patchtst-fm-r2       std_fi_1d_us_3y ok 2     7.3s 
+swept 17 ok / 2 failed / 0 env-skipped -> reports/pass3_trux/lane_cuda-a.jsonl

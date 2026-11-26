@@ -1,0 +1,109 @@
+{
+ "when": "2026-11-25T22:26:04.323887+00:00",
+ "series_file": "/tmp/pass3_csvs.txt",
+ "series": 66,
+ "horizons": "21,63",
+ "max_windows": 8,
+ "seed": 0,
+ "lanes": {
+  "cuda-a": {
+   "device": "cpu",
+   "visible": "",
+   "free_mib": null,
+   "downgraded_from_gpu": true
+  },
+  "cuda-b": {
+   "device": "cpu",
+   "visible": "",
+   "free_mib": null,
+   "downgraded_from_gpu": true
+  }
+ },
+ "buckets": {
+  "cuda-a": [
+   "reports/pass3_trux/csv/std_fx_1h_euraud.csv",
+   "reports/pass3_trux/csv/std_fx_1h_gbpusd.csv",
+   "reports/pass3_trux/csv/std_fx_1h_usdjpy.csv",
+   "reports/pass3_trux/csv/std_fx_1d_usdinr.csv",
+   "reports/pass3_trux/csv/std_fi_1d_uk_20y.csv",
+   "reports/pass3_trux/csv/std_fx_1d_eurgbp.csv",
+   "reports/pass3_trux/csv/std_fx_1d_gbpjpy.csv",
+   "reports/pass3_trux/csv/std_fx_1d_usdchf.csv",
+   "reports/pass3_trux/csv/std_fx_1d_audusd.csv",
+   "reports/pass3_trux/csv/std_fx_1d_usdjpy.csv",
+   "reports/pass3_trux/csv/std_fx_1d_usdtry.csv",
+   "reports/pass3_trux/csv/std_equity_1d_12490.csv",
+   "reports/pass3_trux/csv/std_equity_1d_83443.csv",
+   "reports/pass3_trux/csv/std_equity_1d_91233.csv",
+   "reports/pass3_trux/csv/std_equity_1d_22111.csv",
+   "reports/pass3_trux/csv/std_equity_1d_66181.csv",
+   "reports/pass3_trux/csv/std_equity_1d_48725.csv",
+   "reports/pass3_trux/csv/std_equity_1d_26403.csv",
+   "reports/pass3_trux/csv/std_equity_1d_17830.csv",
+   "reports/pass3_trux/csv/std_equity_1d_50876.csv",
+   "reports/pass3_trux/csv/std_equity_1d_77178.csv",
+   "reports/pass3_trux/csv/std_equity_1d_13928.csv",
+   "reports/pass3_trux/csv/std_equity_1d_22752.csv",
+   "reports/pass3_trux/csv/std_equity_1d_14277.csv",
+   "reports/pass3_trux/csv/std_equity_1d_86356.csv",
+   "reports/pass3_trux/csv/std_equity_1d_21936.csv",
+   "reports/pass3_trux/csv/std_equity_1d_65875.csv",
+   "reports/pass3_trux/csv/std_equity_1d_70519.csv",
+   "reports/pass3_trux/csv/std_fi_1d_de_2y.csv",
+   "reports/pass3_trux/csv/std_fi_1d_jp_10y.csv",
+   "reports/pass3_trux/csv/std_fi_1d_us_10y.csv",
+   "reports/pass3_trux/csv/std_fi_1d_us_20y.csv",
+   "reports/pass3_trux/csv/std_fi_1d_us_3y.csv"
+  ],
+  "cuda-b": [
+   "reports/pass3_trux/csv/std_fx_1h_audusd.csv",
+   "reports/pass3_trux/csv/std_fx_1h_eurchf.csv",
+   "reports/pass3_trux/csv/std_fx_1h_nzdusd.csv",
+   "reports/pass3_trux/csv/std_fi_1d_uk_2y.csv",
+   "reports/pass3_trux/csv/std_fi_1d_uk_7y.csv",
+   "reports/pass3_trux/csv/std_fx_1d_usdzar.csv",
+   "reports/pass3_trux/csv/std_fx_1d_eurjpy.csv",
+   "reports/pass3_trux/csv/std_fx_1d_gbpusd.csv",
+   "reports/pass3_trux/csv/std_fx_1d_usdpln.csv",
+   "reports/pass3_trux/csv/std_fx_1d_euraud.csv",
+   "reports/pass3_trux/csv/std_fx_1d_usdcnh.csv",
+   "reports/pass3_trux/csv/std_equity_1d_90319.csv",
+   "reports/pass3_trux/csv/std_equity_1d_86868.csv",
+   "reports/pass3_trux/csv/std_equity_1d_19561.csv",
+   "reports/pass3_trux/csv/std_equity_1d_92611.csv",
+   "reports/pass3_trux/csv/std_equity_1d_14541.csv",
+   "reports/pass3_trux/csv/std_equity_1d_43449.csv",
+   "reports/pass3_trux/csv/std_equity_1d_18542.csv",
+   "reports/pass3_trux/csv/std_equity_1d_12060.csv",
+   "reports/pass3_trux/csv/std_equity_1d_10107.csv",
+   "reports/pass3_trux/csv/std_equity_1d_59176.csv",
+   "reports/pass3_trux/csv/std_fi_1d_jp_2y.csv",
+   "reports/pass3_trux/csv/std_equity_1d_17005.csv",
+   "reports/pass3_trux/csv/std_fi_1d_jp_5y.csv",
+   "reports/pass3_trux/csv/std_equity_1d_59328.csv",
+   "reports/pass3_trux/csv/std_equity_1d_11308.csv",
+   "reports/pass3_trux/csv/std_equity_1d_38703.csv",
+   "reports/pass3_trux/csv/std_equity_1d_66093.csv",
+   "reports/pass3_trux/csv/std_equity_1d_13901.csv",
+   "reports/pass3_trux/csv/std_fi_1d_de_5y.csv",
+   "reports/pass3_trux/csv/std_fi_1d_de_10y.csv",
+   "reports/pass3_trux/csv/std_fi_1d_us_7y.csv",
+   "reports/pass3_trux/csv/std_fi_1d_us_30y.csv"
+  ]
+ },
+ "gpus_at_plan": [
+  {
+   "index": 0,
+   "free_mib": 1169,
+   "total_mib": 49140
+  },
+  {
+   "index": 1,
+   "free_mib": 1256,
+   "total_mib": 49140
+  }
+ ],
+ "core_env_torch": "2.7.1+cu128 True",
+ "min_free_mib": 4000,
+ "cost_proxy": "train.parquet size / 4 (replace with measured seconds)"
+}

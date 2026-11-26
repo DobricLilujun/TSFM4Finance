@@ -237,6 +237,7 @@ def report(args) -> int:
                     "started": fm.get("started")}
             for r in rec.get("rows", []):
                 r["model_key"] = model          # registry key, not the adapter's family key
+                r.setdefault("dataset", rec.get("dataset"))  # gaps are computed on merged rows
                 r["_prov"] = prov
                 cells[(model, r["series"], r.get("span", "test"), int(r["horizon"]))] = r
             if rec.get("error"):
@@ -384,8 +385,15 @@ def report(args) -> int:
                 "", "No row was produced for these yet — they are **not** measured here, "
                 "and their absence is not a pass:", "",
                 ", ".join(f"`{m}`" for m in absent), ""]
+    # Anything that counts *measurements* must read `rows` (the merged cells), not `recs`:
+    # `rec_by_model` keeps ONE raw record per model, so with two GPU lanes — or a GPU lane
+    # plus a CPU retry — a rec-based count silently reports one lane. That under-counted
+    # this section in pass 2 and would have reported 33 of 66 flagged MOMENT series here.
+    scored_models = {r.get("model_key") or r.get("model") for r in rows}
     dataset_gaps = [(rec["model"], rec["error"]) for rec in recs
-                    if rec["error"] and "covariate panel" in rec["error"]]
+                    if rec.get("error") and "covariate panel" in rec["error"]
+                    and (rec.get("model_key") or rec.get("model")) not in scored_models]
+    dataset_gaps = sorted(set(dataset_gaps))
     if dataset_gaps:
         out += ["## Not scoreable on some series (dataset coverage, not model failure)", "",
                 "These models consume a covariate panel; the close-only series cannot "
@@ -395,11 +403,11 @@ def report(args) -> int:
     # released checkpoint has only a reconstruction head, so its zero-shot forecast row
     # scores a randomly initialised linear map: keep the number, label it.
     untrained = {}
-    for rec in recs:
-        for r in rec.get("rows", []):
-            mt = r.get("meta") or {}
-            if mt.get("head_from_checkpoint") is False and not mt.get("head_trained_here"):
-                untrained.setdefault(rec["model"], set()).add(str(r.get("series", "?")))
+    for r in rows:
+        mt = r.get("meta") or {}
+        if mt.get("head_from_checkpoint") is False and not mt.get("head_trained_here"):
+            untrained.setdefault(r.get("model_key") or r.get("model"), set()).add(
+                str(r.get("series", "?")))
     if untrained:
         out += ["## Flagged: the scored head was never trained", "",
                 "These rows ran fine and are **kept**, because a number you can see beats a "

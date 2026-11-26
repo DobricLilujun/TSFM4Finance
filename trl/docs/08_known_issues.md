@@ -503,6 +503,18 @@ its `model_key` stamp on read for older files. `probes/trux/cross_machine_check.
 on the registry key for the same reason. The trap generalises: a label chosen by the code
 under test is not an identifier for the analysis on top of it.
 
+**Follow-up, because the first reading of the duplicates was also wrong.** With the key
+fixed, the merge's 404 repeated cell keys were re-scored by protocol signature (ctx,
+ctx_note, device, code_sha, torch). They are overwhelmingly *supersessions*: a TTM cell
+measured at ctx 256 (MASE 30.1, the zero-padding artifact) and the same cell at its
+contract ctx 512 (MASE 4.3). Only repeats with an identical signature can be read as run
+variance, and once separated they are small: 254 repeated comparisons on trux - pass-3
+lanes at sha `1d2f3ae` against re-runs at `28fd7e7` - agree to 0.143%, and the DGX Spark
+matches trux to 0.000%. So the journal's earlier "neural cells vary 2-200% run to run" was
+one artifact (the collided key) compounding another (a fixed protocol change counted as
+noise). Reproducibility in this benchmark is now measured, not assumed, and the report
+section says which of the two a repeated key is before it quotes a number.
+
 ### A GPU that answers `[N/A]` for memory is a scheduler bug waiting to happen
 
 The DGX Spark (GB10, aarch64, unified memory) reports `memory.free` and `memory.total`

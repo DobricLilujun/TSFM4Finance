@@ -233,14 +233,21 @@ where the model beat naive:
   33 CUDA cells plus 33 CPU cells after a shared-card OOM. `ctx` and device are per-row
   facts, not footnotes.
 
-* **Cross-machine numbers agree bit-exactly; re-runs on one machine do not.** gpu7 (DGX
-  Spark, GB10) re-scored three series trux had already scored, and every overlapping cell
-  matched to 0.000% (`probes/trux/cross_machine_check.py`) — baselines and neural models
-  alike. But the merge inputs contain 404 cell keys measured more than once, and where one
-  file repeated a cell under the same protocol the two measurements differ by up to 10%
-  for `ttm-r3` (`ttm-r2` is deterministic). So the merged table is a union whose *hardware*
-  is consistent, while individual cells still carry run-to-run spread: quote a model's
-  ranking only where its gap to the next model exceeds that spread.
+* **These numbers are reproducible - across machines and across re-runs.** gpu7 (DGX Spark,
+  GB10) re-scored three series trux had already scored and every overlapping cell matched
+  to 0.000% (`probes/trux/cross_machine_check.py`), baselines and neural models alike. On
+  one machine, 254 repeated cell comparisons - including pass-3 lanes recorded at code sha
+  `1d2f3ae` re-scored today at `28fd7e7` - agree to within 0.143%. That is the first time
+  this benchmark has had a consistency check rather than an assumption, and it is the
+  reason the earlier "chronos-bolt moves 3-40% between machines" note in the lab journal is
+  wrong: see the next bullet, it was a key collision.
+* **Repeated cell keys are mostly a protocol being replaced, not noise.** The pass-3 merge
+  inputs carry 404 `(model, series, span, horizon)` keys measured more than once. Scored by
+  protocol signature (ctx, ctx_note, device, code_sha, torch), they are overwhelmingly
+  supersessions - a TTM cell at ctx 256 (the zero-padding artifact, MASE 30.1) and the same
+  cell at its contract ctx 512 (MASE 4.3). Reading that spread as run variance would blame
+  the noise floor for the bug we removed. The merge now splits the two readings and reports
+  each separately; only identical-signature repeats are quoted as variance.
 * **A row's `model` field is the adapter's family key, not the registry key**, and ten
   checkpoints collide on it (`chronos-bolt-base` and `-small` both write `chronos-bolt`;
   `kronos-base`/`-mini`/`-small` all write `kronos-small`). Grouping results by that field

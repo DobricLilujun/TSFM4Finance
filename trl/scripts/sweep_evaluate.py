@@ -18,6 +18,7 @@ data.
 from __future__ import annotations
 
 import argparse
+import collections
 import json
 import os
 import socket
@@ -207,6 +208,16 @@ def sweep(args) -> int:
     return 0
 
 
+def proto(row: dict) -> tuple:
+    """What protocol produced this cell. Two measurements with the same signature that
+    disagree are run variance; different signatures mean one replaced the other (a context
+    contract applied, a device switched, a fixed commit), and the gap between them measures
+    the fix, not noise."""
+    pr = row.get("_prov") or {}
+    return (row.get("ctx"), row.get("ctx_note") or "", pr.get("device"),
+            pr.get("code_sha"), str(pr.get("torch")))
+
+
 def stamp_rows(rows: list, key: str) -> list:
     """Put the registry key on every row.
 
@@ -263,12 +274,15 @@ def report(args) -> int:
                 key = (model, r["series"], r.get("span", "test"), int(r["horizon"]))
                 prev = cells.get(key)
                 if prev is not None:
-                    # a repeated key is not automatically a retry: the same protocol can
-                    # run twice inside one file and disagree, which is run variance and
-                    # belongs in the report rather than silently resolving newest-wins
-                    dupes.setdefault(key, []).append((prev.get("mase"), r.get("mase"),
-                                                     prev["_prov"].get("started"),
-                                                     prov.get("started")))
+                    # A repeated key is not automatically run variance. Most of the 404
+                    # duplicates in the pass-3 inputs are a SUPERSEDED protocol: the same
+                    # cell scored at ctx 256 before the TTM context contract and at 512
+                    # after (MASE 30.1 vs 4.3), which is a fix, not noise. The protocol
+                    # signature decides which of the two readings applies.
+                    dupes.setdefault(key, []).append(
+                        (prev.get("mase"), r.get("mase"),
+                         prev["_prov"].get("started"), prov.get("started"),
+                         proto(prev), proto(r)))
                 cells[key] = r
             if rec.get("error"):
                 err_by_model.setdefault(model, rec["error"])
@@ -281,12 +295,15 @@ def report(args) -> int:
     if dupes:
         # stdout is a data channel: the warning goes to stderr, and the count also lands
         # in the markdown so a reader of the table sees it
+        n_same = sum(1 for v in dupes.values() if v[-1][4] == v[-1][5])
         print(f"WARNING: {len(dupes)} cell key(s) appear more than once across the merge "
-              f"inputs; the newest file wins per cell. A duplicate inside one JSONL is the "
-              f"same protocol measured twice — read it as run variance, not a fix.",
+              f"inputs; the newest file wins per cell. {n_same} under an identical protocol "
+              f"(run variance); {len(dupes) - n_same} under a different protocol "
+              f"(a superseded measurement - check ctx, device, code_sha).",
               file=sys.stderr)
         for k, v in list(dupes.items())[:5]:
-            print(f"  {k} mase {v[-1][0]} -> {v[-1][1]} ({v[-1][2]} vs {v[-1][3]})",
+            print(f"  {k} mase {v[-1][0]} -> {v[-1][1]} "
+                  f"({'same' if v[-1][4] == v[-1][5] else 'different'} protocol)",
                   file=sys.stderr)
     # which venv and which device produced each row: the same model measured in another
     # interpreter or on another device is a different experiment
@@ -415,31 +432,39 @@ def report(args) -> int:
                 "names for that model (usually a venv alias — verify before quoting):",
                 ""] + [f"- {m} (env {e}) ran with `{i}`" for m, e, i in mismatch] + [""]
     if dupes:
-        spread = []
-        by_model: dict = {}
+        spread, superseded, by_model = [], [], {}
         for (model, _series, _span, _h), seen in dupes.items():
-            a, b = seen[-1][0], seen[-1][1]      # the pair the merge actually resolved
+            a, b, _t0, _t1, p0, p1 = seen[-1]    # the pair the merge actually resolved
+            if p0 != p1:
+                superseded.append(model)
+                continue
             if isinstance(a, (int, float)) and isinstance(b, (int, float)):
                 rel = abs(a - b) / max(abs(b), 1e-9)
                 spread.append(rel)
                 by_model.setdefault(model, []).append(rel)
-        sec = [f"## Duplicated cells: {len(dupes)}", "",
+        sec = [f"## Repeated cell keys: {len(dupes)}", "",
                "These `(model, series, span, horizon)` keys were measured more than once in "
-               "the merge inputs, and the table keeps the newest. Where both came from the "
-               "same protocol, the gap between them is **run variance**, not a correction."]
+               "the merge inputs; the table keeps the newest. **{}** of them sit under a "
+               "*different* protocol signature (ctx, ctx_note, device, code_sha, torch): an "
+               "earlier measurement superseded by a fix, where the gap is the size of that "
+               "fix. The other **{}** share a signature, so their gap is run variance.".format(
+                   len(superseded), len(spread))]
+        if superseded:
+            cnt = collections.Counter(superseded)
+            sec += ["", "Superseded by a protocol change: "
+                        + ", ".join(f"{m} ({n})" for m, n in cnt.most_common(6))]
         if spread:
-            sec += ["", f"MASE gap between the duplicated measurements: median "
-                        f"{100*sorted(spread)[len(spread)//2]:.1f}%, max {100*max(spread):.1f}% "
-                        f"over {len(spread)} comparable pairs.", "",
-                    "Per model (median / max over its duplicated pairs) — this is where a "
+            sec += ["", f"Run variance under an identical protocol: median "
+                        f"{100*sorted(spread)[len(spread)//2]:.2f}%, max "
+                        f"{100*max(spread):.2f}% over {len(spread)} comparable pairs.", "",
+                    "Per model (median / max over its repeated pairs) — this is where a "
                     "family's numbers stop being one number:", "",
                     "| model | pairs | median | max |", "|---|---|---|---|"]
             for m, v in sorted(by_model.items(), key=lambda kv: -sorted(kv[1])[len(kv[1]) // 2]):
-                sec.append(f"| {m} | {len(v)} | {100*sorted(v)[len(v)//2]:.1f}% "
-                           f"| {100*max(v):.1f}% |")
-        sec += ["", "A single-seed, 8-window cell is not a stable number for every family. "
-                "Quote a model's ranking only where its gap to the next model exceeds this "
-                "spread.", ""]
+                sec.append(f"| {m} | {len(v)} | {100*sorted(v)[len(v)//2]:.2f}% "
+                           f"| {100*max(v):.2f}% |")
+        sec += ["", "Quote a model's ranking only where its gap to the next model exceeds "
+                "the run-variance spread above.", ""]
         out += sec
     # a table that leaves models out is read as "they were fine"; say who is missing
     try:

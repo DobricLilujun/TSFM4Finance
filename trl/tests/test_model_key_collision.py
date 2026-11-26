@@ -60,5 +60,5 @@ def test_two_checkpoints_sharing_a_family_key_stay_two_cells(tmp_path):
     md = tmp_path / "out.md"
     mod.report(argparse.Namespace(report=str(f), md=str(md), stdout=False))
     text = md.read_text()
-    assert "Duplicated cells" not in text, "two checkpoints are not one cell measured twice"
+    assert "Repeated cell keys" not in text, "two checkpoints are not one cell measured twice"
     assert "chronos-bolt-small" in text and "chronos-bolt-base" in text

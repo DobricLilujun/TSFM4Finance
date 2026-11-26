@@ -87,10 +87,11 @@ def test_a_model_scored_somewhere_is_not_reported_unscoreable(tmp_path):
 def test_duplicate_cell_keys_are_reported_not_silently_resolved(tmp_path, capsys):
     """The same protocol measured twice in one file is run variance, not a retry.
 
-    pass 3's lane_cuda-b.jsonl carried two chronos-bolt rows for the same
-    (series, horizon) -- MASE 2.2547 and 2.3330 -- and the merge quietly kept the later
-    one. The headline beat-naive rate for that model depended on which of the two the
-    file happened to end with. The generator now counts those keys and says the spread.
+    (This test first shipped when the two chronos-bolt rows in lane_cuda-b.jsonl - MASE
+    2.2547 and 2.3330 - looked like the same cell measured twice. They were not: the two
+    rows came from chronos-bolt-small and chronos-bolt-base sharing a row-level model id
+    (see test_model_key_collision.py). Same-checkpoint duplicates do exist, mostly in the
+    TTM retries; the merge must still report them.
     """
     def row(series, horizon, mase):
         return {"model": "chronos-bolt-small", "adaptation": "zero", "series": series,
@@ -106,11 +107,44 @@ def test_duplicate_cell_keys_are_reported_not_silently_resolved(tmp_path, capsys
     md = tmp_path / "out.md"
     _report([lane], md)
     text = md.read_text()
-    assert "## Duplicated cells: 1" in text, text
+    assert "## Repeated cell keys: 1" in text, text
     assert "run variance" in text
-    assert "max 3.4%" in text, text            # |2.2547-2.3330| / 2.3330
+    assert "max 3.36%" in text, text           # |2.2547-2.3330| / 2.3330
     # newest measurement still wins the cell (the table renders MASE to 2dp)
-    table = text.split("## Duplicated cells")[0]
+    table = text.split("## Repeated cell keys")[0]
     assert "2.33" in table and "2.25" not in table
     err = capsys.readouterr().err
     assert "appear more than once" in err
+
+
+def test_a_repeated_key_under_a_changed_protocol_is_not_run_variance(tmp_path, capsys):
+    """A cell scored before and after a fix is a supersession, and the gap is the fix.
+
+    The pass-3 merge's 404 repeated keys are mostly this: TTM at ctx 256 (the zero-padding
+    artifact, MASE ~30) then the same cell at its contract ctx 512 (MASE ~4). Reporting
+    that as "run variance up to 10%" would tell readers the table is noisy when the noisy
+    half is the bug we removed. The protocol signature - ctx, ctx_note, device, code_sha,
+    torch - decides which reading applies.
+    """
+    def row(ctx, mase):
+        return {"model": "ttm-r2", "adaptation": "zero", "series": "s1", "span": "all",
+                "horizon": 21, "ctx": ctx, "n_windows": 8, "mase": mase, "no_leakage": True,
+                "ctx_note": "" if ctx == 256
+                else "context raised 256->512 (checkpoint contract)"}
+
+    def rec(ctx, mase):
+        return {"model": "ttm-r2", "env": "core", "device": "cuda",
+                "interpreter": "/x/core/bin/python", "torch": {"torch": "2.7.1+cu128"},
+                "rows": [row(ctx, mase)]}
+
+    a = tmp_path / "old.jsonl"
+    b = tmp_path / "new.jsonl"
+    a.write_text("\n".join([json.dumps(_meta("trux")), json.dumps(rec(256, 30.1047))]) + "\n")
+    b.write_text("\n".join([json.dumps(_meta("trux")), json.dumps(rec(512, 4.3169))]) + "\n")
+
+    md = tmp_path / "out.md"
+    _report([a, b], md)
+    text = md.read_text()
+    assert "Superseded by a protocol change: ttm-r2 (1)" in text, text
+    assert "The other **0** share a signature" in text, text
+    assert "appear more than once" in capsys.readouterr().err

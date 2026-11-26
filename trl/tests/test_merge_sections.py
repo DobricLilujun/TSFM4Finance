@@ -82,3 +82,35 @@ def test_a_model_scored_somewhere_is_not_reported_unscoreable(tmp_path):
     _report((a, b), md)
     assert "Not scoreable on some series" not in md.read_text(), (
         "a model that scored on any lane is not dataset-unscoreable")
+
+
+def test_duplicate_cell_keys_are_reported_not_silently_resolved(tmp_path, capsys):
+    """The same protocol measured twice in one file is run variance, not a retry.
+
+    pass 3's lane_cuda-b.jsonl carried two chronos-bolt rows for the same
+    (series, horizon) -- MASE 2.2547 and 2.3330 -- and the merge quietly kept the later
+    one. The headline beat-naive rate for that model depended on which of the two the
+    file happened to end with. The generator now counts those keys and says the spread.
+    """
+    def row(series, horizon, mase):
+        return {"model": "chronos-bolt-small", "adaptation": "zero", "series": series,
+                "span": "all", "horizon": horizon, "ctx": 256, "n_windows": 8,
+                "mase": mase, "no_leakage": True}
+
+    lane = tmp_path / "lane.jsonl"
+    rec = {"model": "chronos-bolt-small", "env": "core", "device": "cuda", "interpreter":
+           "/x/core/bin/python", "torch": {"torch": "2.7.1+cu128"},
+           "rows": [row("s1", 21, 2.2547), row("s1", 21, 2.3330), row("s2", 21, 1.5)]}
+    lane.write_text("\n".join([json.dumps(_meta("trux")), json.dumps(rec)]) + "\n")
+
+    md = tmp_path / "out.md"
+    _report([lane], md)
+    text = md.read_text()
+    assert "## Duplicated cells: 1" in text, text
+    assert "run variance" in text
+    assert "max 3.4%" in text, text            # |2.2547-2.3330| / 2.3330
+    # newest measurement still wins the cell (the table renders MASE to 2dp)
+    table = text.split("## Duplicated cells")[0]
+    assert "2.33" in table and "2.25" not in table
+    err = capsys.readouterr().err
+    assert "appear more than once" in err

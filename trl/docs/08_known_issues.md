@@ -470,6 +470,39 @@ when one checkout feeds another, list what may move (`git ls-files`, plus the pr
 report text manifests) and copy *that*, or keep `--delete` off and let git show what is
 missing. A working tree that holds installed environments is never a safe rsync target.
 
+Because the two checkouts drift, the standalone repo is now pushed (`master` @ the sync
+commit, plus a `pre-sync-2026-11-26` branch holding the state before it), and this tree
+stays the source the machines clone. Docs edits are meant to land in both; where they
+haven't yet, this file is the one to trust.
+
+### A row's `model` field is the adapter's family key, and ten checkpoints collide on it
+
+The registry key (`chronos-bolt-small`) is not what lands in a result row. The adapter
+writes its *family* key (`chronos-bolt`), so one row-level id can come from several
+checkpoints. Across the registry there are ten such collisions:
+
+```
+chronos-bolt   <- chronos-bolt-small, chronos-bolt-base
+chronos-t5     <- chronos-t5-small,   chronos-t5-base
+ttm-r2         <- ttm-r2,             ttm-r3
+kronos-small   <- kronos-small,       kronos-base,  kronos-mini
+moment-1-large <- moment-1-small,     moment-1-large
+moirai-1.1, toto-2-22m, kairos-10m, ... (same pattern)
+```
+
+The report was safe (it keys merges on the record-level registry key and stamps
+`model_key` when reading), but nothing said that out loud, and my own comparison script
+keyed on the row field. The result was a fabricated finding: "`chronos-bolt` disagrees by
+3-40% between the pass-3 run and today's re-run" — which was really *bolt-small vs
+bolt-base* being averaged together, and it nearly sent me chasing cuBLAS nondeterminism
+across GPU generations. After the fix, GB10 (gpu7) and RTX 6000 Ada agree **bit-exactly**
+(0.000%) on every overlapping cell, baselines and neural models alike.
+
+Two changes: every written row now carries `model_key` (`stamp_rows`), and the merge keeps
+its `model_key` stamp on read for older files. `probes/trux/cross_machine_check.py` keys
+on the registry key for the same reason. The trap generalises: a label chosen by the code
+under test is not an identifier for the analysis on top of it.
+
 ### A GPU that answers `[N/A]` for memory is a scheduler bug waiting to happen
 
 The DGX Spark (GB10, aarch64, unified memory) reports `memory.free` and `memory.total`
@@ -483,11 +516,6 @@ memory rows and tolerates extra trailing columns; `gpu_free()` falls back to
 for scheduling should say where it came from. Two facts to keep straight: `nvidia-smi`
 knowing the GPU exists is not the same as knowing its free memory, and strict unpacking of
 a tool's csv turns a column change into silently empty output.
-
-Because the two checkouts drift, the standalone repo is now pushed (`master` @ the sync
-commit, plus a `pre-sync-2026-11-26` branch holding the state before it), and this tree
-stays the source the machines clone. Docs edits are meant to land in both; where they
-haven't yet, this file is the one to trust.
 
 ## Sixth pass: moving the harness onto other machines
 

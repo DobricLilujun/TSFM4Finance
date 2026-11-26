@@ -196,7 +196,7 @@ def sweep(args) -> int:
         # which venv produced which row.
         rec = {"model": k, "env": spec.env, "tier": spec.tier, "family": spec.family,
                "interpreter": py, "device": args.device, "torch": tt,
-               "rows": rows, "error": err,
+               "rows": stamp_rows(rows, k), "error": err,
                "series_errors": series_err}
         fh.write(json.dumps(rec, default=float) + "\n")
         fh.flush()
@@ -205,6 +205,22 @@ def sweep(args) -> int:
     fh.close()
     print(f"swept {n_ok} ok / {n_bad} failed / {skipped} env-skipped -> {out}")
     return 0
+
+
+def stamp_rows(rows: list, key: str) -> list:
+    """Put the registry key on every row.
+
+    An adapter writes its *family* key into a row's `model` field, so `chronos-bolt-small`
+    and `chronos-bolt-base` both emit rows named `chronos-bolt`; ten such collisions exist
+    in the registry (kronos-base/mini/small all emit `kronos-small`, ttm-r3 emits `ttm-r2`
+    ...). Readers that group by `model` then merge different checkpoints and call the
+    result a disagreement. The report already stamped this at read time; writing it makes
+    the JSONL safe for anything else.
+    """
+    for r in rows:
+        if isinstance(r, dict):
+            r.setdefault("model_key", key)
+    return rows
 
 
 def report(args) -> int:
@@ -229,6 +245,7 @@ def report(args) -> int:
     # later files (by mtime) win *per cell* and each row carries the provenance of the
     # run that produced it.
     cells: dict = {}
+    dupes: dict = {}
     err_by_model: dict = {}
     series_err_by_model: dict = {}
     rec_by_model: dict = {}
@@ -240,10 +257,19 @@ def report(args) -> int:
                     "machine": fm.get("machine", "?"), "code_sha": fm.get("code_sha"),
                     "started": fm.get("started")}
             for r in rec.get("rows", []):
-                r["model_key"] = model          # registry key, not the adapter's family key
+                r.setdefault("model_key", model)   # registry key, not the adapter's family key
                 r.setdefault("dataset", rec.get("dataset"))  # gaps are computed on merged rows
                 r["_prov"] = prov
-                cells[(model, r["series"], r.get("span", "test"), int(r["horizon"]))] = r
+                key = (model, r["series"], r.get("span", "test"), int(r["horizon"]))
+                prev = cells.get(key)
+                if prev is not None:
+                    # a repeated key is not automatically a retry: the same protocol can
+                    # run twice inside one file and disagree, which is run variance and
+                    # belongs in the report rather than silently resolving newest-wins
+                    dupes.setdefault(key, []).append((prev.get("mase"), r.get("mase"),
+                                                     prev["_prov"].get("started"),
+                                                     prov.get("started")))
+                cells[key] = r
             if rec.get("error"):
                 err_by_model.setdefault(model, rec["error"])
             series_err_by_model.setdefault(model, {}).update(rec.get("series_errors", {}))
@@ -252,6 +278,16 @@ def report(args) -> int:
                 rec_by_model[model] = rec
     recs = [rec_by_model[k] for k in sorted(rec_by_model)]
     rows = list(cells.values())
+    if dupes:
+        # stdout is a data channel: the warning goes to stderr, and the count also lands
+        # in the markdown so a reader of the table sees it
+        print(f"WARNING: {len(dupes)} cell key(s) appear more than once across the merge "
+              f"inputs; the newest file wins per cell. A duplicate inside one JSONL is the "
+              f"same protocol measured twice — read it as run variance, not a fix.",
+              file=sys.stderr)
+        for k, v in list(dupes.items())[:5]:
+            print(f"  {k} mase {v[-1][0]} -> {v[-1][1]} ({v[-1][2]} vs {v[-1][3]})",
+                  file=sys.stderr)
     # which venv and which device produced each row: the same model measured in another
     # interpreter or on another device is a different experiment
     # older merged runs did not stamp their torch build; if that interpreter is on this
@@ -378,6 +414,33 @@ def report(args) -> int:
                 "Rows whose interpreter does not obviously match the env the registry "
                 "names for that model (usually a venv alias — verify before quoting):",
                 ""] + [f"- {m} (env {e}) ran with `{i}`" for m, e, i in mismatch] + [""]
+    if dupes:
+        spread = []
+        by_model: dict = {}
+        for (model, _series, _span, _h), seen in dupes.items():
+            a, b = seen[-1][0], seen[-1][1]      # the pair the merge actually resolved
+            if isinstance(a, (int, float)) and isinstance(b, (int, float)):
+                rel = abs(a - b) / max(abs(b), 1e-9)
+                spread.append(rel)
+                by_model.setdefault(model, []).append(rel)
+        sec = [f"## Duplicated cells: {len(dupes)}", "",
+               "These `(model, series, span, horizon)` keys were measured more than once in "
+               "the merge inputs, and the table keeps the newest. Where both came from the "
+               "same protocol, the gap between them is **run variance**, not a correction."]
+        if spread:
+            sec += ["", f"MASE gap between the duplicated measurements: median "
+                        f"{100*sorted(spread)[len(spread)//2]:.1f}%, max {100*max(spread):.1f}% "
+                        f"over {len(spread)} comparable pairs.", "",
+                    "Per model (median / max over its duplicated pairs) — this is where a "
+                    "family's numbers stop being one number:", "",
+                    "| model | pairs | median | max |", "|---|---|---|---|"]
+            for m, v in sorted(by_model.items(), key=lambda kv: -sorted(kv[1])[len(kv[1]) // 2]):
+                sec.append(f"| {m} | {len(v)} | {100*sorted(v)[len(v)//2]:.1f}% "
+                           f"| {100*max(v):.1f}% |")
+        sec += ["", "A single-seed, 8-window cell is not a stable number for every family. "
+                "Quote a model's ranking only where its gap to the next model exceeds this "
+                "spread.", ""]
+        out += sec
     # a table that leaves models out is read as "they were fine"; say who is missing
     try:
         reg_keys = set(default_registry().keys())

@@ -1,6 +1,6 @@
 # Effectiveness benchmark
 
-Generated 2026-11-26 13:33:21 from `reports/pass3_trux/lane_cuda-a.jsonl` — 3628 evaluation rows over 101 series, horizons 21, 63. Protocol: `docs/09_benchmark.md`.
+Generated 2026-11-26 18:38:07 from `reports/pass3_trux/lane_cuda-a.jsonl` — 3628 evaluation rows over 101 series, horizons 21, 63. Protocol: `docs/09_benchmark.md`.
 
 Rows are **zero-shot** (no adaptation) and slide windows over the span(s) named above — for zero-shot rows the whole series is legitimate because the model saw no training data; an *adapted* checkpoint must be scored with `--spans test`, or the comparison leaks. Same horizon grid, same window count, same seed for every model. Rows carry the **registry key the sweep requested** (adapters may report a family-level key internally). `ctx` is the context actually used (an oversized one is clamped to the span, which is recorded, not hidden). **CRPS/WQL/pinball appear only for models that emit quantiles**; a point-only model gets point metrics and is marked `pt` — a probabilistic column with a dash is not a zero. `skill` is `1 − MASE` (MASE normalises by the in-sample mean |Δ| of the train span), so MASE is the column to read and a negative skill means the model lost to that trivial scaler on this series. `cov@80` is empirical coverage of the nominal 80% band (`nominal_80` in the JSON rows carries the nominal value the model actually claims, which is not always exactly 0.8 for models with their own quantile grid).
 
@@ -4653,6 +4653,21 @@ Every model runs in the venv its registry env names; a device column is there be
 | moment-1-large | 256 | 8 | 15.5 | 1.43 | 1.23 | 0.565 | -0.0269 | -14.5 | — · pt | — | — | — |
 | moment-1-small | 256 | 8 | 15.6 | 1.44 | 1.23 | 0.452 | -0.0328 | -14.6 | — · pt | — | — | — |
 | ttm-r3 | 512 | 8 | 15.6 | 1.64 | 1.23 | 0.492 | 0.347 | -14.6 | — · pt | — | — | — |
+
+## Duplicated cells: 404
+
+These `(model, series, span, horizon)` keys were measured more than once in the merge inputs, and the table keeps the newest. Where both came from the same protocol, the gap between them is **run variance**, not a correction.
+
+MASE gap between the duplicated measurements: median 0.0%, max 10.0% over 324 comparable pairs.
+
+Per model (median / max over its duplicated pairs) — this is where a family's numbers stop being one number:
+
+| model | pairs | median | max |
+|---|---|---|---|
+| ttm-r3 | 122 | 2.5% | 10.0% |
+| ttm-r2 | 202 | 0.0% | 0.0% |
+
+A single-seed, 8-window cell is not a stable number for every family. Quote a model's ranking only where its gap to the next model exceeds this spread.
 
 ## Not in this table (27 of 46 registry models)
 

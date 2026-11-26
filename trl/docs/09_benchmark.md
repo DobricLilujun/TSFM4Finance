@@ -233,6 +233,21 @@ where the model beat naive:
   33 CUDA cells plus 33 CPU cells after a shared-card OOM. `ctx` and device are per-row
   facts, not footnotes.
 
+* **Cross-machine numbers agree bit-exactly; re-runs on one machine do not.** gpu7 (DGX
+  Spark, GB10) re-scored three series trux had already scored, and every overlapping cell
+  matched to 0.000% (`probes/trux/cross_machine_check.py`) — baselines and neural models
+  alike. But the merge inputs contain 404 cell keys measured more than once, and where one
+  file repeated a cell under the same protocol the two measurements differ by up to 10%
+  for `ttm-r3` (`ttm-r2` is deterministic). So the merged table is a union whose *hardware*
+  is consistent, while individual cells still carry run-to-run spread: quote a model's
+  ranking only where its gap to the next model exceeds that spread.
+* **A row's `model` field is the adapter's family key, not the registry key**, and ten
+  checkpoints collide on it (`chronos-bolt-base` and `-small` both write `chronos-bolt`;
+  `kronos-base`/`-mini`/`-small` all write `kronos-small`). Grouping results by that field
+  merges different checkpoints and manufactures disagreement — it is exactly how a
+  "3-40% cross-machine discrepancy" appeared and disappeared in this session's notes.
+  Rows now carry `model_key`; the merge always keyed on the registry key.
+
 What this does **not** license: any variance claim (one seed, 8 windows per cell), any
 statement about fine-tuned checkpoints, or cross-context comparison of TTM against the
 256-point models without reading the `ctx` column. Reproduce the table with

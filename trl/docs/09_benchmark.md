@@ -253,6 +253,35 @@ statement about fine-tuned checkpoints, or cross-context comparison of TTM again
 256-point models without reading the `ctx` column. Reproduce the table with
 `probes/trux/rank_pass3.py` over the merged JSONL files.
 
+### The one fine-tune measurement in this benchmark (MOMENT, watson A6000)
+
+The matrix says which families *can* be fine-tuned; only MOMENT has zero-shot and
+fine-tuned cells on the same series, because its zero-shot forecast head is randomly
+initialised and fine-tuning is the only way it becomes a forecaster. 12 series, ctx 256,
+120 fit steps from the train span, scored on the test span
+(`reports/moment_ft_watson/lane_ft.jsonl`, read it with
+`probes/watson/moment_ft_report.py`). MASE as a ratio to naive, median over the 12:
+
+| adaptation | lr | h=21 | h=63 |
+|---|---|---|---|
+| zero-shot (head untrained) | - | 2.56 | 2.14 |
+| heads_only | 1e-6 | 2.42 | 2.12 |
+| heads_only | default | 2.18 | 1.71 |
+| heads_only | **1e-4** | **1.67** | **1.55** |
+| full fine-tune | default | 1.70 | 1.54 |
+
+- Fine-tuning the head closes about a third of the gap and no more: MOMENT goes from 2.6x
+  naive to 1.67x naive and still loses to naive on 11 of 12 series. Some individual cells
+  do beat it (best 0.72 of naive at h=63), which is what you would expect on the few
+  series with structure a reconstruction-trained encoder can see.
+- **Learning rate mattered more than which weights were trainable.** lr 1e-6 barely moved
+  the number (2.42, close to zero-shot); lr 1e-4 with only the head trainable matched full
+  fine-tuning of the whole model. A fine-tune comparison that leaves lr at a framework
+  default can conclude "this family does not adapt" when the truth is "this lr does
+  nothing".
+- Every fine-tuned row carries `head_from_checkpoint: false, head_trained_here: true`, so
+  the table cannot be misread as a pretrained forecast head.
+
 ## What is *not* done yet (so nobody reads it in)
 
 * The effectiveness sweep that *has* been run is zero-shot only: 46 registry models ×

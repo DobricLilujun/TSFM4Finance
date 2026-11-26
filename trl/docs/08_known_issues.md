@@ -567,3 +567,24 @@ rows say what ran — MASE 7.0–19.6 where a naive forecast gets 2.1–8.4, `la
 `small`. Rows now carry `head_from_checkpoint` and `head_trained_here`, and the report
 lists flagged models under "Flagged: the scored head was never trained" while keeping the
 numbers.
+
+## Fine-tune pass: the lr moved the number, and the job script lost its own summary
+
+MOMENT is now the only family with both zero-shot and fine-tuned cells on the same series
+(12 series, A6000, `reports/moment_ft_watson/lane_ft.jsonl`). Two findings:
+
+**Learning rate dominated the adaptation scope.** At lr 1e-6, training only the head left
+the score where zero-shot left it (2.42x naive vs 2.56x); at lr 1e-4 with only the head
+trainable it reached 1.67x, matching a full fine-tune of the whole model. Sweeping
+`heads_only` vs `full` while leaving lr at a default compares two things when one knob
+matters. `--configs` therefore accepts `peft:budget[:lr]` and the sweep records `lr` per
+run, so a null result can be attributed instead of being read as a property of the family.
+
+**A batch job can succeed and still print nothing useful.** The MOMENT job finished —
+2373 s, 156 run records, `done in 2373s -> reports/moment_ft_watson/lane_ft.jsonl` — and
+then its trailing summary line failed with `envs/core/bin/python: No such file or
+directory`, because the script used a path relative to a directory SLURM had not made the
+cwd. The results survived only because the lane file is written as it goes; a harness that
+emits its numbers at the end of the script would have produced a successful-looking job
+with no data. Job scripts should use absolute paths for their own environment, and the
+lane file should be append-as-you-go (it is).

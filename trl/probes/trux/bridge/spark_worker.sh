@@ -25,9 +25,9 @@ RDEST() { if [ "${TRANSPORT:-remote}" = local ]; then printf '%s' "$BRIDGE_DIR/$
           else printf '%s' "$BRIDGE_USER@$BRIDGE_HOST:$BRIDGE_DIR/$1"; fi; }
 mkdir -p "$LOCAL/inbox" "$LOCAL/outbox/results"
 # Exactly one poller per bridge directory. Two workers both see the same inbox, and the
-"have I already run this job?" check is a file that appears only after a run starts, so
-overlapping polls can run one job twice on one GPU. Restarting a worker without killing
-the old one is the normal way this happens.
+# "have I already run this job?" check is a file that appears only after a run starts, so
+# overlapping polls can run one job twice on one GPU. Restarting a worker without killing
+# the old one is the normal way this happens.
 LOCK="$LOCAL/worker.pid"
 if [ -f "$LOCK" ] && kill -0 "$(cat "$LOCK" 2>/dev/null)" 2>/dev/null; then
   old=$(cat "$LOCK"); [ "$old" != "$$" ] && {

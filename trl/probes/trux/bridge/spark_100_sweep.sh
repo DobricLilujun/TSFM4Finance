@@ -4,6 +4,12 @@
 # (model, series, span, horizon) and groups provenance by (interpreter, machine, device).
 set -euo pipefail
 REPO=${REPO:-$HOME/tsfm-trl}
+# The harness is either the repo root (standalone tsfm-trl) or the vendored subtree
+# (TSFM4Finance/trl). Accept either so one clone serves both, instead of failing with
+# "code not pulled yet" on a machine that pulled it correctly.
+if [ ! -f "$REPO/scripts/sweep_evaluate.py" ] && [ -f "$REPO/trl/scripts/sweep_evaluate.py" ]; then
+  REPO="$REPO/trl"
+fi
 ENVROOT=${ENVROOT:-$HOME/envs/tsfm-trl}
 # the series list is embedded, so the job is one self-contained file: a worker that
 # cannot fetch extra inputs still runs exactly the intended subset

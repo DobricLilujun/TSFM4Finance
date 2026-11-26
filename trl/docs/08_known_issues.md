@@ -664,3 +664,46 @@ The general form: **a series name identifies a file, not a measurement.** Anythi
 a quantity derived from the data (MASE by the train-split naive error, any z-scored metric,
 any "beat baseline by X%" claim) silently changes when the data path changes, and the only
 durable defence is to write down the bytes and the split next to the number.
+
+## `--device` is a record, not a constraint - until the adapter enforces it
+
+A trux lane run with `--device cpu` wrote `device: cpu` into its meta and then died with
+`CUDA out of memory. Tried to allocate 50.00 MiB. GPU 0 has a total capacity of 47.37 GiB of
+which 14.94 MiB is free` - from TimesFM-2.5, which was never supposed to touch GPU 0. In the
+vendor package (`timesfm/timesfm_2p5/timesfm_2p5_torch.py:72`) `TimesFMModel.__init__` sets
+`self.device = torch.device("cuda:0")` whenever `torch.cuda.is_available()` and calls
+`self.to(self.device)` **inside the constructor**; `from_pretrained` accepts no device
+argument, and `compile()` later sizes work as `per_core_batch_size * model.device_count`.
+
+Two rounds of pinning failed before one worked. `.to("cpu")` after `compile()` was too late
+and left the cached `device`/`device_count` pointing at the GPU; pinning right after
+`from_pretrained` still OOMed because the *load itself* allocates there. What works
+(`TimesFM25._load_off_gpu`): when cpu was requested, hide the device for the duration of
+construction (`torch.cuda.is_available -> False`, `device_count -> 0`), then move the module,
+correct the cached attributes, and verify placement - raising `UnavailableError` rather than
+writing a row that names a device it did not run on. Verified on the saturated trux card: one
+series, one window, ok in 4.6 s, CPU.
+
+The rule for every adapter: **the device column is a claim you have to earn.** Check
+`next(model.parameters()).device` after loading and refuse on mismatch. An adapter that
+ignores `device=` does not just run in the wrong place - it falsifies the provenance of the
+row, which is the one thing a benchmark row is supposed to be able to do.
+
+## One model family is device-sensitive; the rest agree bit-for-bit across machines
+
+With the data path finally held constant (both lanes reading arena directories), the GB10
+replication lane and a trux lane give 192 shared cells, gpu7 on CUDA vs trux on CPU:
+
+| model_key | n cells | median rel. diff (mase) | max |
+|---|--:|--:|--:|
+| naive, seasonal_naive, arima, chronos-2, chronos-bolt-small, chronos-bolt-base, timesfm-2.5-200m, ttm-r2 | 24 each | 0.000% | 0.000% |
+| chronos-t5-small | 24 | 3.48% | 13.44% |
+
+Eight of nine families are identical to the last decimal across an aarch64/CUDA box and an
+x86/CPU box - which is a stronger reproducibility statement than anything this project had
+before. The exception is instructive: Chronos-T5 is the one path that *generates* (beam/
+sample decoding), and generation is where a different BLAS, a different kernel, or a bf16
+accumulation compounds into different sampled quantiles. Its pass-3 rows already mix CUDA
+(33 cells) and CPU (33 cells, the OOM retries), so those cells are not the same measurement -
+read `device` before comparing TTM-style, and treat T5 cross-device gaps of a few percent as
+expected rather than as a bug.

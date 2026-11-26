@@ -600,3 +600,24 @@ cwd. The results survived only because the lane file is written as it goes; a ha
 emits its numbers at the end of the script would have produced a successful-looking job
 with no data. Job scripts should use absolute paths for their own environment, and the
 lane file should be append-as-you-go (it is).
+
+## A dispatched bridge job is one file: three failures, one rule
+
+Getting the GB10 replication job to run took four attempts, and all three failures were the
+same fact approached from a different angle: `trux_dispatch.sh` transfers **one** file to the
+worker's inbox, and the worker runs it in a fresh shell on the far machine.
+
+| attempt | what was assumed | what happened |
+|---|---|---|
+| job_006 | `SERIES_LIST=... bash trux_dispatch.sh job.sh` would carry the argument | `FATAL: SERIES_LIST required` - the env never crosses |
+| job_007 | the job may read a sibling file (`gpu7_watson12.series`) "next to the script" | `cat: .../inbox/gpu7_watson12.series: No such file` - only the job file lands there |
+| job_008 | the job may `exec` the real runner from the repo clone by relative path | `bash: .../inbox/gpu7_030_replicate.sh: No such file` - `$0` is in the inbox, not the repo |
+
+The job that works (job_009+) is generated: the runner body plus the series list inlined.
+Two side lessons from the same loop. The generated file had a literal `\n` spliced into a
+line continuation, which bash read as the word `n` passed to `git pull`, so the repo never
+advanced and the failure surfaced as a `WARN` - a generator that concatenates strings needs
+the same lint as hand-written code. And `--models chronos2` died with `unknown model(s)`:
+the registry *key* is `chronos-2` while the *family* is `chronos2`; the sweep validating
+model names at startup, rather than defaulting to a substring match, is what made that a
+five-second failure instead of a silently empty lane.

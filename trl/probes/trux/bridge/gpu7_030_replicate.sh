@@ -19,6 +19,11 @@ for c in "$HOME/TSFM4Finance-trl/trl" "$HOME/TSFM4Finance-trl" "$HOME/tsfm-trl";
   [ -f "$c/scripts/sweep_evaluate.py" ] && { REPO=$c; break; }
 done
 [ -n "$REPO" ] || { echo "FATAL: no harness clone (looked for scripts/sweep_evaluate.py under \$HOME)"; exit 6; }
+# The row records this clone's sha, so advance it before running: a lane labelled with a
+# stale commit is not reproducible even when its numbers are right. Best-effort - an
+# offline Spark should still produce rows, tagged with whatever sha it does have.
+timeout 200 git -C "$REPO" pull -q --ff-only origin trl-integration 2>/dev/null \
+  || echo "WARN: repo not advanced (offline or diverged); rows carry the sha printed below"
 
 TRUX=${TRUX:-yewei@trux-tsubame.uni.lux}
 TRUX_SSH=${TRUX_SSH:-"ssh -i $HOME/.ssh/id_ed25519_gm_transfer -o StrictHostKeyChecking=accept-new"}
@@ -55,7 +60,7 @@ ARGS=()
 for s in $SERIES_LIST; do ARGS+=(--series "$DATA/$s"); done
 "$ENVROOT/core/bin/python" -u "$REPO/scripts/sweep_evaluate.py" \
   "${ARGS[@]}" \
-  --models naive,seasonal_naive,arima,chronos-bolt-small,chronos-bolt-base,chronos-t5-small,chronos2,timesfm-2.5-200m,ttm-r2 \
+  --models naive,seasonal_naive,arima,chronos-bolt-small,chronos-bolt-base,chronos-t5-small,chronos-2,timesfm-2.5-200m,ttm-r2 \
   --horizons 21,63 --max-windows 8 --ctx 256 --seed 0 \
   --out "$OUT" --device "$DEVICE" --fresh
 

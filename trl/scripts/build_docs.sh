@@ -8,7 +8,11 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 
 PY="${DOCS_PY:-.venv-docs/bin/python}"
-[ -x "$PY" ] || PY="${VIRTUAL_ENV:-}/bin/python"
+# An unset VIRTUAL_ENV used to make this "/bin/python" (the empty string plus a suffix),
+# which exists on GitHub runners but has no mkdocs: the CI build died with
+# `/bin/python: No module named mkdocs` while pip had installed into the setup-python
+# interpreter. Only take the venv path when a venv is actually set.
+if [ ! -x "$PY" ] && [ -n "${VIRTUAL_ENV:-}" ]; then PY="$VIRTUAL_ENV/bin/python"; fi
 [ -x "$PY" ] || PY=python3
 
 if [ ! -f COMPATIBILITY.md ]; then

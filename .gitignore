@@ -35,3 +35,7 @@ trl/*.egg-info/
 # flattened CSVs are regenerable with probes/trux/series_to_csv.py; the MANIFEST stays in git
 trl/reports/*/series_csv/*
 !trl/reports/*/series_csv/MANIFEST.json
+# locally cloned model weights (git-lfs; never commit)
+models/
+# offline HF-cache mirror built by bench.weights --link-into-cache
+.hf-cache/

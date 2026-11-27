@@ -315,30 +315,43 @@ initialised and fine-tuning is the only way it becomes a forecaster. 12 series, 
 - Every fine-tuned row carries `head_from_checkpoint: false, head_trained_here: true`, so
   the table cannot be misread as a pretrained forecast head.
 
-## What pass 4 (and pass 5) show: 101 series on one data path, with intervals
+## What passes 4-6 show: 101 series on one data path, with intervals
 
 Pass 4 scored the corpus on a single arena-parquet data path (`gpu7` 66 series + `watson` the other
-35, horizons 21/63). Pass 5 then had `watson` re-score `gpu7`'s 66 series, so the merged table is
-**3,232 rows over 101 series from 5 lane files on 4 machines**, and 66 of those series - 1,452 cells -
-were measured twice on two CUDA stacks that share nothing. That is what turns the corpus from a
-partition into a sample with replication, and it is why the merge report can call 1,668 repeated pairs
-"same bytes, different stack, median gap 0.000%" instead of hand-waving.
+35, horizons 21/63). Pass 5 had `watson` re-score `gpu7`'s 66 series; pass 6 added the two families
+that had never been cross-checked (`moment-1-small`, `moment-1-large`, `timemoe-50m`: `watson` on an
+A6000, `trux` on CPU) and scored the five families `gpu7` had skipped (`chronos-t5-base`,
+`flowstate-r1`, `timesfm-3.0`, `ttm-r3`, `patchtst-fm-r2`). The merged table is now
+**3,628 rows over 101 series from 8 lane files on 4 machines**, and **1,980 of those cells** were
+measured twice on two stacks that share nothing (66 series x 2 horizons x 15 model keys). That is what
+turns the corpus from a partition into a sample with replication: the merge report classifies all
+2,064 repeated pairs as "same bytes, same protocol, different stack", with no protocol changes hiding
+inside them.
 
 The ranking lives in `EFFECTIVENESS.md`; what belongs here is the uncertainty around it
 (`probes/pass4_share_bootstrap.py`, cluster bootstrap over *series*, each series moving as a block
 because its two horizons are not independent):
 
-| model | cells | beat naive | 95% CI (over 101 series) |
+| model | cells | beat naive | 95% CI |
 |---|--:|---|---|
-| `arima` | 202 | 55.4% | 48.0 .. 62.9 |
-| `chronos-bolt-small` | 202 | 41.1% | 34.7 .. 48.0 |
-| `chronos-2` | 202 | 39.6% | 33.7 .. 45.5 |
-| `chronos-bolt-base` | 202 | 32.2% | 25.7 .. 38.6 |
-| `chronos-t5-small` | 202 | 31.7% | 25.2 .. 39.1 |
-| `chronos-t5-base` | 202 | 30.7% | 24.3 .. 37.1 |
-| `theta` | 202 | 30.2% | 24.3 .. 36.6 |
-| `ttm-r2` | 202 | 26.7% | 20.8 .. 33.2 |
+| `arima` | 202 | 55.4% | 48.0 .. 62.9 (101 series) |
+| `chronos-bolt-small` | 202 | 41.1% | 34.7 .. 47.5 (101 series) |
+| `chronos-2` | 202 | 39.6% | 33.2 .. 45.5 (101 series) |
+| `chronos-bolt-base` | 202 | 32.2% | 25.7 .. 39.1 (101 series) |
+| `chronos-t5-small` | 202 | 31.7% | 24.8 .. 38.6 (101 series) |
+| `chronos-t5-base` | 202 | 30.7% | 24.3 .. 37.1 (101 series) |
+| `theta` | 202 | 30.2% | 24.3 .. 36.6 (101 series) |
+| `timesfm-2.5-200m` | 202 | 29.2% | 23.3 .. 34.7 (101 series) |
+| `timesfm-3.0` | 202 | 29.2% | 23.8 .. 34.7 (101 series) |
+| `ttm-r2` | 202 | 26.7% | 20.3 .. 33.7 (101 series) |
+| `seasonal_naive` | 202 | 19.3% | 14.4 .. 24.3 (101 series) |
+| `flowstate-r1` | 202 | 19.3% | 13.4 .. 25.2 (101 series) |
+| `patchtst-fm-r2` | 202 | 18.8% | 13.9 .. 24.3 (101 series) |
+| `moving_average` | 202 | 12.9% | 8.4 .. 17.8 (101 series) |
+| `timemoe-50m` | 132 | 6.1% | 2.3 .. 9.8 (66 series) |
 | `ttm-r3` | 126 | 0.8% | 0.0 .. 2.4 (63 series) |
+| `moment-1-small` | 132 | 0.8% | 0.0 .. 2.3 (66 series) |
+| `moment-1-large` | 132 | 0.8% | 0.0 .. 2.3 (66 series) |
 
 What that says, and what it does not:
 
@@ -350,7 +363,17 @@ What that says, and what it does not:
   scored corpus-wide (pass 5 supplied its 66 missing series), the whole T5/bolt-base cluster sits
   inside one another's intervals.
 * **`ttm-r3` at ~1% is not noise.** It loses essentially every cell to naive; the interval is near a
-  point because the outcome is constant, not because the sample is large.
+  point because the outcome is constant, not because the sample is large. Its 126 scored cells out of
+  202 are the NaN policy talking: 76 cells had no finite forecast to score, on either machine.
+* **MOMENT and TimeMoE really are that far behind, and the interval now says so.** Both MOMENT sizes
+  sit at 0.8% (0.0 .. 2.3) with a median per-cell MASE ratio of 2.65, `timemoe-50m` at 6.1%
+  (2.3 .. 9.8). These are the families whose measurement was a single number for most of this project;
+  pass 6 gave them two machines and a second pass over 66 series, and nothing about the earlier
+  reading changed: MOMENT's checkpoint carries no trained forecasting head, and that is what the
+  benchmark measures.
+* **`seasonal_naive` beating most foundation models (19.3%) is a finding about the corpus**, not the
+  models: these are financial series with weak seasonality at h=21/63, so a weekly-lag repeat is a
+  hard baseline and `naive` itself scores MASE ~4.5.
 
 A model whose interval overlaps a neighbour's is tied *as far as this pass can see*. Raising
 `--max-windows` narrows these intervals roughly as `1/sqrt(windows)`; scoring more series narrows the

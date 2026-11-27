@@ -117,7 +117,7 @@ recs = [json.loads(l) for l in open(sys.argv[1]) if l.strip()]
 scored = [r for r in recs if r.get("rows")]
 print(f"  records={len(recs)} scored={len(scored)} "
       f"cells={sum(len(r['rows']) for r in scored)} "
-      f"errors={[r['model'] for r in recs if not r.get('rows')]}")
+      f"errors={[r.get('model', '<meta line>') for r in recs if not r.get('rows')]}")
 if scored:
     r = scored[0]; row = r["rows"][0]
     for k in ("model", "model_key", "machine", "device", "code_sha", "torch", "data_kind", "data_hash"):

@@ -84,7 +84,7 @@ recs = [json.loads(l) for l in open(sys.argv[1]) if l.strip()]
 scored = [r for r in recs if r.get("rows")]
 print(f"  records={len(recs)} scored={len(scored)} "
       f"cells={sum(len(r['rows']) for r in scored)} "
-      f"errors={[r['model'] for r in recs if not r.get('rows')]}")
+      f"errors={[r.get('model', '<meta line>') for r in recs if not r.get('rows')]}")
 if scored:
     # provenance from a scored record, not from recs[0]: the first line of a lane can be a
     # skip record that carries no machine, sha, or torch build at all

@@ -138,3 +138,20 @@ def test_dispatch_refuses_a_stale_generated_file(tmp_path):
     r = subprocess.run(["bash", str(disp), str(old)], capture_output=True, text=True,
                        env={**os.environ, "BRIDGE": str(bridge)})
     assert r.returncode == 7 and "generated" in r.stderr, r.stderr
+
+
+def test_the_python_inside_the_templates_compiles(tmp_path):
+    """bash -n cannot see an embedded heredoc. One template shipped an f-string that nested double
+    quotes inside a double-quoted f-string: valid on 3.12, a SyntaxError on the 3.11 interpreter the
+    worker actually runs, and it only exploded in the summary after a two-hour sweep had finished."""
+    import ast
+    import re
+    for tpl in sorted(t for t in (REPO / "probes" / "trux" / "bridge").glob("gpu7_*.sh")
+                      if t.name != "gpu7_generate.sh"):
+        text = tpl.read_text()
+        blocks = re.findall(r"<<'PY'\n(.*?)\nPY\n", text, flags=re.S)
+        for i, block in enumerate(blocks):
+            try:
+                ast.parse(block)
+            except SyntaxError as e:
+                raise AssertionError(f"{tpl.name} python block {i}: {e}") from e

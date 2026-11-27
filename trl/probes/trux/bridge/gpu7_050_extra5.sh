@@ -12,15 +12,12 @@
 # ttm-r3 is expected to produce non-finite windows on this corpus (docs/08); those rows carry None
 # metrics on purpose, and the checker treats them as no-measurement rather than as a disagreement.
 #
-# GENERATED before dispatch (one file crosses the bridge):
+# GENERATED before dispatch - one file crosses the bridge:
 #
-#   cd trl && python3 - <<'GEN'
-#   import pathlib
-#   job = pathlib.Path("probes/trux/bridge/gpu7_050_extra5.sh").read_text()
-#   ser = " ".join(pathlib.Path("probes/trux/gpu7_full66.series").read_text().split())
-#   pathlib.Path("/tmp/job_extra5.sh").write_text(job.replace("@@SERIES@@", ser))
-#   GEN
-#   probes/trux/bridge/trux_dispatch.sh /tmp/job_extra5.sh
+#   probes/trux/bridge/gpu7_generate.sh \
+#       probes/trux/bridge/gpu7_050_extra5.sh probes/trux/gpu7_full66.series /tmp/job.sh
+#   probes/trux/bridge/trux_dispatch.sh /tmp/job.sh
+#
 # Machine-specific endpoints (host, user, path, key) come from an untracked sibling
 # file so this public tree carries no lab hostnames or internal IPs; the example
 # next to it lists the variables. Fail fast if the file is missing.
@@ -37,9 +34,17 @@ done
 timeout 200 git -C "$REPO" pull -q --ff-only origin trl-integration 2>/dev/null \
   || echo "WARN: repo not advanced (offline or diverged); rows carry the sha printed below"
 
-TRUX=${TRUX:?TRUX unset - copy bridge.env.example to bridge.env}
-TRUX_SSH=${TRUX_SSH:?TRUX_SSH unset - copy bridge.env.example to bridge.env}
-SRC=${SRC:?SRC unset - copy bridge.env.example to bridge.env}
+MARKER='@@'
+# filled by probes/trux/bridge/gpu7_generate.sh from bridge.env on trux: this file runs on gpu7,
+# where no bridge.env exists, so `:?` would only turn a generation mistake into a runtime failure
+TRUX=${TRUX:-"@@TRUX@@"}
+TRUX_SSH=${TRUX_SSH:-"@@TRUX_SSH@@"}
+SRC=${SRC:-"@@SRC@@"}
+for _v in TRUX TRUX_SSH SRC; do
+  case "${!_v}" in
+    *"$MARKER"*) echo "FATAL: $_v still holds a generator marker; run gpu7_generate.sh"; exit 6 ;;
+  esac
+done
 DATA=${DATA:-$HOME/tsfm_data/standard}
 OUT=${OUT:-$HOME/spark_bridge/outbox/results/gpu7_pass5_extra5.jsonl}
 # inlined at generation time from probes/trux/gpu7_full66.series (trux's pass-3 66 series)
@@ -49,7 +54,6 @@ SERIES_LIST=${SERIES_LIST:-"@@SERIES@@"}
 # and fails a perfectly good job (job_012 died exactly this way). Test for a leftover
 # marker instead - and note the marker here is spelled with the sigil split from the
 # word so this file cannot self-trigger it.
-MARKER='@@'
 case " $SERIES_LIST " in
   *"$MARKER"*) echo "FATAL: SERIES_LIST still holds a generator marker; generate this job"; exit 6 ;;
 esac

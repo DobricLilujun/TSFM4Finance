@@ -43,7 +43,7 @@ def test_generated_job_carries_the_series_and_the_endpoints(tmp_path):
     ser = tmp_path / "series.txt"
     ser.write_text("std_equity_1d_10107\nstd_fx_1d_eurjpy\n")
     _bridge(tmp_path, BRIDGE="/b", TRUX="trux.example", TRUX_SSH="ssh -p 22 -i /k",
-            SRC="/data/standard")
+            GPU_SSH="ssh -o BatchMode=yes", SRC="/data/standard")
     r = _run(tmp_path, tpl, ser)
     assert r.returncode == 0, r.stderr
     job = (tmp_path / "job.sh").read_text()
@@ -78,6 +78,32 @@ def test_a_token_the_generator_does_not_know_fails_the_run(tmp_path):
                                     'OUT=${OUT:-"@@OUT_DIR@@/lane.jsonl"}'))
     ser = tmp_path / "series.txt"
     ser.write_text("s1\n")
-    _bridge(tmp_path, BRIDGE="/b", TRUX="t", TRUX_SSH="ssh", SRC="/d")
+    _bridge(tmp_path, BRIDGE="/b", TRUX="t", TRUX_SSH="ssh", GPU_SSH="ssh", SRC="/d")
     r = _run(tmp_path, tpl, ser)
     assert r.returncode != 0 and "OUT_DIR" in r.stderr, r.stderr
+
+
+def test_the_shipped_templates_generate_clean(tmp_path):
+    """Every gpu7_*.sh template must survive the generator with no token left, including GPU_SSH,
+    which is the credential the *worker* uses to reach trux (not the one trux uses to reach it)."""
+    bridge = tmp_path / "bridge.env"
+    bridge.write_text('BRIDGE="/b"\nTRUX="user@trux.example"\n'
+                      'TRUX_SSH="ssh -i /on/trux/id_bridge"\n'
+                      'GPU_SSH="ssh -o BatchMode=yes"\nSRC="/data/standard"\n')
+    script = tmp_path / "gpu7_generate.sh"
+    script.write_text(GEN.read_text())
+    ser = tmp_path / "series.txt"
+    ser.write_text("s1\ns2\n")
+    for tpl in sorted(t for t in (REPO / "probes" / "trux" / "bridge").glob("gpu7_*.sh")
+                      if t.name != "gpu7_generate.sh"):  # the generator's own comment carries a
+                                                         # example token, by design
+        r = subprocess.run(["bash", str(script), str(tpl), str(ser), str(tmp_path / "job.sh")],
+                           capture_output=True, text=True)
+        assert r.returncode == 0, f"{tpl.name}: {r.stderr}"
+        job = (tmp_path / "job.sh").read_text()
+        import re
+        assert not re.findall(r"@@[A-Z_]+@@", job), f"{tpl.name}: token left in the generated job"
+        if "@@GPU_SSH@@" in tpl.read_text():
+            # the newer jobs pull the corpus with the worker's own credentials; that value must
+            # arrive filled, because no bridge.env exists on the worker
+            assert 'ssh -o BatchMode=yes' in job, f"{tpl.name}: worker-side ssh not inlined"

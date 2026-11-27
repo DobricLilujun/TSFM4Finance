@@ -14,18 +14,18 @@ HERE="$(cd "$(dirname "$0")" && pwd)"
 [ -f "$HERE/bridge.env" ] || { echo "FATAL: $HERE/bridge.env missing (see bridge.env.example)" >&2; exit 6; }
 # shellcheck disable=SC1090
 . "$HERE/bridge.env"
-for v in TRUX TRUX_SSH SRC; do
+for v in TRUX TRUX_SSH GPU_SSH SRC; do
   [ -n "${!v:-}" ] || { echo "FATAL: bridge.env does not define $v" >&2; exit 6; }
 done
 series=$(cat "$ser" | tr '\n' ' ' | tr -s ' ')
-python3 - "$tpl" "$series" "$out" "$TRUX" "$TRUX_SSH" "$SRC" <<'PY'
+python3 - "$tpl" "$series" "$out" "$TRUX" "$TRUX_SSH" "$GPU_SSH" "$SRC" <<'PY'
 import pathlib, sys
-tpl, series, out, trux, trux_ssh, src = sys.argv[1:7]
+tpl, series, out, trux, trux_ssh, gpu_ssh, src = sys.argv[1:8]  # argv[0] is "-"
 text = pathlib.Path(tpl).read_text()
 # every occurrence, deliberately: a placeholder left in a comment would otherwise survive into the
 # generated file and look like the substitution half-worked
 for tok, val in (("@@SERIES@@", series), ("@@TRUX@@", trux),
-                 ("@@TRUX_SSH@@", trux_ssh), ("@@SRC@@", src)):
+                 ("@@TRUX_SSH@@", trux_ssh), ("@@GPU_SSH@@", gpu_ssh), ("@@SRC@@", src)):
     text = text.replace(tok, val)
 import re
 # any @@UPPERCASE@@ token, not just the four known ones: a placeholder the generator has never

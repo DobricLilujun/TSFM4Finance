@@ -35,12 +35,22 @@ timeout 200 git -C "$REPO" pull -q --ff-only origin trl-integration 2>/dev/null 
   || echo "WARN: repo not advanced (offline or diverged); rows carry the sha printed below"
 
 MARKER='@@'
+# A row says which machine scored it, so a job that runs on the wrong box writes a wrong table.
+# trux is the control plane and the inbox is shared state: refuse to score anywhere else.
+HOST_NOW=$(hostname)
+case "$HOST_NOW" in
+  *gpu7*|*spark*) : ;;
+  *) echo "FATAL: this job is written for the Spark worker, hostname=$HOST_NOW"; exit 6 ;;
+esac
+echo "-- host: $HOST_NOW"
 # filled by probes/trux/bridge/gpu7_generate.sh from bridge.env on trux: this file runs on gpu7,
 # where no bridge.env exists, so `:?` would only turn a generation mistake into a runtime failure
 TRUX=${TRUX:-"@@TRUX@@"}
 TRUX_SSH=${TRUX_SSH:-"@@TRUX_SSH@@"}
 SRC=${SRC:-"@@SRC@@"}
-for _v in TRUX TRUX_SSH SRC; do
+# how *this* box reaches trux (its own key), not how trux reaches this box
+GPU_SSH=${GPU_SSH:-"@@GPU_SSH@@"}
+for _v in TRUX TRUX_SSH GPU_SSH SRC; do
   case "${!_v}" in
     *"$MARKER"*) echo "FATAL: $_v still holds a generator marker; run gpu7_generate.sh"; exit 6 ;;
   esac
@@ -61,11 +71,21 @@ n_ser=$(echo $SERIES_LIST | wc -w)
 echo "host=$(hostname) repo=$REPO sha=$(git -C "$REPO" rev-parse --short HEAD 2>/dev/null || echo unknown)"
 echo "date=$(date -u +%FT%TZ)  series=$n_ser"
 
-echo "-- corpus: $n_ser arena dirs from $TRUX:$SRC"
+echo "-- corpus: $n_ser arena dirs, target $DATA (source $TRUX:$SRC)"
 mkdir -p "$DATA"
+missing=0
 for s in $SERIES_LIST; do
-  rsync -e "$TRUX_SSH" -a "$TRUX:$SRC/$s" "$DATA/" || { echo "FATAL: corpus pull failed for $s"; exit 5; }
+  # skip what is already here: this box keeps its copy of the corpus between jobs, and the pull
+  # path below needs credentials that only exist on this box, so a needless pull is a needless way
+  # to fail a two-hour lane
+  [ -f "$DATA/$s/train.parquet" ] && continue
+  missing=$((missing+1))
+  # GPU_SSH (not TRUX_SSH): the key baked into TRUX_SSH lives on trux and is not readable from
+  # here. job_015 died exactly that way - "Identity file /raid/yewei/.ssh/... not accessible",
+  # then Permission denied - over a corpus this box already had in full.
+  rsync -e "$GPU_SSH" -a "$TRUX:$SRC/$s/" "$DATA/$s/" || { echo "FATAL: corpus pull failed for $s"; exit 5; }
 done
+echo "  pulled: $missing | present: $(ls -1 "$DATA" | wc -l)"
 ls -1 "$DATA" | wc -l | sed 's/^/  series dirs present: /'
 
 # GB10 answers [N/A] to nvidia-smi memory queries and the box is shared, so the device comes

@@ -692,7 +692,8 @@ row, which is the one thing a benchmark row is supposed to be able to do.
 ## One model family is device-sensitive; the rest agree bit-for-bit across machines
 
 With the data path finally held constant (both lanes reading arena directories), the GB10
-replication lane and a trux lane give 192 shared cells, gpu7 on CUDA vs trux on CPU:
+replication lane and a trux lane give 216 shared cells (12 series x 2 horizons x 9 models,
+once the TimesFM CPU lane was re-run), gpu7 on CUDA vs trux on CPU:
 
 | model_key | n cells | median rel. diff (mase) | max |
 |---|--:|--:|--:|
@@ -707,3 +708,14 @@ accumulation compounds into different sampled quantiles. Its pass-3 rows already
 (33 cells) and CPU (33 cells, the OOM retries), so those cells are not the same measurement -
 read `device` before comparing TTM-style, and treat T5 cross-device gaps of a few percent as
 expected rather than as a bug.
+
+Three machines, same protocol, same bytes (2026-11-27). Watson's 35-series lane was re-run
+reading arena directories (`reports/pass4_watson_arena`: RTX A6000, CUDA, 16 models, 0 failures), so its 12 overlap series now share a data path with gpu7 and trux. Pairwise MASE on those cells:
+
+| machine pair | hardware | identical | out of tolerance |
+|---|---|---|---|
+| gpu7 \| sedan-gpu1 | GB10 CUDA \| A6000 CUDA | 8 of 9 families at 0.000% | 18 cells, all `chronos-t5-small` (median 5.38%, max 11.32%) |
+| gpu7 \| trux-tsubame | GB10 CUDA \| x86 CPU | 8 of 9 families at 0.000% | T5 only |
+| sedan-gpu1 \| trux-tsubame | A6000 CUDA \| x86 CPU | 8 of 9 families at 0.000% | T5 only |
+
+Two CUDA stacks that share nothing - different GPU architecture, different torch build - reproduce each other exactly. That is the strongest form of the claim available, and it locates the exception in the *decoding path*: `chronos-t5-base` ran only on watson in this pass, so it still has no cross-machine pair.

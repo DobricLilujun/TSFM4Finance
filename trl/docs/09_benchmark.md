@@ -314,6 +314,38 @@ initialised and fine-tuning is the only way it becomes a forecaster. 12 series, 
 - Every fine-tuned row carries `head_from_checkpoint: false, head_trained_here: true`, so
   the table cannot be misread as a pretrained forecast head.
 
+## What pass 4 shows (101 series on one data path, with intervals)
+
+Pass 4 re-scored the corpus on a single arena-parquet data path (`gpu7` 66 series + `watson` the
+other 35, horizons 21/63, 2,572 rows), so the merged table is one protocol rather than pass 3's
+mix of CSV and arena. The ranking is published in `EFFECTIVENESS.md`; what belongs here is the
+uncertainty around it (`probes/pass4_share_bootstrap.py`, cluster bootstrap over *series*, each
+series moving as a block because its two horizons are not independent):
+
+| model | cells | beat naive | 95% CI |
+|---|--:|---|---|
+| `arima` | 202 | 55.4% | 48.5 .. 61.9 |
+| `chronos-bolt-small` | 202 | 41.1% | 34.2 .. 47.5 |
+| `chronos-2` | 202 | 39.6% | 34.2 .. 46.0 |
+| `chronos-t5-base` | 70 | 32.9% | 21.4 .. 44.3 |
+| `chronos-bolt-base` | 202 | 32.2% | 25.7 .. 38.6 |
+| `ttm-r3` | 44 | 0.0% | 0.0 .. 0.0 |
+
+What that says, and what it does not:
+
+* **`arima` over every foundation model is real.** It wins the paired comparison against
+  `chronos-bolt-small` in 100.0% of resamples and `chronos-2` in 99.8%. Intervals barely touch.
+* **`chronos-bolt-small` vs `chronos-2` is a tie, not 41% > 40%.** Pairwise 61.8% - a mildly
+  favoured coin flip. Publishing them as ranks 2 and 3 is over-precision.
+* **`chronos-t5-base` vs `chronos-bolt-base` is 50.0%**: with 35 series, no ordering exists.
+* **`ttm-r3` at 0/44 is not noise.** Every cell lost to naive; that one is a property of the
+  checkpoint on these series, and its interval is exactly a point.
+
+A model whose interval overlaps a neighbour's is tied *as far as this pass can see*. Raising
+`--max-windows` narrows these intervals; scoring more series narrows them further, and only
+`watson` re-scoring `gpu7`'s half (pass 5) turns the corpus from a partition into a sample with
+replication.
+
 ## What is *not* done yet (so nobody reads it in)
 
 * The effectiveness sweep that *has* been run is zero-shot only: 46 registry models ×

@@ -1,7 +1,7 @@
 # pass-4 merge order (newest-wins per cell), arena parquet path only.
 # Consumed by: scripts/sweep_evaluate.py --report "$(tr ' ' ',' < probes/pass4_merge_files.txt)" --summary-only --md EFFECTIVENESS.md
-# watson first: its pass-5 run re-scores gpu7's 66 series on an A6000, and those rows are the
-# ones the cross-machine claim rests on, so they must win over the Spark rows for shared cells.
+# pass-5 last on purpose: it re-scores gpu7's 66 series on an A6000, and the merge is newest-wins,
+# so those rows are what the table shows for shared cells and what the cross-machine check reads.
 reports/pass4_gpu7_full/lane_full66.jsonl
 reports/trux_rep12/lane.jsonl
 reports/trux_rep12/lane_timesfm.jsonl

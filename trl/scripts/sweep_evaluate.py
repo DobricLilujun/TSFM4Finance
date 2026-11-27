@@ -402,54 +402,69 @@ def report(args) -> int:
             f"| `{k}` | {v['machine']} | {v['device']} | {tcell(v['torch'])} | "
             f"{', '.join(f'`{m}`' for m in v['models'])} |"
             for (k, _machine, _device), v in sorted(prov.items())] + [""]
-    # Headline ranking: aggregates, so the site page stays readable and small. `beat naive`
-    # is the headline column because it is the only MASE-derived quantity comparable across
-    # data paths (MASE's denominator comes from the split the file carries); median MASE is
-    # printed but explicitly scoped to this pass. NaN / no-measurement cells are counted,
-    # never averaged in.
+    # Headline ranking: aggregates, so the site page stays readable and small.
+    #
+    # "beat naive" compares a model against the *naive row scored on the same cell*, not
+    # against MASE < 1. MASE's denominator is the in-sample mean |delta| of the train span,
+    # so on these financial series the naive baseline itself scores ~4.5 and a MASE < 1 test
+    # would call everything a loss (that wrong version printed 0% for every model). Ratios
+    # are medians of per-cell mase_model / mase_naive; a cell with no naive measurement is
+    # skipped, and missing measurements are counted, never averaged in.
     from statistics import median as _median
+    base = {}
+    for (m, srs, sp, h), r in cells.items():
+        if m == "naive" and isinstance(r.get("mase"), (int, float)) and r["mase"] == r["mase"]:
+            base[(srs, sp, h)] = float(r["mase"])
     per_model: dict = {}
-    for (m, _s, _sp, _h), r in cells.items():
-        d = per_model.setdefault(m, {"n": 0, "beat": 0, "mase": [], "rmse": [],
-                                     "ctx": set(), "none": 0})
+    for (m, srs, sp, h), r in cells.items():
+        d = per_model.setdefault(m, {"n": 0, "beat": 0, "cmp": 0, "ratio": [], "mase": [],
+                                     "rmse": [], "ctx": set(), "none": 0})
         d["n"] += 1
         if isinstance(r.get("ctx"), (int, float)):
             d["ctx"].add(int(r["ctx"]))
         mv = r.get("mase")
         if isinstance(mv, (int, float)) and mv == mv:
             d["mase"].append(float(mv))
-            if mv < 1.0:
-                d["beat"] += 1
+            b = base.get((srs, sp, h))
+            if b and b > 0:
+                d["cmp"] += 1
+                d["ratio"].append(float(mv) / b)
+                if mv < b:
+                    d["beat"] += 1
         else:
             d["none"] += 1
         rv = r.get("rmse")
         if isinstance(rv, (int, float)) and rv == rv:
             d["rmse"].append(float(rv))
     ranked = sorted(per_model.items(),
-                    key=lambda kv: (-(kv[1]["beat"] / kv[1]["n"] if kv[1]["n"] else 0.0),
-                                    _median(kv[1]["mase"]) if kv[1]["mase"] else 9e9))
+                    key=lambda kv: (-(kv[1]["beat"] / kv[1]["cmp"] if kv[1]["cmp"] else 0.0),
+                                    _median(kv[1]["ratio"]) if kv[1]["ratio"] else 9e9))
     out += ["## Headline ranking", "",
-            "`beat naive` = share of this model's cells whose MASE is below the naive "
-            "baseline for the same (series, span, horizon) cell — the column that survives "
-            "a data-path change, since it compares each model against the baseline scored "
-            "on the same bytes. Median MASE is scoped to this pass's data path "
-            "(docs/09_benchmark.md); a model with a different ctx is a different "
-            "measurement, which is why the ctx column is printed rather than assumed.", "",
-            "| model_key | cells | beat naive | median MASE | median RMSE | ctx | no measurement |",
-            "|---|--:|--:|--:|--:|---|--:|"]
+            "`beat naive` is the share of cells where the model's MASE beats the **naive row "
+            "scored on the same (series, span, horizon) cell** - not MASE < 1: MASE's "
+            "denominator is the in-sample mean |delta| of the train span, so on these series "
+            "naive itself sits near 4.5 and a MASE < 1 test calls everything a loss. The ratio "
+            "column is the median of per-cell `mase_model / mase_naive`, which is comparable "
+            "across data paths (same bytes, same split, same denominator on both sides); raw "
+            "median MASE is scoped to this pass. `ctx` prints the context lengths actually "
+            "used - different ctx is a different measurement. `no measurement` counts cells "
+            "whose windows were all non-finite or unscored; those never enter a median.", "",
+            "| model_key | cells | beat naive | med MASE/naive | median MASE | median RMSE | ctx | no measurement |",
+            "|---|--:|--:|--:|--:|--:|---|--:|"]
     def _num(vals):
         # an empty list is "no measurement", not a zero and not a nan to be averaged later
         return f"{_median(vals):.3g}" if vals else "—"
     for m, d in ranked:
-        share = 100.0 * d["beat"] / d["n"] if d["n"] else 0.0
+        share = 100.0 * d["beat"] / d["cmp"] if d["cmp"] else 0.0
         ctxs = ", ".join(str(c) for c in sorted(d["ctx"])) or "—"
-        out.append(f"| `{m}` | {d['n']} | {share:.0f}% | {_num(d['mase'])} "
-                   f"| {_num(d['rmse'])} | {ctxs} | {d['none']} |")
+        out.append(f"| `{m}` | {d['n']} | {share:.0f}% ({d['beat']}/{d['cmp']}) "
+                   f"| {_num(d['ratio'])} | {_num(d['mase'])} | {_num(d['rmse'])} "
+                   f"| {ctxs} | {d['none']} |")
     out += [""]
     if getattr(args, "summary_only", False):
         out += ["_Per-cell tables are omitted (`--summary-only`): a 3,600-row page is ~2 MB "
                 "of HTML, and GitHub Pages does not serve the directory URL for a page that "
-                "large — the full tables live in the repo's merged report instead._", ""]
+                "large - the full tables live in the repo's merged report instead._", ""]
     spans = sorted({r.get("span", "test") for r in rows})
 
     def cell(v):

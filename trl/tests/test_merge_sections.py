@@ -197,30 +197,37 @@ def _row(model, series, mase, rmse=1.0, ctx=256):
                       "model": model}]}
 
 
-def test_headline_ranking_counts_beat_naive_and_skips_missing_measurements(tmp_path):
-    """The aggregate table is the site's headline: beat-naive share per model, with
-    no-measurement cells counted rather than averaged into the median."""
+def test_headline_ranking_compares_against_the_naive_row_not_mase_below_one(tmp_path):
+    """The trap this guards: MASE's denominator is the *in-sample* naive error, so MASE < 1
+    is not "beat naive on this cell". On these financial series the naive row itself scores
+    ~4.5, and the first version of this table printed 0% for every model. The comparison is
+    against the naive row scored on the same (series, span, horizon) cell."""
     a = tmp_path / "lane.jsonl"
-    a.write_text("\n".join([
-        json.dumps(_meta("trux")),
-        json.dumps(_row("chronos-bolt-small", "s1", 0.5)),
-        json.dumps(_row("chronos-bolt-small", "s2", 0.8)),
-        json.dumps(_row("chronos-bolt-small", "s3", None, rmse=None)),
+    recs = [json.dumps(_meta("trux"))]
+    # naive baseline per cell: 1.4 on s1/s2/s3, but a hard cell s4 where naive is 0.5
+    for srs, nm in (("s1", 1.4), ("s2", 1.4), ("s3", 1.4), ("s4", 0.5)):
+        recs.append(json.dumps(_row("naive", srs, nm)))
+    recs += [
+        json.dumps(_row("chronos-bolt-small", "s1", 0.5)),    # beats 1.4
+        json.dumps(_row("chronos-bolt-small", "s2", 0.8)),    # beats 1.4
+        json.dumps(_row("chronos-bolt-small", "s3", None, rmse=None)),  # no measurement
+        json.dumps(_row("chronos-bolt-small", "s4", 0.9)),    # MASE < 1 but LOSES to 0.5
         json.dumps(_row("moment-1-large", "s1", 3.0)),
         json.dumps(_row("moment-1-large", "s2", 2.0)),
-        json.dumps(_row("moment-1-large", "s3", 4.0)),
-    ]) + "\n")
+    ]
+    a.write_text("\n".join(recs) + "\n")
     md = tmp_path / "M.md"
     _report((a,), md)
     text = md.read_text()
-    rank = text[text.index("## Headline ranking"):text.index("## ", text.index("## Headline ranking") + 5)]
+    h = text.index("## Headline ranking")
+    rank = text[h:text.index("## ", h + 5)]
     cb = next(l for l in rank.splitlines() if "chronos-bolt-small" in l)
     mo = next(l for l in rank.splitlines() if "moment-1-large" in l)
-    assert rank.index("chronos-bolt-small") < rank.index("moment-1-large"), \
-        "the better model must sort first"
-    assert "| 3 | 67% |" in cb, f"2 of 3 cells beat naive, third is not a measurement: {cb}"
-    assert "| 3 | 0% |" in mo, mo
-    assert cb.rstrip().endswith("| 1 |"), f"the None-mase cell is counted as no measurement: {cb}"
+    assert rank.index("chronos-bolt-small") < rank.index("moment-1-large"), "better model sorts first"
+    assert "3/4" in cb, f"s4 must not count as a win despite MASE 0.9 < 1: {cb}"
+    assert "0/2" in mo, mo
+    assert cb.rstrip().endswith("| 1 |"), f"the None-mase cell counts as no measurement: {cb}"
+    assert "not MASE < 1" in rank, "the table must say which comparison it is making"
     assert "nan" not in rank, "a missing measurement must never render as nan"
 
 

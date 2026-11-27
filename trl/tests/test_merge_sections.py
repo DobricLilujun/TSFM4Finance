@@ -224,7 +224,9 @@ def test_headline_ranking_compares_against_the_naive_row_not_mase_below_one(tmp_
     cb = next(l for l in rank.splitlines() if "chronos-bolt-small" in l)
     mo = next(l for l in rank.splitlines() if "moment-1-large" in l)
     assert rank.index("chronos-bolt-small") < rank.index("moment-1-large"), "better model sorts first"
-    assert "3/4" in cb, f"s4 must not count as a win despite MASE 0.9 < 1: {cb}"
+    # 4 cells, 3 comparable (s3 had no measurement), 2 wins: s4 is comparable and LOST,
+    # even though its MASE 0.9 is below 1.0
+    assert "67% (2/3)" in cb, f"s4 must not count as a win despite MASE 0.9 < 1: {cb}"
     assert "0/2" in mo, mo
     assert cb.rstrip().endswith("| 1 |"), f"the None-mase cell counts as no measurement: {cb}"
     assert "not MASE < 1" in rank, "the table must say which comparison it is making"

@@ -402,12 +402,60 @@ def report(args) -> int:
             f"| `{k}` | {v['machine']} | {v['device']} | {tcell(v['torch'])} | "
             f"{', '.join(f'`{m}`' for m in v['models'])} |"
             for (k, _machine, _device), v in sorted(prov.items())] + [""]
+    # Headline ranking: aggregates, so the site page stays readable and small. `beat naive`
+    # is the headline column because it is the only MASE-derived quantity comparable across
+    # data paths (MASE's denominator comes from the split the file carries); median MASE is
+    # printed but explicitly scoped to this pass. NaN / no-measurement cells are counted,
+    # never averaged in.
+    from statistics import median as _median
+    per_model: dict = {}
+    for (m, _s, _sp, _h), r in cells.items():
+        d = per_model.setdefault(m, {"n": 0, "beat": 0, "mase": [], "rmse": [],
+                                     "ctx": set(), "none": 0})
+        d["n"] += 1
+        if isinstance(r.get("ctx"), (int, float)):
+            d["ctx"].add(int(r["ctx"]))
+        mv = r.get("mase")
+        if isinstance(mv, (int, float)) and mv == mv:
+            d["mase"].append(float(mv))
+            if mv < 1.0:
+                d["beat"] += 1
+        else:
+            d["none"] += 1
+        rv = r.get("rmse")
+        if isinstance(rv, (int, float)) and rv == rv:
+            d["rmse"].append(float(rv))
+    ranked = sorted(per_model.items(),
+                    key=lambda kv: (-(kv[1]["beat"] / kv[1]["n"] if kv[1]["n"] else 0.0),
+                                    _median(kv[1]["mase"]) if kv[1]["mase"] else 9e9))
+    out += ["## Headline ranking", "",
+            "`beat naive` = share of this model's cells whose MASE is below the naive "
+            "baseline for the same (series, span, horizon) cell — the column that survives "
+            "a data-path change, since it compares each model against the baseline scored "
+            "on the same bytes. Median MASE is scoped to this pass's data path "
+            "(docs/09_benchmark.md); a model with a different ctx is a different "
+            "measurement, which is why the ctx column is printed rather than assumed.", "",
+            "| model_key | cells | beat naive | median MASE | median RMSE | ctx | no measurement |",
+            "|---|--:|--:|--:|--:|---|--:|"]
+    def _num(vals):
+        # an empty list is "no measurement", not a zero and not a nan to be averaged later
+        return f"{_median(vals):.3g}" if vals else "—"
+    for m, d in ranked:
+        share = 100.0 * d["beat"] / d["n"] if d["n"] else 0.0
+        ctxs = ", ".join(str(c) for c in sorted(d["ctx"])) or "—"
+        out.append(f"| `{m}` | {d['n']} | {share:.0f}% | {_num(d['mase'])} "
+                   f"| {_num(d['rmse'])} | {ctxs} | {d['none']} |")
+    out += [""]
+    if getattr(args, "summary_only", False):
+        out += ["_Per-cell tables are omitted (`--summary-only`): a 3,600-row page is ~2 MB "
+                "of HTML, and GitHub Pages does not serve the directory URL for a page that "
+                "large — the full tables live in the repo's merged report instead._", ""]
     spans = sorted({r.get("span", "test") for r in rows})
 
     def cell(v):
         return "—" if v is None or (isinstance(v, float) and v != v) else f"{v:.3g}"
 
-    for srs in series:
+    for srs in (series if not getattr(args, "summary_only", False) else []):
         for sp in spans:
             for h in hz:
                 sel = [r for r in rows if r["series"] == srs
@@ -596,6 +644,10 @@ def main() -> int:
                     help="render markdown from JSONL(s); comma-separated merges several "
                          "runs/machines (rows beat errors)")
     ap.add_argument("--md", default="EFFECTIVENESS.md")
+    ap.add_argument("--summary-only", action="store_true",
+                    help="aggregates and provenance only, no per-cell tables: the docs "
+                         "site page for 3,600 cells is ~2 MB of HTML, and GitHub Pages "
+                         "will not serve a directory URL that large")
     ap.add_argument("--stdout", action="store_true")
     args = ap.parse_args()
     if args.report:

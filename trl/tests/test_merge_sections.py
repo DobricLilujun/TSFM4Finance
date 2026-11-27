@@ -24,11 +24,12 @@ def _load():
     return mod
 
 
-def _report(files, md_path):
+def _report(files, md_path, summary_only=False):
     """Call the generator the way the CLI does (it takes an argparse namespace, not paths):
     a subprocess run would hide the traceback, which is how this test started."""
     _load().report(argparse.Namespace(report=",".join(str(f) for f in files),
-                                      md=str(md_path), stdout=False))
+                                      md=str(md_path), stdout=False,
+                                      summary_only=summary_only))
 
 
 def _meta(machine):
@@ -184,3 +185,56 @@ def test_a_cell_read_from_another_data_path_is_a_supersession_not_run_variance(t
     text = md.read_text()
     assert "Superseded by a protocol change: chronos-bolt-small (1)" in text, text
     assert "**0** share a signature" in text, text
+
+
+def _row(model, series, mase, rmse=1.0, ctx=256):
+    return {"model": model, "family": "fam", "env": "core", "interpreter": "/venv/bin/python",
+            "torch": None, "cuda": None, "dataset": "datasets/standard/x", "task": "forecast",
+            "status": "ok", "detail": "ran", "error": None, "series_errors": {},
+            "rows": [{"series": series, "span": "test", "horizon": 21, "ctx": ctx,
+                      "mase": mase, "rmse": rmse, "mda": 0.5, "nd": 0.0, "no_leakage": True,
+                      "n_windows": 2, "seconds": 1.0, "adaptation": "zero-shot",
+                      "model": model}]}
+
+
+def test_headline_ranking_counts_beat_naive_and_skips_missing_measurements(tmp_path):
+    """The aggregate table is the site's headline: beat-naive share per model, with
+    no-measurement cells counted rather than averaged into the median."""
+    a = tmp_path / "lane.jsonl"
+    a.write_text("\n".join([
+        json.dumps(_meta("trux")),
+        json.dumps(_row("chronos-bolt-small", "s1", 0.5)),
+        json.dumps(_row("chronos-bolt-small", "s2", 0.8)),
+        json.dumps(_row("chronos-bolt-small", "s3", None, rmse=None)),
+        json.dumps(_row("moment-1-large", "s1", 3.0)),
+        json.dumps(_row("moment-1-large", "s2", 2.0)),
+        json.dumps(_row("moment-1-large", "s3", 4.0)),
+    ]) + "\n")
+    md = tmp_path / "M.md"
+    _report((a,), md)
+    text = md.read_text()
+    rank = text[text.index("## Headline ranking"):text.index("## ", text.index("## Headline ranking") + 5)]
+    cb = next(l for l in rank.splitlines() if "chronos-bolt-small" in l)
+    mo = next(l for l in rank.splitlines() if "moment-1-large" in l)
+    assert rank.index("chronos-bolt-small") < rank.index("moment-1-large"), \
+        "the better model must sort first"
+    assert "| 3 | 67% |" in cb, f"2 of 3 cells beat naive, third is not a measurement: {cb}"
+    assert "| 3 | 0% |" in mo, mo
+    assert cb.rstrip().endswith("| 1 |"), f"the None-mase cell is counted as no measurement: {cb}"
+    assert "nan" not in rank, "a missing measurement must never render as nan"
+
+
+def test_summary_only_keeps_aggregates_and_drops_per_cell_tables(tmp_path):
+    """GitHub Pages does not serve the directory URL of a ~2 MB page, and a 3,600-row
+    table is unreadable anyway: the site asks for aggregates only."""
+    a = tmp_path / "lane.jsonl"
+    a.write_text("\n".join([json.dumps(_meta("trux")),
+                            json.dumps(_row("chronos-bolt-small", "s1", 0.5)),
+                            json.dumps(_row("chronos-bolt-small", "s2", 0.7))]) + "\n")
+    md = tmp_path / "M.md"
+    _report((a,), md, summary_only=True)
+    text = md.read_text()
+    assert "## Headline ranking" in text
+    assert "## Which interpreter produced which row" in text
+    assert "· horizon 21" not in text, "per-cell tables must be absent in summary mode"
+    assert "--summary-only" in text, "the page must say what it left out and why"

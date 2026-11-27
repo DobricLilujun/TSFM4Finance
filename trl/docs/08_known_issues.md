@@ -737,6 +737,44 @@ and TTM had been suspected of device sensitivity earlier — it was the context-
 device. So the rule to carry forward is narrow and checkable: **anything that samples tokens at decode
 time may differ across stacks by several percent; everything else should be compared to zero.**
 
+**The five families gpu7 had never scored (2026-11-27, `reports/pass5_gpu7_extra`) widen the stratum
+to 1,980 cells and break the tidy version of that rule.** The model list made the 1,452-cell claim look
+wider than it was: `chronos-t5-base`, `flowstate-r1`, `timesfm-3.0`, `ttm-r3` and `patchtst-fm-r2` had
+been run on watson only, so they had no cross-machine pair anywhere. Scoring them on gpu7 gives 132
+cells each:
+
+| model_key | cells | median diff | max diff | cells > 2% |
+|---|--:|--:|--:|--:|
+| flowstate-r1 | 132 | 0.000% | 0.000% | 0 |
+| timesfm-3.0 | 132 | 0.000% | 0.000% | 0 |
+| patchtst-fm-r2 | 132 | 0.078% | 0.633% | 0 |
+| ttm-r3 | 74 | 0.913% | 9.229% | 24 |
+| chronos-t5-base | 132 | 5.414% | 29.323% | 110 |
+
+Three separate behaviours, and only one of them is token sampling:
+
+* **Bit-exact** (`flowstate-r1`, `timesfm-3.0`): same bytes, same protocol, identical to the last
+  decimal on a different architecture and torch build.
+* **Small drift, always inside tolerance** (`patchtst-fm-r2`: 0.078% median, 0.63% worst cell). Not
+  zero, so a strict "compare to zero" gate would call it a failure; it is float-order noise in an
+  attention stack that never amplifies past a percent. Worth knowing before anyone wires a CI check
+  that requires 0.000%.
+* **Pre-existing instability, made device-visible** (`ttm-r3`). This is the family that emitted NaN
+  forecasts on *both* machines in pass 3, so its NaN policy drops a variable number of windows per
+  stack: only 74 of its 132 cells have a MASE on both sides, and those 74 differ at 0.91% median and
+  9.2% worst. That is not the hardware inventing numbers; a run that is already on a cliff edge
+  falls off it at different windows depending on rounding order. The honest reading is that
+  `ttm-r3`'s per-cell MASE is not a stable quantity on this corpus, on any machine.
+* **Generative decoding** (`chronos-t5-base`): 5.4% median, 29.3% worst, 110 of 132 cells outside
+  tolerance - same signature as `chronos-t5-small`, larger magnitude.
+
+So the rule survives, but the exception is bigger than "sampling at decode time": a family whose
+forecasts are numerically unstable on the corpus (TTM-r3) is effectively device-sensitive too, because
+which windows survive the NaN policy is itself a rounding-order question. Compare to zero for the
+bit-exact majority; expect sub-percent drift for well-conditioned attention stacks; expect several
+percent - and occasionally a changed denominator - for anything that samples tokens or already
+produces NaNs.
+
 
 ## A 2 MB documentation page is published but not served
 

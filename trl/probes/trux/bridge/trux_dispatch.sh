@@ -16,8 +16,18 @@ if [ -f "$BRIDGE/outbox/heartbeat" ]; then
   echo "heartbeat ${age}s old:"; sed 's/^/  /' "$BRIDGE/outbox/heartbeat"
   [ "$age" -gt 900 ] && echo "WARNING: worker silent for ${age}s — results may be stale" >&2
 fi
-n=$(printf '%03d' $(( $(ls -1 "$BRIDGE/inbox"/*.done.sh 2>/dev/null | wc -l) + 1 )))
+# Number from the highest number ever seen, not from how many are finished. The worker only
+# runs an inbox job that has no outbox log of the same name, so reusing a number is not a
+# cosmetic problem: the job is silently never executed (it looked queued, the worker was
+# alive, and there was no error anywhere). Counting *.done.sh misses jobs still in the inbox
+# and jobs whose log exists while the file was already reaped.
+last=$(ls -1 "$BRIDGE/inbox"/job_*.sh "$BRIDGE/inbox_done"/job_*.sh \
+          "$BRIDGE/outbox"/job_*.log 2>/dev/null | sed -E 's/.*job_0*([0-9]+).*/\1/' | sort -n | tail -1)
+n=$(printf '%03d' $((${last:-0} + 1)))
 name="job_${n}.sh"
+if [ -f "$BRIDGE/outbox/$name.log" ]; then
+  echo "FATAL: $name.log already exists - the worker would skip this job" >&2; exit 5
+fi
 install -m 0644 "$job" "$BRIDGE/inbox/$name"
 echo "queued $name -> $BRIDGE/inbox/"
 [ "$wait" = 0 ] && exit 0

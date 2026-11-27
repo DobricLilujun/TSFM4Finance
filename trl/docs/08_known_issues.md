@@ -737,3 +737,32 @@ Separately, `actions/deploy-pages` never worked on this account: every attempt f
 before and after the repository went public and after recreating Pages with
 `build_type=workflow`. The branch-push route (`git push HEAD:gh-pages`) does publish - the
 same mechanism the TSFM4Finance leaderboard site uses - so the docs workflow does that now.
+
+## Re-dispatching a bridge job under a used number never runs
+
+The Spark/GPU7 worker picks the first `inbox/*.sh` that has **no** matching
+`outbox/<name>.log`, because trux leaves the job file in the inbox until it is reaped and
+`rsync` would otherwise hand the same job back forever. That rule makes job numbers
+single-use: after `job_013` ran and reported, dropping a corrected `job_013` back into the
+inbox left it sitting there for an hour, with a live worker and a fresh heartbeat, and no
+error anywhere — from the worker's point of view it was already finished.
+
+Two facts to keep separate: the run I was waiting for had actually completed (`job_013.log`
+on trux: 11 models ok / 0 failed over 66 series), and the file I re-dispatched was a stale
+duplicate of my own making. Housekeeping rule: a dispatch is a new number or nothing; if a
+name has a log, the answer is already in that log.
+
+## A partitioned corpus makes a merged report look cross-checked when it is not
+
+The multi-machine fleet was designed to avoid duplicate work: watson scored 35 series,
+trux/gpu7 scored 66, and the two sets **do not intersect**. A merged 101-series report is
+therefore not 101 series measured twice; it is 101 series measured once each. When the
+pass-4 arena lanes were fed to the cross-machine checker it reported
+`cells seen: 2546, on >=2 machines: 216` and zero gpu7-vs-watson pairs — with no disagreement
+flag, because there was nothing to compare.
+
+This is the mirror image of the duplicate-key trap. Too many rows for one cell hides which
+measurement applies; too few rows per cell silently removes the ability to check at all.
+`probes/watson/watson_pass5_66.sh` re-scores gpu7's 66 series on the A6000 (different GPU
+architecture, different torch build, same arena parquet bytes) so the bit-exactness claim
+that currently rests on 12 series rests on 66.

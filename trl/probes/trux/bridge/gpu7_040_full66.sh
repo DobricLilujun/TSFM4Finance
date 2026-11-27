@@ -44,7 +44,10 @@ SERIES_LIST=${SERIES_LIST:-"@@SERIES@@"}
 # and fails a perfectly good job (job_012 died exactly this way). Test for a leftover
 # marker instead - and note the marker here is spelled with the sigil split from the
 # word so this file cannot self-trigger it.
-case " $SERIES_LIST " in *"@"@"*) echo "FATAL: SERIES_LIST still holds a generator marker; generate this job"; exit 6;; esac
+MARKER='@@'
+case " $SERIES_LIST " in
+  *"$MARKER"*) echo "FATAL: SERIES_LIST still holds a generator marker; generate this job"; exit 6 ;;
+esac
 n_ser=$(echo $SERIES_LIST | wc -w)
 echo "host=$(hostname) repo=$REPO sha=$(git -C "$REPO" rev-parse --short HEAD 2>/dev/null || echo unknown)"
 echo "date=$(date -u +%FT%TZ)  series=$n_ser"

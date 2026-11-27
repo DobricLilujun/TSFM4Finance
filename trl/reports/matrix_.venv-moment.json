@@ -1,0 +1,72 @@
+{
+ "generated": "2026-11-17 20:07:43",
+ "python": "3.11.15",
+ "machine": "ubadmin-Precision-3591",
+ "n": 2,
+ "rows": [
+  {
+   "model": "moment-1-large",
+   "family": "moment",
+   "tier": "A",
+   "env": "moment",
+   "weights": "AutonLab/MOMENT-1-large",
+   "license": "mit",
+   "weights_present": true,
+   "load": "ok",
+   "predict": "fail",
+   "quantiles": "skip",
+   "embed": "skip",
+   "finetune": "failed",
+   "ft_loss_first": NaN,
+   "ft_loss_last": NaN,
+   "ft_params": 0,
+   "classify": "fail",
+   "clf_metrics": {},
+   "anomaly": "n/a",
+   "reward": "failed",
+   "seconds": 27.8,
+   "reasons": {
+    "predict": "RuntimeError: mat1 and mat2 shapes cannot be multiplied (4x16384 and 65536x16)",
+    "finetune": "RuntimeError: mat1 and mat2 shapes cannot be multiplied (2x16384 and 65536x16)",
+    "classify": "RuntimeError: mat1 and mat2 shapes cannot be multiplied (4x15360 and 65536x64)",
+    "anomaly": "RuntimeError: mat1 and mat2 shapes cannot be multiplied (4x16384 and 65536x32)",
+    "reward": "RuntimeError: mat1 and mat2 shapes cannot be multiplied (2x16384 and 65536x16)"
+   },
+   "machine": "ubadmin-Precision-3591/x86_64",
+   "python": "3.11.15",
+   "device": "cuda"
+  },
+  {
+   "model": "moment-1-small",
+   "family": "moment",
+   "tier": "B",
+   "env": "moment",
+   "weights": "AutonLab/MOMENT-1-small",
+   "license": "mit",
+   "weights_present": false,
+   "load": "ok",
+   "predict": "fail",
+   "quantiles": "skip",
+   "embed": "skip",
+   "finetune": "failed",
+   "ft_loss_first": NaN,
+   "ft_loss_last": NaN,
+   "ft_params": 0,
+   "classify": "fail",
+   "clf_metrics": {},
+   "anomaly": "n/a",
+   "reward": "failed",
+   "seconds": 7.8,
+   "reasons": {
+    "predict": "RuntimeError: mat1 and mat2 shapes cannot be multiplied (4x8192 and 32768x16)",
+    "finetune": "RuntimeError: mat1 and mat2 shapes cannot be multiplied (2x8192 and 32768x16)",
+    "classify": "RuntimeError: mat1 and mat2 shapes cannot be multiplied (4x7680 and 32768x64)",
+    "anomaly": "RuntimeError: mat1 and mat2 shapes cannot be multiplied (4x8192 and 32768x32)",
+    "reward": "RuntimeError: mat1 and mat2 shapes cannot be multiplied (2x8192 and 32768x16)"
+   },
+   "machine": "ubadmin-Precision-3591/x86_64",
+   "python": "3.11.15",
+   "device": "cuda"
+  }
+ ]
+}

@@ -1,0 +1,87 @@
+{
+ "path": "reports/moment_ft/ckpts/moment-1-large__fs16__moment-1-small_std_equity_1d_10107_heads_only_fs16_h21.pt",
+ "meta": {
+  "model": "moment-1-large",
+  "family": "moment",
+  "dataset": "std_equity_1d_10107",
+  "budget": "fs16",
+  "smoke": false,
+  "split": "train",
+  "split_end": "2020-09-10 00:00:00",
+  "split_end_index": 1937,
+  "n_windows": 16,
+  "steps": 40,
+  "ctx": 256,
+  "horizon": 21,
+  "trainable_parameters": 344085,
+  "trained_parameters": [
+   "head.linear.weight",
+   "head.linear.bias"
+  ],
+  "peft": "heads_only",
+  "seed": 0,
+  "profile": {
+   "device": "cuda",
+   "amp": "fp32",
+   "bs": 4,
+   "ctx": 256,
+   "fallbacks": []
+  },
+  "loss_first": 134.684296,
+  "loss_last": 246.504929,
+  "seconds": 7.8
+ },
+ "config": {
+  "ctx": 256,
+  "horizon": 21,
+  "budget": "fs16",
+  "split": "train",
+  "steps": null,
+  "epochs": null,
+  "n_windows": null,
+  "lr": null,
+  "bs": 4,
+  "amp": "fp32",
+  "device": "auto",
+  "seed": 0,
+  "reward_steps": 6,
+  "reward_candidates": 4,
+  "peft": "heads_only",
+  "lora_r": 8,
+  "lora_targets": [
+   "q_proj",
+   "k_proj",
+   "v_proj",
+   "out_proj",
+   "o_proj",
+   "wqkv",
+   "fc1",
+   "fc2"
+  ],
+  "grad_clip": 1.0,
+  "warmup": 0,
+  "weight_decay": 0.01,
+  "smoke": false,
+  "out_dir": "reports/moment_ft/ckpts",
+  "log_every": 10,
+  "tag": "moment-1-small_std_equity_1d_10107_heads_only_fs16_h21",
+  "max_seconds": 0.0,
+  "extra": {},
+  "budget_kw": {
+   "n_windows": 16,
+   "steps": 40,
+   "epochs": 0,
+   "lr": 1e-05
+  }
+ },
+ "loss_first_last": [
+  [
+   1,
+   134.684296
+  ],
+  [
+   40,
+   246.504929
+  ]
+ ]
+}

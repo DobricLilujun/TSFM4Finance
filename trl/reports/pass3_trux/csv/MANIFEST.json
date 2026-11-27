@@ -1,0 +1,1987 @@
+{
+ "protocol_note": "flattened splits; for zero-shot --spans all only; adapted checkpoints need a real split and --spans test",
+ "duplicates": "same timestamp with the same value, kept first; a timestamp carrying different values aborts the run",
+ "flagged_non_monotone_splits": [],
+ "series": [
+  {
+   "series": "std_equity_1d_10107",
+   "csv": "reports/pass3_trux/csv/std_equity_1d_10107.csv",
+   "source_dir": "/raid/yewei/projects_yewei/TSFM4Finance/assets/data/standard/std_equity_1d_10107",
+   "rows_raw": 2768,
+   "rows_deduped": 2768,
+   "dropped_duplicates": 0,
+   "split_overlap": {
+    "train\u2229validation": 0,
+    "train\u2229test": 0,
+    "validation\u2229test": 0
+   },
+   "split_ranges": {
+    "train": [
+     "2013-01-02",
+     "2018-12-31"
+    ],
+    "validation": [
+     "2019-01-02",
+     "2020-12-31"
+    ],
+    "test": [
+     "2021-01-04",
+     "2023-12-29"
+    ]
+   },
+   "overlap_kind": "none",
+   "start": "2013-01-02 00:00:00",
+   "end": "2023-12-29 00:00:00"
+  },
+  {
+   "series": "std_equity_1d_11308",
+   "csv": "reports/pass3_trux/csv/std_equity_1d_11308.csv",
+   "source_dir": "/raid/yewei/projects_yewei/TSFM4Finance/assets/data/standard/std_equity_1d_11308",
+   "rows_raw": 2768,
+   "rows_deduped": 2768,
+   "dropped_duplicates": 0,
+   "split_overlap": {
+    "train\u2229validation": 0,
+    "train\u2229test": 0,
+    "validation\u2229test": 0
+   },
+   "split_ranges": {
+    "train": [
+     "2013-01-02",
+     "2018-12-31"
+    ],
+    "validation": [
+     "2019-01-02",
+     "2020-12-31"
+    ],
+    "test": [
+     "2021-01-04",
+     "2023-12-29"
+    ]
+   },
+   "overlap_kind": "none",
+   "start": "2013-01-02 00:00:00",
+   "end": "2023-12-29 00:00:00"
+  },
+  {
+   "series": "std_equity_1d_12060",
+   "csv": "reports/pass3_trux/csv/std_equity_1d_12060.csv",
+   "source_dir": "/raid/yewei/projects_yewei/TSFM4Finance/assets/data/standard/std_equity_1d_12060",
+   "rows_raw": 2768,
+   "rows_deduped": 2768,
+   "dropped_duplicates": 0,
+   "split_overlap": {
+    "train\u2229validation": 0,
+    "train\u2229test": 0,
+    "validation\u2229test": 0
+   },
+   "split_ranges": {
+    "train": [
+     "2013-01-02",
+     "2018-12-31"
+    ],
+    "validation": [
+     "2019-01-02",
+     "2020-12-31"
+    ],
+    "test": [
+     "2021-01-04",
+     "2023-12-29"
+    ]
+   },
+   "overlap_kind": "none",
+   "start": "2013-01-02 00:00:00",
+   "end": "2023-12-29 00:00:00"
+  },
+  {
+   "series": "std_equity_1d_12490",
+   "csv": "reports/pass3_trux/csv/std_equity_1d_12490.csv",
+   "source_dir": "/raid/yewei/projects_yewei/TSFM4Finance/assets/data/standard/std_equity_1d_12490",
+   "rows_raw": 2768,
+   "rows_deduped": 2768,
+   "dropped_duplicates": 0,
+   "split_overlap": {
+    "train\u2229validation": 0,
+    "train\u2229test": 0,
+    "validation\u2229test": 0
+   },
+   "split_ranges": {
+    "train": [
+     "2013-01-02",
+     "2018-12-31"
+    ],
+    "validation": [
+     "2019-01-02",
+     "2020-12-31"
+    ],
+    "test": [
+     "2021-01-04",
+     "2023-12-29"
+    ]
+   },
+   "overlap_kind": "none",
+   "start": "2013-01-02 00:00:00",
+   "end": "2023-12-29 00:00:00"
+  },
+  {
+   "series": "std_equity_1d_13901",
+   "csv": "reports/pass3_trux/csv/std_equity_1d_13901.csv",
+   "source_dir": "/raid/yewei/projects_yewei/TSFM4Finance/assets/data/standard/std_equity_1d_13901",
+   "rows_raw": 2768,
+   "rows_deduped": 2768,
+   "dropped_duplicates": 0,
+   "split_overlap": {
+    "train\u2229validation": 0,
+    "train\u2229test": 0,
+    "validation\u2229test": 0
+   },
+   "split_ranges": {
+    "train": [
+     "2013-01-02",
+     "2018-12-31"
+    ],
+    "validation": [
+     "2019-01-02",
+     "2020-12-31"
+    ],
+    "test": [
+     "2021-01-04",
+     "2023-12-29"
+    ]
+   },
+   "overlap_kind": "none",
+   "start": "2013-01-02 00:00:00",
+   "end": "2023-12-29 00:00:00"
+  },
+  {
+   "series": "std_equity_1d_13928",
+   "csv": "reports/pass3_trux/csv/std_equity_1d_13928.csv",
+   "source_dir": "/raid/yewei/projects_yewei/TSFM4Finance/assets/data/standard/std_equity_1d_13928",
+   "rows_raw": 2768,
+   "rows_deduped": 2768,
+   "dropped_duplicates": 0,
+   "split_overlap": {
+    "train\u2229validation": 0,
+    "train\u2229test": 0,
+    "validation\u2229test": 0
+   },
+   "split_ranges": {
+    "train": [
+     "2013-01-02",
+     "2018-12-31"
+    ],
+    "validation": [
+     "2019-01-02",
+     "2020-12-31"
+    ],
+    "test": [
+     "2021-01-04",
+     "2023-12-29"
+    ]
+   },
+   "overlap_kind": "none",
+   "start": "2013-01-02 00:00:00",
+   "end": "2023-12-29 00:00:00"
+  },
+  {
+   "series": "std_equity_1d_14277",
+   "csv": "reports/pass3_trux/csv/std_equity_1d_14277.csv",
+   "source_dir": "/raid/yewei/projects_yewei/TSFM4Finance/assets/data/standard/std_equity_1d_14277",
+   "rows_raw": 2768,
+   "rows_deduped": 2768,
+   "dropped_duplicates": 0,
+   "split_overlap": {
+    "train\u2229validation": 0,
+    "train\u2229test": 0,
+    "validation\u2229test": 0
+   },
+   "split_ranges": {
+    "train": [
+     "2013-01-02",
+     "2018-12-31"
+    ],
+    "validation": [
+     "2019-01-02",
+     "2020-12-31"
+    ],
+    "test": [
+     "2021-01-04",
+     "2023-12-29"
+    ]
+   },
+   "overlap_kind": "none",
+   "start": "2013-01-02 00:00:00",
+   "end": "2023-12-29 00:00:00"
+  },
+  {
+   "series": "std_equity_1d_14541",
+   "csv": "reports/pass3_trux/csv/std_equity_1d_14541.csv",
+   "source_dir": "/raid/yewei/projects_yewei/TSFM4Finance/assets/data/standard/std_equity_1d_14541",
+   "rows_raw": 2768,
+   "rows_deduped": 2768,
+   "dropped_duplicates": 0,
+   "split_overlap": {
+    "train\u2229validation": 0,
+    "train\u2229test": 0,
+    "validation\u2229test": 0
+   },
+   "split_ranges": {
+    "train": [
+     "2013-01-02",
+     "2018-12-31"
+    ],
+    "validation": [
+     "2019-01-02",
+     "2020-12-31"
+    ],
+    "test": [
+     "2021-01-04",
+     "2023-12-29"
+    ]
+   },
+   "overlap_kind": "none",
+   "start": "2013-01-02 00:00:00",
+   "end": "2023-12-29 00:00:00"
+  },
+  {
+   "series": "std_equity_1d_17005",
+   "csv": "reports/pass3_trux/csv/std_equity_1d_17005.csv",
+   "source_dir": "/raid/yewei/projects_yewei/TSFM4Finance/assets/data/standard/std_equity_1d_17005",
+   "rows_raw": 2768,
+   "rows_deduped": 2768,
+   "dropped_duplicates": 0,
+   "split_overlap": {
+    "train\u2229validation": 0,
+    "train\u2229test": 0,
+    "validation\u2229test": 0
+   },
+   "split_ranges": {
+    "train": [
+     "2013-01-02",
+     "2018-12-31"
+    ],
+    "validation": [
+     "2019-01-02",
+     "2020-12-31"
+    ],
+    "test": [
+     "2021-01-04",
+     "2023-12-29"
+    ]
+   },
+   "overlap_kind": "none",
+   "start": "2013-01-02 00:00:00",
+   "end": "2023-12-29 00:00:00"
+  },
+  {
+   "series": "std_equity_1d_17830",
+   "csv": "reports/pass3_trux/csv/std_equity_1d_17830.csv",
+   "source_dir": "/raid/yewei/projects_yewei/TSFM4Finance/assets/data/standard/std_equity_1d_17830",
+   "rows_raw": 2768,
+   "rows_deduped": 2768,
+   "dropped_duplicates": 0,
+   "split_overlap": {
+    "train\u2229validation": 0,
+    "train\u2229test": 0,
+    "validation\u2229test": 0
+   },
+   "split_ranges": {
+    "train": [
+     "2013-01-02",
+     "2018-12-31"
+    ],
+    "validation": [
+     "2019-01-02",
+     "2020-12-31"
+    ],
+    "test": [
+     "2021-01-04",
+     "2023-12-29"
+    ]
+   },
+   "overlap_kind": "none",
+   "start": "2013-01-02 00:00:00",
+   "end": "2023-12-29 00:00:00"
+  },
+  {
+   "series": "std_equity_1d_18542",
+   "csv": "reports/pass3_trux/csv/std_equity_1d_18542.csv",
+   "source_dir": "/raid/yewei/projects_yewei/TSFM4Finance/assets/data/standard/std_equity_1d_18542",
+   "rows_raw": 2768,
+   "rows_deduped": 2768,
+   "dropped_duplicates": 0,
+   "split_overlap": {
+    "train\u2229validation": 0,
+    "train\u2229test": 0,
+    "validation\u2229test": 0
+   },
+   "split_ranges": {
+    "train": [
+     "2013-01-02",
+     "2018-12-31"
+    ],
+    "validation": [
+     "2019-01-02",
+     "2020-12-31"
+    ],
+    "test": [
+     "2021-01-04",
+     "2023-12-29"
+    ]
+   },
+   "overlap_kind": "none",
+   "start": "2013-01-02 00:00:00",
+   "end": "2023-12-29 00:00:00"
+  },
+  {
+   "series": "std_equity_1d_19561",
+   "csv": "reports/pass3_trux/csv/std_equity_1d_19561.csv",
+   "source_dir": "/raid/yewei/projects_yewei/TSFM4Finance/assets/data/standard/std_equity_1d_19561",
+   "rows_raw": 2768,
+   "rows_deduped": 2768,
+   "dropped_duplicates": 0,
+   "split_overlap": {
+    "train\u2229validation": 0,
+    "train\u2229test": 0,
+    "validation\u2229test": 0
+   },
+   "split_ranges": {
+    "train": [
+     "2013-01-02",
+     "2018-12-31"
+    ],
+    "validation": [
+     "2019-01-02",
+     "2020-12-31"
+    ],
+    "test": [
+     "2021-01-04",
+     "2023-12-29"
+    ]
+   },
+   "overlap_kind": "none",
+   "start": "2013-01-02 00:00:00",
+   "end": "2023-12-29 00:00:00"
+  },
+  {
+   "series": "std_equity_1d_21936",
+   "csv": "reports/pass3_trux/csv/std_equity_1d_21936.csv",
+   "source_dir": "/raid/yewei/projects_yewei/TSFM4Finance/assets/data/standard/std_equity_1d_21936",
+   "rows_raw": 2768,
+   "rows_deduped": 2768,
+   "dropped_duplicates": 0,
+   "split_overlap": {
+    "train\u2229validation": 0,
+    "train\u2229test": 0,
+    "validation\u2229test": 0
+   },
+   "split_ranges": {
+    "train": [
+     "2013-01-02",
+     "2018-12-31"
+    ],
+    "validation": [
+     "2019-01-02",
+     "2020-12-31"
+    ],
+    "test": [
+     "2021-01-04",
+     "2023-12-29"
+    ]
+   },
+   "overlap_kind": "none",
+   "start": "2013-01-02 00:00:00",
+   "end": "2023-12-29 00:00:00"
+  },
+  {
+   "series": "std_equity_1d_22111",
+   "csv": "reports/pass3_trux/csv/std_equity_1d_22111.csv",
+   "source_dir": "/raid/yewei/projects_yewei/TSFM4Finance/assets/data/standard/std_equity_1d_22111",
+   "rows_raw": 2768,
+   "rows_deduped": 2768,
+   "dropped_duplicates": 0,
+   "split_overlap": {
+    "train\u2229validation": 0,
+    "train\u2229test": 0,
+    "validation\u2229test": 0
+   },
+   "split_ranges": {
+    "train": [
+     "2013-01-02",
+     "2018-12-31"
+    ],
+    "validation": [
+     "2019-01-02",
+     "2020-12-31"
+    ],
+    "test": [
+     "2021-01-04",
+     "2023-12-29"
+    ]
+   },
+   "overlap_kind": "none",
+   "start": "2013-01-02 00:00:00",
+   "end": "2023-12-29 00:00:00"
+  },
+  {
+   "series": "std_equity_1d_22752",
+   "csv": "reports/pass3_trux/csv/std_equity_1d_22752.csv",
+   "source_dir": "/raid/yewei/projects_yewei/TSFM4Finance/assets/data/standard/std_equity_1d_22752",
+   "rows_raw": 2768,
+   "rows_deduped": 2768,
+   "dropped_duplicates": 0,
+   "split_overlap": {
+    "train\u2229validation": 0,
+    "train\u2229test": 0,
+    "validation\u2229test": 0
+   },
+   "split_ranges": {
+    "train": [
+     "2013-01-02",
+     "2018-12-31"
+    ],
+    "validation": [
+     "2019-01-02",
+     "2020-12-31"
+    ],
+    "test": [
+     "2021-01-04",
+     "2023-12-29"
+    ]
+   },
+   "overlap_kind": "none",
+   "start": "2013-01-02 00:00:00",
+   "end": "2023-12-29 00:00:00"
+  },
+  {
+   "series": "std_equity_1d_26403",
+   "csv": "reports/pass3_trux/csv/std_equity_1d_26403.csv",
+   "source_dir": "/raid/yewei/projects_yewei/TSFM4Finance/assets/data/standard/std_equity_1d_26403",
+   "rows_raw": 2768,
+   "rows_deduped": 2768,
+   "dropped_duplicates": 0,
+   "split_overlap": {
+    "train\u2229validation": 0,
+    "train\u2229test": 0,
+    "validation\u2229test": 0
+   },
+   "split_ranges": {
+    "train": [
+     "2013-01-02",
+     "2018-12-31"
+    ],
+    "validation": [
+     "2019-01-02",
+     "2020-12-31"
+    ],
+    "test": [
+     "2021-01-04",
+     "2023-12-29"
+    ]
+   },
+   "overlap_kind": "none",
+   "start": "2013-01-02 00:00:00",
+   "end": "2023-12-29 00:00:00"
+  },
+  {
+   "series": "std_equity_1d_38703",
+   "csv": "reports/pass3_trux/csv/std_equity_1d_38703.csv",
+   "source_dir": "/raid/yewei/projects_yewei/TSFM4Finance/assets/data/standard/std_equity_1d_38703",
+   "rows_raw": 2768,
+   "rows_deduped": 2768,
+   "dropped_duplicates": 0,
+   "split_overlap": {
+    "train\u2229validation": 0,
+    "train\u2229test": 0,
+    "validation\u2229test": 0
+   },
+   "split_ranges": {
+    "train": [
+     "2013-01-02",
+     "2018-12-31"
+    ],
+    "validation": [
+     "2019-01-02",
+     "2020-12-31"
+    ],
+    "test": [
+     "2021-01-04",
+     "2023-12-29"
+    ]
+   },
+   "overlap_kind": "none",
+   "start": "2013-01-02 00:00:00",
+   "end": "2023-12-29 00:00:00"
+  },
+  {
+   "series": "std_equity_1d_43449",
+   "csv": "reports/pass3_trux/csv/std_equity_1d_43449.csv",
+   "source_dir": "/raid/yewei/projects_yewei/TSFM4Finance/assets/data/standard/std_equity_1d_43449",
+   "rows_raw": 2768,
+   "rows_deduped": 2768,
+   "dropped_duplicates": 0,
+   "split_overlap": {
+    "train\u2229validation": 0,
+    "train\u2229test": 0,
+    "validation\u2229test": 0
+   },
+   "split_ranges": {
+    "train": [
+     "2013-01-02",
+     "2018-12-31"
+    ],
+    "validation": [
+     "2019-01-02",
+     "2020-12-31"
+    ],
+    "test": [
+     "2021-01-04",
+     "2023-12-29"
+    ]
+   },
+   "overlap_kind": "none",
+   "start": "2013-01-02 00:00:00",
+   "end": "2023-12-29 00:00:00"
+  },
+  {
+   "series": "std_equity_1d_48725",
+   "csv": "reports/pass3_trux/csv/std_equity_1d_48725.csv",
+   "source_dir": "/raid/yewei/projects_yewei/TSFM4Finance/assets/data/standard/std_equity_1d_48725",
+   "rows_raw": 2768,
+   "rows_deduped": 2768,
+   "dropped_duplicates": 0,
+   "split_overlap": {
+    "train\u2229validation": 0,
+    "train\u2229test": 0,
+    "validation\u2229test": 0
+   },
+   "split_ranges": {
+    "train": [
+     "2013-01-02",
+     "2018-12-31"
+    ],
+    "validation": [
+     "2019-01-02",
+     "2020-12-31"
+    ],
+    "test": [
+     "2021-01-04",
+     "2023-12-29"
+    ]
+   },
+   "overlap_kind": "none",
+   "start": "2013-01-02 00:00:00",
+   "end": "2023-12-29 00:00:00"
+  },
+  {
+   "series": "std_equity_1d_50876",
+   "csv": "reports/pass3_trux/csv/std_equity_1d_50876.csv",
+   "source_dir": "/raid/yewei/projects_yewei/TSFM4Finance/assets/data/standard/std_equity_1d_50876",
+   "rows_raw": 2768,
+   "rows_deduped": 2768,
+   "dropped_duplicates": 0,
+   "split_overlap": {
+    "train\u2229validation": 0,
+    "train\u2229test": 0,
+    "validation\u2229test": 0
+   },
+   "split_ranges": {
+    "train": [
+     "2013-01-02",
+     "2018-12-31"
+    ],
+    "validation": [
+     "2019-01-02",
+     "2020-12-31"
+    ],
+    "test": [
+     "2021-01-04",
+     "2023-12-29"
+    ]
+   },
+   "overlap_kind": "none",
+   "start": "2013-01-02 00:00:00",
+   "end": "2023-12-29 00:00:00"
+  },
+  {
+   "series": "std_equity_1d_59176",
+   "csv": "reports/pass3_trux/csv/std_equity_1d_59176.csv",
+   "source_dir": "/raid/yewei/projects_yewei/TSFM4Finance/assets/data/standard/std_equity_1d_59176",
+   "rows_raw": 2768,
+   "rows_deduped": 2768,
+   "dropped_duplicates": 0,
+   "split_overlap": {
+    "train\u2229validation": 0,
+    "train\u2229test": 0,
+    "validation\u2229test": 0
+   },
+   "split_ranges": {
+    "train": [
+     "2013-01-02",
+     "2018-12-31"
+    ],
+    "validation": [
+     "2019-01-02",
+     "2020-12-31"
+    ],
+    "test": [
+     "2021-01-04",
+     "2023-12-29"
+    ]
+   },
+   "overlap_kind": "none",
+   "start": "2013-01-02 00:00:00",
+   "end": "2023-12-29 00:00:00"
+  },
+  {
+   "series": "std_equity_1d_59328",
+   "csv": "reports/pass3_trux/csv/std_equity_1d_59328.csv",
+   "source_dir": "/raid/yewei/projects_yewei/TSFM4Finance/assets/data/standard/std_equity_1d_59328",
+   "rows_raw": 2768,
+   "rows_deduped": 2768,
+   "dropped_duplicates": 0,
+   "split_overlap": {
+    "train\u2229validation": 0,
+    "train\u2229test": 0,
+    "validation\u2229test": 0
+   },
+   "split_ranges": {
+    "train": [
+     "2013-01-02",
+     "2018-12-31"
+    ],
+    "validation": [
+     "2019-01-02",
+     "2020-12-31"
+    ],
+    "test": [
+     "2021-01-04",
+     "2023-12-29"
+    ]
+   },
+   "overlap_kind": "none",
+   "start": "2013-01-02 00:00:00",
+   "end": "2023-12-29 00:00:00"
+  },
+  {
+   "series": "std_equity_1d_65875",
+   "csv": "reports/pass3_trux/csv/std_equity_1d_65875.csv",
+   "source_dir": "/raid/yewei/projects_yewei/TSFM4Finance/assets/data/standard/std_equity_1d_65875",
+   "rows_raw": 2768,
+   "rows_deduped": 2768,
+   "dropped_duplicates": 0,
+   "split_overlap": {
+    "train\u2229validation": 0,
+    "train\u2229test": 0,
+    "validation\u2229test": 0
+   },
+   "split_ranges": {
+    "train": [
+     "2013-01-02",
+     "2018-12-31"
+    ],
+    "validation": [
+     "2019-01-02",
+     "2020-12-31"
+    ],
+    "test": [
+     "2021-01-04",
+     "2023-12-29"
+    ]
+   },
+   "overlap_kind": "none",
+   "start": "2013-01-02 00:00:00",
+   "end": "2023-12-29 00:00:00"
+  },
+  {
+   "series": "std_equity_1d_66093",
+   "csv": "reports/pass3_trux/csv/std_equity_1d_66093.csv",
+   "source_dir": "/raid/yewei/projects_yewei/TSFM4Finance/assets/data/standard/std_equity_1d_66093",
+   "rows_raw": 2768,
+   "rows_deduped": 2768,
+   "dropped_duplicates": 0,
+   "split_overlap": {
+    "train\u2229validation": 0,
+    "train\u2229test": 0,
+    "validation\u2229test": 0
+   },
+   "split_ranges": {
+    "train": [
+     "2013-01-02",
+     "2018-12-31"
+    ],
+    "validation": [
+     "2019-01-02",
+     "2020-12-31"
+    ],
+    "test": [
+     "2021-01-04",
+     "2023-12-29"
+    ]
+   },
+   "overlap_kind": "none",
+   "start": "2013-01-02 00:00:00",
+   "end": "2023-12-29 00:00:00"
+  },
+  {
+   "series": "std_equity_1d_66181",
+   "csv": "reports/pass3_trux/csv/std_equity_1d_66181.csv",
+   "source_dir": "/raid/yewei/projects_yewei/TSFM4Finance/assets/data/standard/std_equity_1d_66181",
+   "rows_raw": 2768,
+   "rows_deduped": 2768,
+   "dropped_duplicates": 0,
+   "split_overlap": {
+    "train\u2229validation": 0,
+    "train\u2229test": 0,
+    "validation\u2229test": 0
+   },
+   "split_ranges": {
+    "train": [
+     "2013-01-02",
+     "2018-12-31"
+    ],
+    "validation": [
+     "2019-01-02",
+     "2020-12-31"
+    ],
+    "test": [
+     "2021-01-04",
+     "2023-12-29"
+    ]
+   },
+   "overlap_kind": "none",
+   "start": "2013-01-02 00:00:00",
+   "end": "2023-12-29 00:00:00"
+  },
+  {
+   "series": "std_equity_1d_70519",
+   "csv": "reports/pass3_trux/csv/std_equity_1d_70519.csv",
+   "source_dir": "/raid/yewei/projects_yewei/TSFM4Finance/assets/data/standard/std_equity_1d_70519",
+   "rows_raw": 2768,
+   "rows_deduped": 2768,
+   "dropped_duplicates": 0,
+   "split_overlap": {
+    "train\u2229validation": 0,
+    "train\u2229test": 0,
+    "validation\u2229test": 0
+   },
+   "split_ranges": {
+    "train": [
+     "2013-01-02",
+     "2018-12-31"
+    ],
+    "validation": [
+     "2019-01-02",
+     "2020-12-31"
+    ],
+    "test": [
+     "2021-01-04",
+     "2023-12-29"
+    ]
+   },
+   "overlap_kind": "none",
+   "start": "2013-01-02 00:00:00",
+   "end": "2023-12-29 00:00:00"
+  },
+  {
+   "series": "std_equity_1d_77178",
+   "csv": "reports/pass3_trux/csv/std_equity_1d_77178.csv",
+   "source_dir": "/raid/yewei/projects_yewei/TSFM4Finance/assets/data/standard/std_equity_1d_77178",
+   "rows_raw": 2768,
+   "rows_deduped": 2768,
+   "dropped_duplicates": 0,
+   "split_overlap": {
+    "train\u2229validation": 0,
+    "train\u2229test": 0,
+    "validation\u2229test": 0
+   },
+   "split_ranges": {
+    "train": [
+     "2013-01-02",
+     "2018-12-31"
+    ],
+    "validation": [
+     "2019-01-02",
+     "2020-12-31"
+    ],
+    "test": [
+     "2021-01-04",
+     "2023-12-29"
+    ]
+   },
+   "overlap_kind": "none",
+   "start": "2013-01-02 00:00:00",
+   "end": "2023-12-29 00:00:00"
+  },
+  {
+   "series": "std_equity_1d_83443",
+   "csv": "reports/pass3_trux/csv/std_equity_1d_83443.csv",
+   "source_dir": "/raid/yewei/projects_yewei/TSFM4Finance/assets/data/standard/std_equity_1d_83443",
+   "rows_raw": 2768,
+   "rows_deduped": 2768,
+   "dropped_duplicates": 0,
+   "split_overlap": {
+    "train\u2229validation": 0,
+    "train\u2229test": 0,
+    "validation\u2229test": 0
+   },
+   "split_ranges": {
+    "train": [
+     "2013-01-02",
+     "2018-12-31"
+    ],
+    "validation": [
+     "2019-01-02",
+     "2020-12-31"
+    ],
+    "test": [
+     "2021-01-04",
+     "2023-12-29"
+    ]
+   },
+   "overlap_kind": "none",
+   "start": "2013-01-02 00:00:00",
+   "end": "2023-12-29 00:00:00"
+  },
+  {
+   "series": "std_equity_1d_86356",
+   "csv": "reports/pass3_trux/csv/std_equity_1d_86356.csv",
+   "source_dir": "/raid/yewei/projects_yewei/TSFM4Finance/assets/data/standard/std_equity_1d_86356",
+   "rows_raw": 2768,
+   "rows_deduped": 2768,
+   "dropped_duplicates": 0,
+   "split_overlap": {
+    "train\u2229validation": 0,
+    "train\u2229test": 0,
+    "validation\u2229test": 0
+   },
+   "split_ranges": {
+    "train": [
+     "2013-01-02",
+     "2018-12-31"
+    ],
+    "validation": [
+     "2019-01-02",
+     "2020-12-31"
+    ],
+    "test": [
+     "2021-01-04",
+     "2023-12-29"
+    ]
+   },
+   "overlap_kind": "none",
+   "start": "2013-01-02 00:00:00",
+   "end": "2023-12-29 00:00:00"
+  },
+  {
+   "series": "std_equity_1d_86868",
+   "csv": "reports/pass3_trux/csv/std_equity_1d_86868.csv",
+   "source_dir": "/raid/yewei/projects_yewei/TSFM4Finance/assets/data/standard/std_equity_1d_86868",
+   "rows_raw": 2768,
+   "rows_deduped": 2768,
+   "dropped_duplicates": 0,
+   "split_overlap": {
+    "train\u2229validation": 0,
+    "train\u2229test": 0,
+    "validation\u2229test": 0
+   },
+   "split_ranges": {
+    "train": [
+     "2013-01-02",
+     "2018-12-31"
+    ],
+    "validation": [
+     "2019-01-02",
+     "2020-12-31"
+    ],
+    "test": [
+     "2021-01-04",
+     "2023-12-29"
+    ]
+   },
+   "overlap_kind": "none",
+   "start": "2013-01-02 00:00:00",
+   "end": "2023-12-29 00:00:00"
+  },
+  {
+   "series": "std_equity_1d_90319",
+   "csv": "reports/pass3_trux/csv/std_equity_1d_90319.csv",
+   "source_dir": "/raid/yewei/projects_yewei/TSFM4Finance/assets/data/standard/std_equity_1d_90319",
+   "rows_raw": 2768,
+   "rows_deduped": 2768,
+   "dropped_duplicates": 0,
+   "split_overlap": {
+    "train\u2229validation": 0,
+    "train\u2229test": 0,
+    "validation\u2229test": 0
+   },
+   "split_ranges": {
+    "train": [
+     "2013-01-02",
+     "2018-12-31"
+    ],
+    "validation": [
+     "2019-01-02",
+     "2020-12-31"
+    ],
+    "test": [
+     "2021-01-04",
+     "2023-12-29"
+    ]
+   },
+   "overlap_kind": "none",
+   "start": "2013-01-02 00:00:00",
+   "end": "2023-12-29 00:00:00"
+  },
+  {
+   "series": "std_equity_1d_91233",
+   "csv": "reports/pass3_trux/csv/std_equity_1d_91233.csv",
+   "source_dir": "/raid/yewei/projects_yewei/TSFM4Finance/assets/data/standard/std_equity_1d_91233",
+   "rows_raw": 2768,
+   "rows_deduped": 2768,
+   "dropped_duplicates": 0,
+   "split_overlap": {
+    "train\u2229validation": 0,
+    "train\u2229test": 0,
+    "validation\u2229test": 0
+   },
+   "split_ranges": {
+    "train": [
+     "2013-01-02",
+     "2018-12-31"
+    ],
+    "validation": [
+     "2019-01-02",
+     "2020-12-31"
+    ],
+    "test": [
+     "2021-01-04",
+     "2023-12-29"
+    ]
+   },
+   "overlap_kind": "none",
+   "start": "2013-01-02 00:00:00",
+   "end": "2023-12-29 00:00:00"
+  },
+  {
+   "series": "std_equity_1d_92611",
+   "csv": "reports/pass3_trux/csv/std_equity_1d_92611.csv",
+   "source_dir": "/raid/yewei/projects_yewei/TSFM4Finance/assets/data/standard/std_equity_1d_92611",
+   "rows_raw": 2768,
+   "rows_deduped": 2768,
+   "dropped_duplicates": 0,
+   "split_overlap": {
+    "train\u2229validation": 0,
+    "train\u2229test": 0,
+    "validation\u2229test": 0
+   },
+   "split_ranges": {
+    "train": [
+     "2013-01-02",
+     "2018-12-31"
+    ],
+    "validation": [
+     "2019-01-02",
+     "2020-12-31"
+    ],
+    "test": [
+     "2021-01-04",
+     "2023-12-29"
+    ]
+   },
+   "overlap_kind": "none",
+   "start": "2013-01-02 00:00:00",
+   "end": "2023-12-29 00:00:00"
+  },
+  {
+   "series": "std_fi_1d_uk_20y",
+   "csv": "reports/pass3_trux/csv/std_fi_1d_uk_20y.csv",
+   "source_dir": "/raid/yewei/projects_yewei/TSFM4Finance/assets/data/standard/std_fi_1d_uk_20y",
+   "rows_raw": 2778,
+   "rows_deduped": 2778,
+   "dropped_duplicates": 0,
+   "split_overlap": {
+    "train\u2229validation": 0,
+    "train\u2229test": 0,
+    "validation\u2229test": 0
+   },
+   "split_ranges": {
+    "train": [
+     "2013-01-02",
+     "2018-12-31"
+    ],
+    "validation": [
+     "2019-01-02",
+     "2020-12-31"
+    ],
+    "test": [
+     "2021-01-04",
+     "2023-12-29"
+    ]
+   },
+   "overlap_kind": "none",
+   "start": "2013-01-02 00:00:00",
+   "end": "2023-12-29 00:00:00"
+  },
+  {
+   "series": "std_fi_1d_uk_2y",
+   "csv": "reports/pass3_trux/csv/std_fi_1d_uk_2y.csv",
+   "source_dir": "/raid/yewei/projects_yewei/TSFM4Finance/assets/data/standard/std_fi_1d_uk_2y",
+   "rows_raw": 2778,
+   "rows_deduped": 2778,
+   "dropped_duplicates": 0,
+   "split_overlap": {
+    "train\u2229validation": 0,
+    "train\u2229test": 0,
+    "validation\u2229test": 0
+   },
+   "split_ranges": {
+    "train": [
+     "2013-01-02",
+     "2018-12-31"
+    ],
+    "validation": [
+     "2019-01-02",
+     "2020-12-31"
+    ],
+    "test": [
+     "2021-01-04",
+     "2023-12-29"
+    ]
+   },
+   "overlap_kind": "none",
+   "start": "2013-01-02 00:00:00",
+   "end": "2023-12-29 00:00:00"
+  },
+  {
+   "series": "std_fi_1d_uk_7y",
+   "csv": "reports/pass3_trux/csv/std_fi_1d_uk_7y.csv",
+   "source_dir": "/raid/yewei/projects_yewei/TSFM4Finance/assets/data/standard/std_fi_1d_uk_7y",
+   "rows_raw": 2778,
+   "rows_deduped": 2778,
+   "dropped_duplicates": 0,
+   "split_overlap": {
+    "train\u2229validation": 0,
+    "train\u2229test": 0,
+    "validation\u2229test": 0
+   },
+   "split_ranges": {
+    "train": [
+     "2013-01-02",
+     "2018-12-31"
+    ],
+    "validation": [
+     "2019-01-02",
+     "2020-12-31"
+    ],
+    "test": [
+     "2021-01-04",
+     "2023-12-29"
+    ]
+   },
+   "overlap_kind": "none",
+   "start": "2013-01-02 00:00:00",
+   "end": "2023-12-29 00:00:00"
+  },
+  {
+   "series": "std_fi_1d_de_10y",
+   "csv": "reports/pass3_trux/csv/std_fi_1d_de_10y.csv",
+   "source_dir": "/raid/yewei/projects_yewei/TSFM4Finance/assets/data/standard/std_fi_1d_de_10y",
+   "rows_raw": 2788,
+   "rows_deduped": 2788,
+   "dropped_duplicates": 0,
+   "split_overlap": {
+    "train\u2229validation": 0,
+    "train\u2229test": 0,
+    "validation\u2229test": 0
+   },
+   "split_ranges": {
+    "train": [
+     "2013-01-02",
+     "2018-12-28"
+    ],
+    "validation": [
+     "2019-01-02",
+     "2020-12-30"
+    ],
+    "test": [
+     "2021-01-04",
+     "2023-12-29"
+    ]
+   },
+   "overlap_kind": "none",
+   "start": "2013-01-02 00:00:00",
+   "end": "2023-12-29 00:00:00"
+  },
+  {
+   "series": "std_fi_1d_de_2y",
+   "csv": "reports/pass3_trux/csv/std_fi_1d_de_2y.csv",
+   "source_dir": "/raid/yewei/projects_yewei/TSFM4Finance/assets/data/standard/std_fi_1d_de_2y",
+   "rows_raw": 2788,
+   "rows_deduped": 2788,
+   "dropped_duplicates": 0,
+   "split_overlap": {
+    "train\u2229validation": 0,
+    "train\u2229test": 0,
+    "validation\u2229test": 0
+   },
+   "split_ranges": {
+    "train": [
+     "2013-01-02",
+     "2018-12-28"
+    ],
+    "validation": [
+     "2019-01-02",
+     "2020-12-30"
+    ],
+    "test": [
+     "2021-01-04",
+     "2023-12-29"
+    ]
+   },
+   "overlap_kind": "none",
+   "start": "2013-01-02 00:00:00",
+   "end": "2023-12-29 00:00:00"
+  },
+  {
+   "series": "std_fi_1d_de_5y",
+   "csv": "reports/pass3_trux/csv/std_fi_1d_de_5y.csv",
+   "source_dir": "/raid/yewei/projects_yewei/TSFM4Finance/assets/data/standard/std_fi_1d_de_5y",
+   "rows_raw": 2788,
+   "rows_deduped": 2788,
+   "dropped_duplicates": 0,
+   "split_overlap": {
+    "train\u2229validation": 0,
+    "train\u2229test": 0,
+    "validation\u2229test": 0
+   },
+   "split_ranges": {
+    "train": [
+     "2013-01-02",
+     "2018-12-28"
+    ],
+    "validation": [
+     "2019-01-02",
+     "2020-12-30"
+    ],
+    "test": [
+     "2021-01-04",
+     "2023-12-29"
+    ]
+   },
+   "overlap_kind": "none",
+   "start": "2013-01-02 00:00:00",
+   "end": "2023-12-29 00:00:00"
+  },
+  {
+   "series": "std_fi_1d_us_10y",
+   "csv": "reports/pass3_trux/csv/std_fi_1d_us_10y.csv",
+   "source_dir": "/raid/yewei/projects_yewei/TSFM4Finance/assets/data/standard/std_fi_1d_us_10y",
+   "rows_raw": 2751,
+   "rows_deduped": 2751,
+   "dropped_duplicates": 0,
+   "split_overlap": {
+    "train\u2229validation": 0,
+    "train\u2229test": 0,
+    "validation\u2229test": 0
+   },
+   "split_ranges": {
+    "train": [
+     "2013-01-02",
+     "2018-12-31"
+    ],
+    "validation": [
+     "2019-01-02",
+     "2020-12-31"
+    ],
+    "test": [
+     "2021-01-04",
+     "2023-12-29"
+    ]
+   },
+   "overlap_kind": "none",
+   "start": "2013-01-02 00:00:00",
+   "end": "2023-12-29 00:00:00"
+  },
+  {
+   "series": "std_fi_1d_us_20y",
+   "csv": "reports/pass3_trux/csv/std_fi_1d_us_20y.csv",
+   "source_dir": "/raid/yewei/projects_yewei/TSFM4Finance/assets/data/standard/std_fi_1d_us_20y",
+   "rows_raw": 2751,
+   "rows_deduped": 2751,
+   "dropped_duplicates": 0,
+   "split_overlap": {
+    "train\u2229validation": 0,
+    "train\u2229test": 0,
+    "validation\u2229test": 0
+   },
+   "split_ranges": {
+    "train": [
+     "2013-01-02",
+     "2018-12-31"
+    ],
+    "validation": [
+     "2019-01-02",
+     "2020-12-31"
+    ],
+    "test": [
+     "2021-01-04",
+     "2023-12-29"
+    ]
+   },
+   "overlap_kind": "none",
+   "start": "2013-01-02 00:00:00",
+   "end": "2023-12-29 00:00:00"
+  },
+  {
+   "series": "std_fi_1d_us_30y",
+   "csv": "reports/pass3_trux/csv/std_fi_1d_us_30y.csv",
+   "source_dir": "/raid/yewei/projects_yewei/TSFM4Finance/assets/data/standard/std_fi_1d_us_30y",
+   "rows_raw": 2751,
+   "rows_deduped": 2751,
+   "dropped_duplicates": 0,
+   "split_overlap": {
+    "train\u2229validation": 0,
+    "train\u2229test": 0,
+    "validation\u2229test": 0
+   },
+   "split_ranges": {
+    "train": [
+     "2013-01-02",
+     "2018-12-31"
+    ],
+    "validation": [
+     "2019-01-02",
+     "2020-12-31"
+    ],
+    "test": [
+     "2021-01-04",
+     "2023-12-29"
+    ]
+   },
+   "overlap_kind": "none",
+   "start": "2013-01-02 00:00:00",
+   "end": "2023-12-29 00:00:00"
+  },
+  {
+   "series": "std_fi_1d_us_3y",
+   "csv": "reports/pass3_trux/csv/std_fi_1d_us_3y.csv",
+   "source_dir": "/raid/yewei/projects_yewei/TSFM4Finance/assets/data/standard/std_fi_1d_us_3y",
+   "rows_raw": 2751,
+   "rows_deduped": 2751,
+   "dropped_duplicates": 0,
+   "split_overlap": {
+    "train\u2229validation": 0,
+    "train\u2229test": 0,
+    "validation\u2229test": 0
+   },
+   "split_ranges": {
+    "train": [
+     "2013-01-02",
+     "2018-12-31"
+    ],
+    "validation": [
+     "2019-01-02",
+     "2020-12-31"
+    ],
+    "test": [
+     "2021-01-04",
+     "2023-12-29"
+    ]
+   },
+   "overlap_kind": "none",
+   "start": "2013-01-02 00:00:00",
+   "end": "2023-12-29 00:00:00"
+  },
+  {
+   "series": "std_fi_1d_us_7y",
+   "csv": "reports/pass3_trux/csv/std_fi_1d_us_7y.csv",
+   "source_dir": "/raid/yewei/projects_yewei/TSFM4Finance/assets/data/standard/std_fi_1d_us_7y",
+   "rows_raw": 2751,
+   "rows_deduped": 2751,
+   "dropped_duplicates": 0,
+   "split_overlap": {
+    "train\u2229validation": 0,
+    "train\u2229test": 0,
+    "validation\u2229test": 0
+   },
+   "split_ranges": {
+    "train": [
+     "2013-01-02",
+     "2018-12-31"
+    ],
+    "validation": [
+     "2019-01-02",
+     "2020-12-31"
+    ],
+    "test": [
+     "2021-01-04",
+     "2023-12-29"
+    ]
+   },
+   "overlap_kind": "none",
+   "start": "2013-01-02 00:00:00",
+   "end": "2023-12-29 00:00:00"
+  },
+  {
+   "series": "std_fi_1d_jp_10y",
+   "csv": "reports/pass3_trux/csv/std_fi_1d_jp_10y.csv",
+   "source_dir": "/raid/yewei/projects_yewei/TSFM4Finance/assets/data/standard/std_fi_1d_jp_10y",
+   "rows_raw": 2689,
+   "rows_deduped": 2689,
+   "dropped_duplicates": 0,
+   "split_overlap": {
+    "train\u2229validation": 0,
+    "train\u2229test": 0,
+    "validation\u2229test": 0
+   },
+   "split_ranges": {
+    "train": [
+     "2013-01-04",
+     "2018-12-28"
+    ],
+    "validation": [
+     "2019-01-04",
+     "2020-12-30"
+    ],
+    "test": [
+     "2021-01-04",
+     "2023-12-29"
+    ]
+   },
+   "overlap_kind": "none",
+   "start": "2013-01-04 00:00:00",
+   "end": "2023-12-29 00:00:00"
+  },
+  {
+   "series": "std_fi_1d_jp_2y",
+   "csv": "reports/pass3_trux/csv/std_fi_1d_jp_2y.csv",
+   "source_dir": "/raid/yewei/projects_yewei/TSFM4Finance/assets/data/standard/std_fi_1d_jp_2y",
+   "rows_raw": 2689,
+   "rows_deduped": 2689,
+   "dropped_duplicates": 0,
+   "split_overlap": {
+    "train\u2229validation": 0,
+    "train\u2229test": 0,
+    "validation\u2229test": 0
+   },
+   "split_ranges": {
+    "train": [
+     "2013-01-04",
+     "2018-12-28"
+    ],
+    "validation": [
+     "2019-01-04",
+     "2020-12-30"
+    ],
+    "test": [
+     "2021-01-04",
+     "2023-12-29"
+    ]
+   },
+   "overlap_kind": "none",
+   "start": "2013-01-04 00:00:00",
+   "end": "2023-12-29 00:00:00"
+  },
+  {
+   "series": "std_fi_1d_jp_5y",
+   "csv": "reports/pass3_trux/csv/std_fi_1d_jp_5y.csv",
+   "source_dir": "/raid/yewei/projects_yewei/TSFM4Finance/assets/data/standard/std_fi_1d_jp_5y",
+   "rows_raw": 2689,
+   "rows_deduped": 2689,
+   "dropped_duplicates": 0,
+   "split_overlap": {
+    "train\u2229validation": 0,
+    "train\u2229test": 0,
+    "validation\u2229test": 0
+   },
+   "split_ranges": {
+    "train": [
+     "2013-01-04",
+     "2018-12-28"
+    ],
+    "validation": [
+     "2019-01-04",
+     "2020-12-30"
+    ],
+    "test": [
+     "2021-01-04",
+     "2023-12-29"
+    ]
+   },
+   "overlap_kind": "none",
+   "start": "2013-01-04 00:00:00",
+   "end": "2023-12-29 00:00:00"
+  },
+  {
+   "series": "std_fx_1d_audusd",
+   "csv": "reports/pass3_trux/csv/std_fx_1d_audusd.csv",
+   "source_dir": "/raid/yewei/projects_yewei/TSFM4Finance/assets/data/standard/std_fx_1d_audusd",
+   "rows_raw": 3439,
+   "rows_deduped": 3439,
+   "dropped_duplicates": 0,
+   "split_overlap": {
+    "train\u2229validation": 0,
+    "train\u2229test": 0,
+    "validation\u2229test": 0
+   },
+   "split_ranges": {
+    "train": [
+     "2013-01-01",
+     "2018-12-31"
+    ],
+    "validation": [
+     "2019-01-01",
+     "2020-12-31"
+    ],
+    "test": [
+     "2021-01-03",
+     "2023-12-29"
+    ]
+   },
+   "overlap_kind": "none",
+   "start": "2013-01-01 00:00:00",
+   "end": "2023-12-29 00:00:00"
+  },
+  {
+   "series": "std_fx_1d_euraud",
+   "csv": "reports/pass3_trux/csv/std_fx_1d_euraud.csv",
+   "source_dir": "/raid/yewei/projects_yewei/TSFM4Finance/assets/data/standard/std_fx_1d_euraud",
+   "rows_raw": 3439,
+   "rows_deduped": 3439,
+   "dropped_duplicates": 0,
+   "split_overlap": {
+    "train\u2229validation": 0,
+    "train\u2229test": 0,
+    "validation\u2229test": 0
+   },
+   "split_ranges": {
+    "train": [
+     "2013-01-01",
+     "2018-12-31"
+    ],
+    "validation": [
+     "2019-01-01",
+     "2020-12-31"
+    ],
+    "test": [
+     "2021-01-03",
+     "2023-12-29"
+    ]
+   },
+   "overlap_kind": "none",
+   "start": "2013-01-01 00:00:00",
+   "end": "2023-12-29 00:00:00"
+  },
+  {
+   "series": "std_fx_1d_eurgbp",
+   "csv": "reports/pass3_trux/csv/std_fx_1d_eurgbp.csv",
+   "source_dir": "/raid/yewei/projects_yewei/TSFM4Finance/assets/data/standard/std_fx_1d_eurgbp",
+   "rows_raw": 3439,
+   "rows_deduped": 3439,
+   "dropped_duplicates": 0,
+   "split_overlap": {
+    "train\u2229validation": 0,
+    "train\u2229test": 0,
+    "validation\u2229test": 0
+   },
+   "split_ranges": {
+    "train": [
+     "2013-01-01",
+     "2018-12-31"
+    ],
+    "validation": [
+     "2019-01-01",
+     "2020-12-31"
+    ],
+    "test": [
+     "2021-01-03",
+     "2023-12-29"
+    ]
+   },
+   "overlap_kind": "none",
+   "start": "2013-01-01 00:00:00",
+   "end": "2023-12-29 00:00:00"
+  },
+  {
+   "series": "std_fx_1d_eurjpy",
+   "csv": "reports/pass3_trux/csv/std_fx_1d_eurjpy.csv",
+   "source_dir": "/raid/yewei/projects_yewei/TSFM4Finance/assets/data/standard/std_fx_1d_eurjpy",
+   "rows_raw": 3439,
+   "rows_deduped": 3439,
+   "dropped_duplicates": 0,
+   "split_overlap": {
+    "train\u2229validation": 0,
+    "train\u2229test": 0,
+    "validation\u2229test": 0
+   },
+   "split_ranges": {
+    "train": [
+     "2013-01-01",
+     "2018-12-31"
+    ],
+    "validation": [
+     "2019-01-01",
+     "2020-12-31"
+    ],
+    "test": [
+     "2021-01-03",
+     "2023-12-29"
+    ]
+   },
+   "overlap_kind": "none",
+   "start": "2013-01-01 00:00:00",
+   "end": "2023-12-29 00:00:00"
+  },
+  {
+   "series": "std_fx_1d_gbpjpy",
+   "csv": "reports/pass3_trux/csv/std_fx_1d_gbpjpy.csv",
+   "source_dir": "/raid/yewei/projects_yewei/TSFM4Finance/assets/data/standard/std_fx_1d_gbpjpy",
+   "rows_raw": 3438,
+   "rows_deduped": 3438,
+   "dropped_duplicates": 0,
+   "split_overlap": {
+    "train\u2229validation": 0,
+    "train\u2229test": 0,
+    "validation\u2229test": 0
+   },
+   "split_ranges": {
+    "train": [
+     "2013-01-01",
+     "2018-12-31"
+    ],
+    "validation": [
+     "2019-01-01",
+     "2020-12-31"
+    ],
+    "test": [
+     "2021-01-03",
+     "2023-12-29"
+    ]
+   },
+   "overlap_kind": "none",
+   "start": "2013-01-01 00:00:00",
+   "end": "2023-12-29 00:00:00"
+  },
+  {
+   "series": "std_fx_1d_gbpusd",
+   "csv": "reports/pass3_trux/csv/std_fx_1d_gbpusd.csv",
+   "source_dir": "/raid/yewei/projects_yewei/TSFM4Finance/assets/data/standard/std_fx_1d_gbpusd",
+   "rows_raw": 3438,
+   "rows_deduped": 3438,
+   "dropped_duplicates": 0,
+   "split_overlap": {
+    "train\u2229validation": 0,
+    "train\u2229test": 0,
+    "validation\u2229test": 0
+   },
+   "split_ranges": {
+    "train": [
+     "2013-01-01",
+     "2018-12-31"
+    ],
+    "validation": [
+     "2019-01-01",
+     "2020-12-31"
+    ],
+    "test": [
+     "2021-01-03",
+     "2023-12-29"
+    ]
+   },
+   "overlap_kind": "none",
+   "start": "2013-01-01 00:00:00",
+   "end": "2023-12-29 00:00:00"
+  },
+  {
+   "series": "std_fx_1d_usdchf",
+   "csv": "reports/pass3_trux/csv/std_fx_1d_usdchf.csv",
+   "source_dir": "/raid/yewei/projects_yewei/TSFM4Finance/assets/data/standard/std_fx_1d_usdchf",
+   "rows_raw": 3439,
+   "rows_deduped": 3439,
+   "dropped_duplicates": 0,
+   "split_overlap": {
+    "train\u2229validation": 0,
+    "train\u2229test": 0,
+    "validation\u2229test": 0
+   },
+   "split_ranges": {
+    "train": [
+     "2013-01-01",
+     "2018-12-31"
+    ],
+    "validation": [
+     "2019-01-01",
+     "2020-12-31"
+    ],
+    "test": [
+     "2021-01-03",
+     "2023-12-29"
+    ]
+   },
+   "overlap_kind": "none",
+   "start": "2013-01-01 00:00:00",
+   "end": "2023-12-29 00:00:00"
+  },
+  {
+   "series": "std_fx_1d_usdjpy",
+   "csv": "reports/pass3_trux/csv/std_fx_1d_usdjpy.csv",
+   "source_dir": "/raid/yewei/projects_yewei/TSFM4Finance/assets/data/standard/std_fx_1d_usdjpy",
+   "rows_raw": 3439,
+   "rows_deduped": 3439,
+   "dropped_duplicates": 0,
+   "split_overlap": {
+    "train\u2229validation": 0,
+    "train\u2229test": 0,
+    "validation\u2229test": 0
+   },
+   "split_ranges": {
+    "train": [
+     "2013-01-01",
+     "2018-12-31"
+    ],
+    "validation": [
+     "2019-01-01",
+     "2020-12-31"
+    ],
+    "test": [
+     "2021-01-03",
+     "2023-12-29"
+    ]
+   },
+   "overlap_kind": "none",
+   "start": "2013-01-01 00:00:00",
+   "end": "2023-12-29 00:00:00"
+  },
+  {
+   "series": "std_fx_1d_usdtry",
+   "csv": "reports/pass3_trux/csv/std_fx_1d_usdtry.csv",
+   "source_dir": "/raid/yewei/projects_yewei/TSFM4Finance/assets/data/standard/std_fx_1d_usdtry",
+   "rows_raw": 3378,
+   "rows_deduped": 3378,
+   "dropped_duplicates": 0,
+   "split_overlap": {
+    "train\u2229validation": 0,
+    "train\u2229test": 0,
+    "validation\u2229test": 0
+   },
+   "split_ranges": {
+    "train": [
+     "2013-01-01",
+     "2018-12-31"
+    ],
+    "validation": [
+     "2019-01-01",
+     "2020-12-31"
+    ],
+    "test": [
+     "2021-01-04",
+     "2023-12-29"
+    ]
+   },
+   "overlap_kind": "none",
+   "start": "2013-01-01 00:00:00",
+   "end": "2023-12-29 00:00:00"
+  },
+  {
+   "series": "std_fx_1d_usdzar",
+   "csv": "reports/pass3_trux/csv/std_fx_1d_usdzar.csv",
+   "source_dir": "/raid/yewei/projects_yewei/TSFM4Finance/assets/data/standard/std_fx_1d_usdzar",
+   "rows_raw": 3430,
+   "rows_deduped": 3430,
+   "dropped_duplicates": 0,
+   "split_overlap": {
+    "train\u2229validation": 0,
+    "train\u2229test": 0,
+    "validation\u2229test": 0
+   },
+   "split_ranges": {
+    "train": [
+     "2013-01-01",
+     "2018-12-31"
+    ],
+    "validation": [
+     "2019-01-01",
+     "2020-12-31"
+    ],
+    "test": [
+     "2021-01-03",
+     "2023-12-29"
+    ]
+   },
+   "overlap_kind": "none",
+   "start": "2013-01-01 00:00:00",
+   "end": "2023-12-29 00:00:00"
+  },
+  {
+   "series": "std_fx_1d_usdpln",
+   "csv": "reports/pass3_trux/csv/std_fx_1d_usdpln.csv",
+   "source_dir": "/raid/yewei/projects_yewei/TSFM4Finance/assets/data/standard/std_fx_1d_usdpln",
+   "rows_raw": 3428,
+   "rows_deduped": 3428,
+   "dropped_duplicates": 0,
+   "split_overlap": {
+    "train\u2229validation": 0,
+    "train\u2229test": 0,
+    "validation\u2229test": 0
+   },
+   "split_ranges": {
+    "train": [
+     "2013-01-01",
+     "2018-12-31"
+    ],
+    "validation": [
+     "2019-01-01",
+     "2020-12-31"
+    ],
+    "test": [
+     "2021-01-03",
+     "2023-12-29"
+    ]
+   },
+   "overlap_kind": "none",
+   "start": "2013-01-01 00:00:00",
+   "end": "2023-12-29 00:00:00"
+  },
+  {
+   "series": "std_fx_1d_usdcnh",
+   "csv": "reports/pass3_trux/csv/std_fx_1d_usdcnh.csv",
+   "source_dir": "/raid/yewei/projects_yewei/TSFM4Finance/assets/data/standard/std_fx_1d_usdcnh",
+   "rows_raw": 3426,
+   "rows_deduped": 3426,
+   "dropped_duplicates": 0,
+   "split_overlap": {
+    "train\u2229validation": 0,
+    "train\u2229test": 0,
+    "validation\u2229test": 0
+   },
+   "split_ranges": {
+    "train": [
+     "2013-01-01",
+     "2018-12-31"
+    ],
+    "validation": [
+     "2019-01-01",
+     "2020-12-31"
+    ],
+    "test": [
+     "2021-01-03",
+     "2023-12-29"
+    ]
+   },
+   "overlap_kind": "none",
+   "start": "2013-01-01 00:00:00",
+   "end": "2023-12-29 00:00:00"
+  },
+  {
+   "series": "std_fx_1d_usdinr",
+   "csv": "reports/pass3_trux/csv/std_fx_1d_usdinr.csv",
+   "source_dir": "/raid/yewei/projects_yewei/TSFM4Finance/assets/data/standard/std_fx_1d_usdinr",
+   "rows_raw": 2755,
+   "rows_deduped": 2755,
+   "dropped_duplicates": 0,
+   "split_overlap": {
+    "train\u2229validation": 0,
+    "train\u2229test": 0,
+    "validation\u2229test": 0
+   },
+   "split_ranges": {
+    "train": [
+     "2013-01-01",
+     "2018-12-31"
+    ],
+    "validation": [
+     "2019-01-01",
+     "2020-12-31"
+    ],
+    "test": [
+     "2021-01-01",
+     "2023-12-28"
+    ]
+   },
+   "overlap_kind": "none",
+   "start": "2013-01-01 00:00:00",
+   "end": "2023-12-28 00:00:00"
+  },
+  {
+   "series": "std_fx_1h_eurchf",
+   "csv": "reports/pass3_trux/csv/std_fx_1h_eurchf.csv",
+   "source_dir": "/raid/yewei/projects_yewei/TSFM4Finance/assets/data/standard/std_fx_1h_eurchf",
+   "rows_raw": 68546,
+   "rows_deduped": 68546,
+   "dropped_duplicates": 0,
+   "split_overlap": {
+    "train\u2229validation": 0,
+    "train\u2229test": 0,
+    "validation\u2229test": 0
+   },
+   "split_ranges": {
+    "train": [
+     "2013-01-01",
+     "2018-12-31"
+    ],
+    "validation": [
+     "2019-01-01",
+     "2020-12-31"
+    ],
+    "test": [
+     "2021-01-03",
+     "2023-12-29"
+    ]
+   },
+   "overlap_kind": "none",
+   "start": "2013-01-01 00:00:00",
+   "end": "2023-12-29 21:00:00"
+  },
+  {
+   "series": "std_fx_1h_gbpusd",
+   "csv": "reports/pass3_trux/csv/std_fx_1h_gbpusd.csv",
+   "source_dir": "/raid/yewei/projects_yewei/TSFM4Finance/assets/data/standard/std_fx_1h_gbpusd",
+   "rows_raw": 68549,
+   "rows_deduped": 68549,
+   "dropped_duplicates": 0,
+   "split_overlap": {
+    "train\u2229validation": 0,
+    "train\u2229test": 0,
+    "validation\u2229test": 0
+   },
+   "split_ranges": {
+    "train": [
+     "2013-01-01",
+     "2018-12-31"
+    ],
+    "validation": [
+     "2019-01-01",
+     "2020-12-31"
+    ],
+    "test": [
+     "2021-01-03",
+     "2023-12-29"
+    ]
+   },
+   "overlap_kind": "none",
+   "start": "2013-01-01 22:00:00",
+   "end": "2023-12-29 21:00:00"
+  },
+  {
+   "series": "std_fx_1h_usdjpy",
+   "csv": "reports/pass3_trux/csv/std_fx_1h_usdjpy.csv",
+   "source_dir": "/raid/yewei/projects_yewei/TSFM4Finance/assets/data/standard/std_fx_1h_usdjpy",
+   "rows_raw": 68551,
+   "rows_deduped": 68551,
+   "dropped_duplicates": 0,
+   "split_overlap": {
+    "train\u2229validation": 0,
+    "train\u2229test": 0,
+    "validation\u2229test": 0
+   },
+   "split_ranges": {
+    "train": [
+     "2013-01-01",
+     "2018-12-31"
+    ],
+    "validation": [
+     "2019-01-01",
+     "2020-12-31"
+    ],
+    "test": [
+     "2021-01-03",
+     "2023-12-29"
+    ]
+   },
+   "overlap_kind": "none",
+   "start": "2013-01-01 22:00:00",
+   "end": "2023-12-29 21:00:00"
+  },
+  {
+   "series": "std_fx_1h_audusd",
+   "csv": "reports/pass3_trux/csv/std_fx_1h_audusd.csv",
+   "source_dir": "/raid/yewei/projects_yewei/TSFM4Finance/assets/data/standard/std_fx_1h_audusd",
+   "rows_raw": 68551,
+   "rows_deduped": 68551,
+   "dropped_duplicates": 0,
+   "split_overlap": {
+    "train\u2229validation": 0,
+    "train\u2229test": 0,
+    "validation\u2229test": 0
+   },
+   "split_ranges": {
+    "train": [
+     "2013-01-01",
+     "2018-12-31"
+    ],
+    "validation": [
+     "2019-01-01",
+     "2020-12-31"
+    ],
+    "test": [
+     "2021-01-03",
+     "2023-12-29"
+    ]
+   },
+   "overlap_kind": "none",
+   "start": "2013-01-01 00:00:00",
+   "end": "2023-12-29 21:00:00"
+  },
+  {
+   "series": "std_fx_1h_euraud",
+   "csv": "reports/pass3_trux/csv/std_fx_1h_euraud.csv",
+   "source_dir": "/raid/yewei/projects_yewei/TSFM4Finance/assets/data/standard/std_fx_1h_euraud",
+   "rows_raw": 68548,
+   "rows_deduped": 68548,
+   "dropped_duplicates": 0,
+   "split_overlap": {
+    "train\u2229validation": 0,
+    "train\u2229test": 0,
+    "validation\u2229test": 0
+   },
+   "split_ranges": {
+    "train": [
+     "2013-01-01",
+     "2018-12-31"
+    ],
+    "validation": [
+     "2019-01-01",
+     "2020-12-31"
+    ],
+    "test": [
+     "2021-01-03",
+     "2023-12-29"
+    ]
+   },
+   "overlap_kind": "none",
+   "start": "2013-01-01 00:00:00",
+   "end": "2023-12-29 21:00:00"
+  },
+  {
+   "series": "std_fx_1h_nzdusd",
+   "csv": "reports/pass3_trux/csv/std_fx_1h_nzdusd.csv",
+   "source_dir": "/raid/yewei/projects_yewei/TSFM4Finance/assets/data/standard/std_fx_1h_nzdusd",
+   "rows_raw": 68542,
+   "rows_deduped": 68542,
+   "dropped_duplicates": 0,
+   "split_overlap": {
+    "train\u2229validation": 0,
+    "train\u2229test": 0,
+    "validation\u2229test": 0
+   },
+   "split_ranges": {
+    "train": [
+     "2013-01-01",
+     "2018-12-31"
+    ],
+    "validation": [
+     "2019-01-01",
+     "2020-12-31"
+    ],
+    "test": [
+     "2021-01-03",
+     "2023-12-29"
+    ]
+   },
+   "overlap_kind": "none",
+   "start": "2013-01-01 22:00:00",
+   "end": "2023-12-29 21:00:00"
+  }
+ ]
+}

@@ -1,0 +1,39 @@
+{
+ "generated": "2026-11-17 20:28:05",
+ "python": "3.12.13",
+ "machine": "ubadmin-Precision-3591",
+ "n": 1,
+ "rows": [
+  {
+   "model": "tirex-2",
+   "family": "tirex2",
+   "tier": "B",
+   "env": "tirex2",
+   "weights": "NX-AI/TiRex-2",
+   "license": "apache-2.0",
+   "weights_present": true,
+   "load": "ok",
+   "predict": "fail",
+   "quantiles": "skip",
+   "embed": "skip",
+   "finetune": "skip",
+   "ft_loss_first": NaN,
+   "ft_loss_last": NaN,
+   "ft_params": 0,
+   "classify": "fail",
+   "clf_metrics": {},
+   "anomaly": "n/a",
+   "reward": "skipped",
+   "seconds": 18.5,
+   "reasons": {
+    "predict": "RuntimeError: Ninja is required to load C++ extensions (pip install ninja to get it)",
+    "classify": "RuntimeError: Errors during CUDA kernel calls forward.",
+    "anomaly": "AcceleratorError: CUDA error: the provided PTX was compiled with an unsupported toolchain.\nSearch for `cudaErrorUnsupportedPtxVersion' in https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__T",
+    "reward": "tirex-2: no 'finetune' support (adapter exposes no trainable module)"
+   },
+   "machine": "ubadmin-Precision-3591/x86_64",
+   "python": "3.12.13",
+   "device": "cuda"
+  }
+ ]
+}

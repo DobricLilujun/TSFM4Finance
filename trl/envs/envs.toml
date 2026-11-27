@@ -1,0 +1,104 @@
+# Machine-readable environment spec, consumed by scripts/make_envs.sh.
+#
+# Most envs install from a *lock* taken from the venv where the matrix actually passed
+# (envs/<name>.lock.txt). That is deliberate: the version archaeology in
+# docs/08_known_issues.md shows how easy it is to break a family with an unrelated
+# upgrade, and a resolver that is free to pick "latest" silently changes which models
+# work. torch is always installed separately (TORCH_SPEC / TORCH_INDEX) because the
+# right build is platform-specific: cu12x x86 wheels here, cu13 aarch64 on the DGX Spark.
+
+[env.core]
+python = "3.11"
+lock = "core.lock.txt"
+notes = "chronos-forecasting==2.3.2 (Chronos2Pipeline/Bolt/T5), timesfm==3.0.2, granite-tsfm==0.3.12, peft==0.19.1 (0.20 dropped the base_model kwarg), transformers==4.57.6"
+
+[env.moirai]
+python = "3.11"
+lock = "moirai.lock.txt"
+notes = "uni2ts; Moirai 1.1 fine-tune needs uni2ts' own Lightning stack, so the column reports 'skipped' there"
+
+[env.moment]
+python = "3.11"   # the laptop venv is 3.10; on aarch64 the same lock installs on 3.11
+                  # once filelock (which requires >=3.11 in that build) is dropped
+lock = "moment.lock.txt"
+notes = "MOMENT from git; forward() returns samples, so reward uses the point-head path"
+
+[env.toto]
+python = "3.12"   # the lock comes from a 3.12 venv (contourpy/matplotlib pins)
+lock = "toto.lock.txt"
+notes = """safetensors==0.4.5 (0.4.6 breaks its deserializer), tokenizers==0.22.2,
+transformers==5.10.1 (Toto 2.0 needs it), torchmetrics (Moirai-free but the shared
+backbone imports it), setuptools<81 for pkg_resources, toto-ts for Toto 1.0.
+On aarch64 do NOT install the x86 lock file: build from this machine's core lock and
+add those pins, otherwise the venv ends up without transformers at all and every row
+reports 'missing package'.
+Family envs pin numpy 1.26, so the parquet engine is pyarrow 16 (pyarrow >=18 needs numpy 2
+and fails to import here); needed to read fev-style train/validation/test directories."""
+
+[env.tirex]
+python = "3.11"
+lock = "tirex.lock.txt"
+notes = "neuralforecast; its loader validates a model *id*, not a local path"
+
+[env.tirex2]
+python = "3.12"   # ditto: its mLSTM/triton stack lock is a 3.12 freeze
+lock = "tirex2.lock.txt"
+notes = "Triton mLSTM kernels need sm>=10.0 + Triton>=3.4; otherwise the native backend JIT-compiles a CUDA extension and needs nvcc (and ninja, installed on the DGX Spark). As of 2026-11-21 neither path works on the Spark: the Triton scan kernel raises CompilationError at runtime and the JIT-built slstm extension fails to import, so tirex-2 is a failed row, not a declined one"
+env = { USE_TRITON_KERNELS = "0" }
+
+[env.timemoe]
+python = "3.11"
+lock = "timemoe.lock.txt"
+notes = """transformers==4.40.2 and numpy<2 - 4.42 introduced Cache objects, 4.44 removed
+standardize_cache_format; the released remote code only runs on 4.40.x. Family envs pin numpy
+1.26, so the parquet engine is pyarrow 16 (pyarrow >=18 needs numpy 2 and fails to import
+here); needed to read fev-style train/validation/test directories."""
+
+[env.kronos]
+python = "3.11"
+lock = "kronos.lock.txt"
+git = [{ repo = "https://github.com/shiyu-coder/Kronos", dir = "Kronos" }]
+notes = "no wheel: the repo (shiyu-coder/Kronos; weights live under the NeoQuasar HF org) is imported as model.kronos via $TSFMTRL_THIRD_PARTY"
+
+[env.ttm]
+python = "3.12"
+lock = "ttm.lock.txt"
+notes = "only needed for TTM-r1; r2/r3 run in core. transformers==4.44.0 there (4.57 dropped PatchTSMEncoderLayer)"
+
+[env.timesfm20]
+python = "3.11"
+lock = "timesfm20.lock.txt"
+notes = "timesfm==1.2.9 is the LAST release with the v1 API (TimesFm/TimesFmHparams) that the 2.0-500M checkpoint needs; it imports jax at package import even for the torch backend. timesfm 2.0.x/3.x on PyPI are the 2.5/3.0 models, not this one."
+
+[env.new]
+python = "3.11"
+lock = "new.lock.txt"
+notes = "Kairos, Aurora, VisionTS++ remote code on the core stack"
+
+[env.sundial]
+python = "3.11"   # the upstream repo predates 3.12; 3.11 is the ceiling for its deps
+deps = ["torch", "transformers==4.40.1", "accelerate", "numpy<2", "einops==0.8.1",
+        "pandas", "scikit-learn"]
+git = [{ repo = "https://github.com/thuml/Sundial", dir = "Sundial" }]
+notes = """no wheel: inference runs on the Hub repo's own remote code, so
+transformers==4.40.1 (the version its Quickstart names) is what makes the Auto path
+resolve SundialForPrediction; 4.42.x mis-builds the causal mask for patched inputs.
+`accelerate` is required because the loader touches device_map paths, but the adapter
+must not pass device_map (accelerate re-dispatches through the Auto mapping, which does
+not know model_type=sundial). The repo ships no tokenizer and none is needed:
+generate() takes raw values. Fine-tune needs no third-party checkout: the objective is
+``flow_loss.FlowLoss`` imported from the checkpoint's own repo files (the snapshot
+directory is put on ``sys.path``), rebuilt at ``input_token_len`` because the shipped
+``output_token_lens=[720]`` is a generation setting that cannot supervise a short
+window. The trunk transfers; that head does not.
+Family envs pin numpy 1.26, so the parquet engine is pyarrow 16 (pyarrow >=18 needs numpy 2
+and fails to import here); needed to read fev-style train/validation/test directories."""
+
+[env.vendor]
+python = "3.11"
+lock = "core.lock.txt"
+git = [
+  { repo = "https://github.com/InfiniteZZZ/VisionTS", dir = "VisionTS" },
+  { repo = "https://github.com/zaffardo/Time-MoE", dir = "Time-MoE" },
+]
+notes = "upstream checkouts for the families that publish code but no wheel (VisionTS++, t0, Kronos variants)"

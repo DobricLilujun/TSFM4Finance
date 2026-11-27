@@ -1,0 +1,57 @@
+{
+ "generated": "2026-11-21 16:25:02",
+ "python": "3.11.15",
+ "machine": "ubadmin-Precision-3591",
+ "n": 1,
+ "rows": [
+  {
+   "model": "tirex",
+   "family": "tirex",
+   "tier": "A",
+   "env": "tirex",
+   "weights": "NX-AI/TiRex",
+   "license": "nxai-community (non-commercial)",
+   "weights_present": true,
+   "load": "ok",
+   "predict": "ok",
+   "quantiles": "ok",
+   "embed": "skip",
+   "finetune": "skipped",
+   "ft_loss_first": NaN,
+   "ft_loss_last": NaN,
+   "ft_params": 0,
+   "classify": "ok",
+   "clf_metrics": {
+    "pr_auc": 0.4925,
+    "roc_auc": 0.4845,
+    "accuracy": 0.5,
+    "macro_f1": 0.2222,
+    "f1_beta2": 0.2778,
+    "precision": 0.1667,
+    "recall": 0.3333,
+    "n": 66,
+    "n_classes": 3,
+    "base_rate": 0.5,
+    "auc_roc": 0.4845,
+    "routes": {
+     "probe": "ok",
+     "head": "ok",
+     "native": "n/a"
+    }
+   },
+   "anomaly": "ok",
+   "reward": "skipped",
+   "reward_mode": "",
+   "reward_early": NaN,
+   "reward_late": NaN,
+   "seconds": 29.5,
+   "reasons": {
+    "finetune": "tirex: no trainable module and no loss_kind in the installed package (nothing to fine-tune)",
+    "reward": "tirex: no 'finetune' support (adapter exposes no trainable module)"
+   },
+   "machine": "ubadmin-Precision-3591/x86_64",
+   "python": "3.11.15",
+   "device": "cuda"
+  }
+ ]
+}

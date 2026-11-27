@@ -1,0 +1,10 @@
+reports/pass3_trux/lane_cuda-a.jsonl
+reports/pass3_trux/lane_cuda-b.jsonl
+reports/pass3_trux_moment/lane_cuda-a.jsonl
+reports/pass3_trux_moment/lane_cuda-b.jsonl
+reports/pass3_trux_t5retry/lane_t5retry.jsonl
+reports/pass3_watson/lane_watson.jsonl
+reports/pass3_trux_ttm/lane_cuda-a.jsonl
+reports/pass3_trux_ttm/lane_cuda-b.jsonl
+reports/pass3_trux_ttm_gpu/lane_ttm_r3_cuda.jsonl
+reports/pass3_trux_ttm_gpu/lane_ttm_r2_cuda.jsonl

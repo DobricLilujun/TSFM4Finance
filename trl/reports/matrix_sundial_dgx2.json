@@ -1,0 +1,51 @@
+{
+ "generated": "2026-11-20 00:12:15",
+ "python": "3.11.14",
+ "machine": "gpu7",
+ "n": 1,
+ "rows": [
+  {
+   "model": "sundial-base-128m",
+   "family": "sundial",
+   "tier": "A",
+   "env": "sundial",
+   "weights": "thuml/sundial-base-128m",
+   "license": "apache-2.0",
+   "weights_present": true,
+   "load": "ok",
+   "predict": "ok",
+   "quantiles": "ok",
+   "embed": "skip",
+   "finetune": "ok",
+   "ft_loss_first": 3.436439,
+   "ft_loss_last": 3.505367,
+   "ft_params": 127247632,
+   "classify": "ok",
+   "clf_metrics": {
+    "pr_auc": 0.4839,
+    "roc_auc": 0.493,
+    "accuracy": 0.5,
+    "macro_f1": 0.2222,
+    "f1_beta2": 0.2778,
+    "precision": 0.1667,
+    "recall": 0.3333,
+    "n": 66,
+    "n_classes": 3,
+    "base_rate": 0.5,
+    "auc_roc": 0.493,
+    "routes": {
+     "probe": "ok",
+     "head": "ok",
+     "native": "n/a"
+    }
+   },
+   "anomaly": "ok",
+   "reward": "ok",
+   "seconds": 20.4,
+   "reasons": {},
+   "machine": "gpu7/aarch64",
+   "python": "3.11.14",
+   "device": "cuda"
+  }
+ ]
+}

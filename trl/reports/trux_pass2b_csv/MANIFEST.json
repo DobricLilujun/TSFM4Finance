@@ -1,0 +1,187 @@
+{
+ "protocol_note": "flattened splits; for zero-shot --spans all only; adapted checkpoints need a real split and --spans test",
+ "duplicates": "same timestamp with the same value, kept first; a timestamp carrying different values aborts the run",
+ "flagged_non_monotone_splits": [],
+ "series": [
+  {
+   "series": "std_equity_1d_10107",
+   "csv": "reports/trux_pass2b_csv/std_equity_1d_10107.csv",
+   "source_dir": "/raid/yewei/projects_yewei/TSFM4Finance/assets/data/standard/std_equity_1d_10107",
+   "rows_raw": 2768,
+   "rows_deduped": 2768,
+   "dropped_duplicates": 0,
+   "split_overlap": {
+    "train\u2229validation": 0,
+    "train\u2229test": 0,
+    "validation\u2229test": 0
+   },
+   "split_ranges": {
+    "train": [
+     "2013-01-02",
+     "2018-12-31"
+    ],
+    "validation": [
+     "2019-01-02",
+     "2020-12-31"
+    ],
+    "test": [
+     "2021-01-04",
+     "2023-12-29"
+    ]
+   },
+   "overlap_kind": "none",
+   "start": "2013-01-02 00:00:00",
+   "end": "2023-12-29 00:00:00"
+  },
+  {
+   "series": "std_equity_1d_11850",
+   "csv": "reports/trux_pass2b_csv/std_equity_1d_11850.csv",
+   "source_dir": "/raid/yewei/projects_yewei/TSFM4Finance/assets/data/standard/std_equity_1d_11850",
+   "rows_raw": 2768,
+   "rows_deduped": 2768,
+   "dropped_duplicates": 0,
+   "split_overlap": {
+    "train\u2229validation": 0,
+    "train\u2229test": 0,
+    "validation\u2229test": 0
+   },
+   "split_ranges": {
+    "train": [
+     "2013-01-02",
+     "2018-12-31"
+    ],
+    "validation": [
+     "2019-01-02",
+     "2020-12-31"
+    ],
+    "test": [
+     "2021-01-04",
+     "2023-12-29"
+    ]
+   },
+   "overlap_kind": "none",
+   "start": "2013-01-02 00:00:00",
+   "end": "2023-12-29 00:00:00"
+  },
+  {
+   "series": "std_fi_1d_uk_20y",
+   "csv": "reports/trux_pass2b_csv/std_fi_1d_uk_20y.csv",
+   "source_dir": "/raid/yewei/projects_yewei/TSFM4Finance/assets/data/standard/std_fi_1d_uk_20y",
+   "rows_raw": 2778,
+   "rows_deduped": 2778,
+   "dropped_duplicates": 0,
+   "split_overlap": {
+    "train\u2229validation": 0,
+    "train\u2229test": 0,
+    "validation\u2229test": 0
+   },
+   "split_ranges": {
+    "train": [
+     "2013-01-02",
+     "2018-12-31"
+    ],
+    "validation": [
+     "2019-01-02",
+     "2020-12-31"
+    ],
+    "test": [
+     "2021-01-04",
+     "2023-12-29"
+    ]
+   },
+   "overlap_kind": "none",
+   "start": "2013-01-02 00:00:00",
+   "end": "2023-12-29 00:00:00"
+  },
+  {
+   "series": "std_fx_1d_euraud",
+   "csv": "reports/trux_pass2b_csv/std_fx_1d_euraud.csv",
+   "source_dir": "/raid/yewei/projects_yewei/TSFM4Finance/assets/data/standard/std_fx_1d_euraud",
+   "rows_raw": 3439,
+   "rows_deduped": 3439,
+   "dropped_duplicates": 0,
+   "split_overlap": {
+    "train\u2229validation": 0,
+    "train\u2229test": 0,
+    "validation\u2229test": 0
+   },
+   "split_ranges": {
+    "train": [
+     "2013-01-01",
+     "2018-12-31"
+    ],
+    "validation": [
+     "2019-01-01",
+     "2020-12-31"
+    ],
+    "test": [
+     "2021-01-03",
+     "2023-12-29"
+    ]
+   },
+   "overlap_kind": "none",
+   "start": "2013-01-01 00:00:00",
+   "end": "2023-12-29 00:00:00"
+  },
+  {
+   "series": "std_fx_1h_eurchf",
+   "csv": "reports/trux_pass2b_csv/std_fx_1h_eurchf.csv",
+   "source_dir": "/raid/yewei/projects_yewei/TSFM4Finance/assets/data/standard/std_fx_1h_eurchf",
+   "rows_raw": 68546,
+   "rows_deduped": 68546,
+   "dropped_duplicates": 0,
+   "split_overlap": {
+    "train\u2229validation": 0,
+    "train\u2229test": 0,
+    "validation\u2229test": 0
+   },
+   "split_ranges": {
+    "train": [
+     "2013-01-01",
+     "2018-12-31"
+    ],
+    "validation": [
+     "2019-01-01",
+     "2020-12-31"
+    ],
+    "test": [
+     "2021-01-03",
+     "2023-12-29"
+    ]
+   },
+   "overlap_kind": "none",
+   "start": "2013-01-01 00:00:00",
+   "end": "2023-12-29 21:00:00"
+  },
+  {
+   "series": "btc_crypto",
+   "csv": "reports/trux_pass2b_csv/btc_crypto.csv",
+   "source_dir": "/raid/yewei/projects_yewei/TSFM4Finance/assets/data/open/btc_crypto",
+   "rows_raw": 1247,
+   "rows_deduped": 1097,
+   "dropped_duplicates": 150,
+   "split_overlap": {
+    "train\u2229validation": 150,
+    "train\u2229test": 0,
+    "validation\u2229test": 0
+   },
+   "split_ranges": {
+    "train": [
+     "2023-08-15",
+     "2026-02-16"
+    ],
+    "validation": [
+     "2025-09-20",
+     "2026-03-03"
+    ],
+    "test": [
+     "2026-03-04",
+     "2026-08-15"
+    ]
+   },
+   "overlap_kind": "context reuse",
+   "start": "2023-08-15 00:00:00",
+   "end": "2026-08-15 00:00:00"
+  }
+ ]
+}

@@ -20,3 +20,18 @@ data/bis_raw/
 # are required for CI / GitHub Pages (see explicit force-adds below).
 assets/outputs/
 assets/data/
+
+# vendored tsfm-trl harness (trl/): run artifacts and local envs stay out of git
+trl/envs/*/
+trl/envs/local.json
+trl/reports/ft*/
+trl/reports/reward_demo/*/
+trl/site/
+trl/.venv*/
+trl/.pytest_cache/
+trl/.ruff_cache/
+trl/*.egg-info/
+
+# flattened CSVs are regenerable with probes/trux/series_to_csv.py; the MANIFEST stays in git
+trl/reports/*/series_csv/*
+!trl/reports/*/series_csv/MANIFEST.json

@@ -1,0 +1,47 @@
+{
+ "generated": "2026-11-17 20:31:39",
+ "python": "3.11.15",
+ "machine": "ubadmin-Precision-3591",
+ "n": 1,
+ "rows": [
+  {
+   "model": "tirex",
+   "family": "tirex",
+   "tier": "A",
+   "env": "tirex",
+   "weights": "NX-AI/TiRex",
+   "license": "nxai-community (non-commercial)",
+   "weights_present": true,
+   "load": "ok",
+   "predict": "ok",
+   "quantiles": "ok",
+   "embed": "skip",
+   "finetune": "skip",
+   "ft_loss_first": NaN,
+   "ft_loss_last": NaN,
+   "ft_params": 0,
+   "classify": "ok",
+   "clf_metrics": {
+    "accuracy": 0.4,
+    "macro_f1": 0.1905,
+    "f1_beta2": NaN,
+    "precision": 0.1333,
+    "recall": 0.3333,
+    "n": 265,
+    "n_classes": 3,
+    "base_rate": 0.5094,
+    "pr_auc": NaN,
+    "roc_auc": NaN
+   },
+   "anomaly": "ok",
+   "reward": "skipped",
+   "seconds": 62.6,
+   "reasons": {
+    "reward": "tirex: no 'finetune' support (adapter exposes no trainable module)"
+   },
+   "machine": "ubadmin-Precision-3591/x86_64",
+   "python": "3.11.15",
+   "device": "cuda"
+  }
+ ]
+}

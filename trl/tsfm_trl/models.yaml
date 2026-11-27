@@ -1,0 +1,255 @@
+# tsfm-trl model registry.
+#
+# One row per (family, checkpoint). The library is data-driven: adding a model
+# means adding a row here (plus an adapter class if the family is new), and it
+# automatically enters the doctor matrix, the fine-tune planner and the evaluator.
+#
+#   key      stable id used by the CLI/API
+#   family   adapter family (which class implements it)
+#   adapter  <module>:<Class>; every adapter must expose the same contract
+#   weights  Hugging Face id or a local dir (see tsfm_trl/weights.py)
+#   caps     subset of: forecast quantiles embed finetune clf_head anomaly_head
+#            multivariate covariates panel_in paths
+#   loss     quantile | token | vendor | none     (what the trainer can optimise)
+#   env      which python environment this family wants (uv project under envs/,
+#            or "core"); the matrix runner uses it to isolate dependency conflicts
+#   tier     A = must pass, B = best effort, C = heavy / finicky
+#   license  recorded because several strong TSFMs are non-commercial
+
+envs:
+  core:  core        # torch + timesfm + chronos + granite-tsfm + statsmodels
+  moirai: moirai     # uni2ts pins an older torch
+  moment: moment     # momentfm pins numpy/hub
+  toto:   toto       # toto-2 needs python >= 3.12
+  tirex:  tirex
+  tirex2: tirex2     # xLSTM triton kernels
+  kronos: kronos
+  new:    new        # sundial / kairos / aurora / visionts (remote or vendored code)
+  vendor: vendor     # hirondel / t0 / yug / timestral (vendor pip packages)
+
+models:
+  # ---------------------------------------------------------------- baselines
+  naive:            {family: baseline, adapter: baselines:Naive, env: core, tier: A,
+                     caps: [forecast], loss: none, license: "n/a (classical)", notes: persistence}
+  seasonal_naive:   {family: baseline, adapter: baselines:SeasonalNaive, env: core, tier: A,
+                     caps: [forecast], loss: none, license: "n/a (classical)", notes: "season=5"}
+  moving_average:   {family: baseline, adapter: baselines:MovingAverage, env: core, tier: A,
+                     caps: [forecast], loss: none, license: "n/a (classical)", notes: "window=20"}
+  theta:            {family: baseline, adapter: baselines:Theta, env: core, tier: A,
+                     caps: [forecast], loss: none, license: "n/a (classical)", notes: "statsmodels ThetaModel"}
+  arima:            {family: baseline, adapter: baselines:Arima, env: core, tier: A,
+                     caps: [forecast, quantiles], loss: none, license: "n/a (classical)", install: "[baselines]",
+                     notes: "ARIMA(1,1,0) refit per origin"}
+
+  # ------------------------------------------------------------------ TimesFM
+  timesfm-2.0-500m:
+    {family: timesfm20, adapter: timesfm:TimesFM20, env: timesfm20, tier: A,
+     weights: google/timesfm-2.0-500m-pytorch, caps: [forecast, quantiles, embed, finetune],
+     loss: quantile, license: apache-2.0, max_context: 512, max_horizon: 128}
+  timesfm-2.5-200m:
+    {family: timesfm25, adapter: timesfm:TimesFM25, env: core, tier: A,
+     weights: google/timesfm-2.5-200m-pytorch, caps: [forecast, quantiles, embed, finetune],
+     loss: quantile, license: apache-2.0, max_context: 512, max_horizon: 128,
+     notes: "the checkpoint behind the published survey case study"}
+  timesfm-3.0:
+    {family: timesfm30, adapter: timesfm:TimesFM30, env: core, tier: B,
+     weights: google/timesfm-3.0-pytorch, caps: [forecast, quantiles, multivariate, covariates, finetune],
+     loss: quantile, license: "timesfm-non-commercial-1.0 (weights)",
+     max_context: 15360, max_horizon: 512,
+     notes: "multivariate (variate attention) + 9 quantiles"}
+
+  # ------------------------------------------------------------------ Chronos
+  chronos-2:
+    {family: chronos2, adapter: chronos:Chronos2, env: core, tier: A,
+     weights: amazon/chronos-2, caps: [forecast, quantiles, covariates, multivariate, finetune],
+     loss: vendor, license: apache-2.0, max_context: 2048, max_horizon: 256,
+     notes: "vendor Chronos2Pipeline.fit() is the fine-tune path"}
+  chronos-bolt-small:
+    {family: chronos_bolt, adapter: chronos:ChronosBolt, env: core, tier: A,
+     weights: amazon/chronos-bolt-small, caps: [forecast, quantiles, finetune],
+     loss: quantile, license: apache-2.0, max_context: 2048, max_horizon: 64}
+  chronos-bolt-base:
+    {family: chronos_bolt, adapter: chronos:ChronosBolt, env: core, tier: B,
+     weights: amazon/chronos-bolt-base, caps: [forecast, quantiles, finetune],
+     loss: quantile, license: apache-2.0, max_context: 2048, max_horizon: 64}
+  chronos-t5-small:
+    {family: chronos_t5, adapter: chronos:ChronosT5, env: core, tier: A,
+     weights: amazon/chronos-t5-small, caps: [forecast, quantiles, finetune, paths],
+     loss: token, license: apache-2.0, max_context: 512, max_horizon: 64,
+     notes: "discrete-token AR head: token cross-entropy, and the GRPO-style track's model"}
+  chronos-t5-base:
+    {family: chronos_t5, adapter: chronos:ChronosT5, env: core, tier: B,
+     weights: amazon/chronos-t5-base, caps: [forecast, quantiles, finetune, paths],
+     loss: token, license: apache-2.0, max_context: 512, max_horizon: 64}
+
+  # ------------------------------------------------------------------ Moirai
+  moirai-1.1-R-small:
+    {family: moirai, adapter: moirai:Moirai, env: moirai, tier: A,
+     weights: Salesforce/moirai-1.1-R-small, caps: [forecast, quantiles, multivariate, finetune],
+     loss: vendor, license: cc-by-nc-4.0, max_context: 2048,
+     notes: "1.1/MoE heads emit a distribution, so predict samples from it; the fine-tune step is uni2ts' own PackedNLLLoss over prediction-masked patches (its pretraining objective), not pinball on samples. Moirai 2 keeps a differentiable quantile head"}
+  moirai-1.1-R-base:
+    {family: moirai, adapter: moirai:Moirai, env: moirai, tier: B,
+     weights: Salesforce/moirai-1.1-R-base, caps: [forecast, quantiles, multivariate, finetune],
+     loss: vendor, license: cc-by-nc-4.0, max_context: 2048}
+  moirai-2.0-R-small:
+    {family: moirai2, adapter: moirai:Moirai2, env: moirai, tier: A,
+     weights: Salesforce/moirai-2.0-R-small, caps: [forecast, quantiles, multivariate, covariates, finetune],
+     loss: quantile, license: cc-by-nc-4.0, max_context: 2048,
+     notes: "the only public Moirai 2.0 checkpoint"}
+  moirai-moe-1.0-R-base:
+    {family: moirai_moe, adapter: moirai:MoiraiMoE, env: moirai, tier: B,
+     weights: Salesforce/moirai-moe-1.0-R-base, caps: [forecast, quantiles, multivariate, finetune],
+     loss: vendor, license: cc-by-nc-4.0, max_context: 2048}
+
+  # ------------------------------------------------------------------ Granite
+  ttm-r2:
+    {family: ttm, adapter: granite:TTM, env: core, tier: A,
+     weights: ibm-granite/granite-timeseries-ttm-r2, caps: [forecast, finetune],
+     loss: quantile, license: apache-2.0, max_context: 512,
+     notes: "fixed prediction length; mean-only on the small variant"}
+  ttm-r3:
+    {family: ttm, adapter: granite:TTM, env: core, tier: A,
+     weights: ibm-granite/granite-timeseries-ttm-r3, caps: [forecast, finetune],
+     loss: quantile, license: apache-2.0, max_context: 512}
+  flowstate-r1:
+    {family: flowstate, adapter: granite:FlowState, env: core, tier: A,
+     weights: ibm-granite/granite-timeseries-flowstate-r1, caps: [forecast, quantiles, finetune],
+     loss: quantile, license: apache-2.0, max_context: 1536,
+     notes: "SSM encoder + functional-basis decoder (sampling-rate equivariance)"}
+  patchtst-fm-r2:
+    {family: patchtst, adapter: granite:PatchTSTFM, env: core, tier: C,
+     weights: ibm-granite/granite-timeseries-patchtst-fm-r2, caps: [forecast, quantiles, finetune],
+     loss: quantile, license: openmdw-1.0, max_context: 512}
+
+  # ------------------------------------------------------------------ MOMENT
+  moment-1-small:
+    {family: moment, adapter: moment:Moment, env: moment, tier: B,
+     weights: AutonLab/MOMENT-1-small, caps: [forecast, embed, clf_head, anomaly_head, finetune],
+     loss: quantile, license: mit, max_context: 512, max_horizon: 96}
+  moment-1-large:
+    {family: moment, adapter: moment:Moment, env: moment, tier: A,
+     weights: AutonLab/MOMENT-1-large, caps: [forecast, embed, clf_head, anomaly_head, finetune],
+     loss: quantile, license: mit, max_context: 512, max_horizon: 96,
+     notes: "the only family with native classification + anomaly heads"}
+
+  # -------------------------------------------------------------------- Toto
+  toto-open-1.0:
+    {family: toto1, adapter: toto:Toto1, env: toto, tier: B,
+     weights: Datadog/Toto-Open-Base-1.0,
+     caps: [forecast, quantiles, multivariate, finetune],
+     loss: quantile, license: apache-2.0, max_context: 4096}
+  toto-2-22m:
+    {family: toto2, adapter: toto:Toto2, env: toto, tier: A,
+     weights: Datadog/Toto-2.0-22m, caps: [forecast, quantiles, multivariate, finetune],
+     loss: quantile, license: apache-2.0, max_context: 4096}
+  toto-2-313m:
+    {family: toto2, adapter: toto:Toto2, env: toto, tier: B,
+     weights: Datadog/Toto-2.0-313m, caps: [forecast, quantiles, multivariate, finetune],
+     loss: quantile, license: apache-2.0, max_context: 4096}
+
+  # ------------------------------------------------------------------- TiRex
+  tirex:
+    {family: tirex, adapter: tirex:TiRex, env: tirex, tier: A,
+     weights: NX-AI/TiRex, caps: [forecast, quantiles], loss: none,
+     license: "nxai-community (non-commercial)", max_context: 2048}
+  tirex-2:
+    {family: tirex2, adapter: tirex:TiRex2, env: tirex2, tier: B,
+     weights: NX-AI/TiRex-2, caps: [forecast, quantiles, covariates], loss: none,
+     license: apache-2.0, max_context: 2048,
+     notes: "xLSTM triton kernels may need the pure-PyTorch fallback"}
+
+  # --------------------------------------------------- Time-MoE / Sundial / Timer
+  timemoe-50m:
+    {family: timemoe, adapter: timemoe:TimeMoE, env: timemoe, tier: A,
+     weights: Maple728/TimeMoE-50M, caps: [forecast, finetune, paths],
+     loss: token, license: apache-2.0, max_context: 4096, max_horizon: 512}
+  sundial-base-128m:
+    {family: sundial, adapter: sundial:Sundial, env: sundial, tier: A,
+     weights: thuml/sundial-base-128m,
+     caps: [forecast, quantiles, paths, finetune],
+     loss: vendor, license: apache-2.0, max_context: 2880, max_horizon: 720,
+     notes: "continuous patch tokens + TimeFlow head; generate(values) API, no tokenizer; env pins transformers==4.40.1; fine-tune rebuilds the flow head at the training horizon (trunk transfers)"}
+
+  # ------------------------------------------------------------------ Kronos
+  kronos-mini:
+    {family: kronos, adapter: kronos:Kronos, env: kronos, tier: B,
+     weights: NeoQuasar/Kronos-mini, caps: [forecast, panel_in, paths, finetune],
+     loss: vendor, license: mit, max_context: 512,
+     needs: [open, high, low, close, volume]}
+  kronos-small:
+    {family: kronos, adapter: kronos:Kronos, env: kronos, tier: A,
+     weights: NeoQuasar/Kronos-small, caps: [forecast, panel_in, paths, finetune],
+     loss: vendor, license: mit, max_context: 512,
+     needs: [open, high, low, close, volume],
+     notes: "pretrained on K-lines: needs OHLCV panels, emits OHLCV"}
+  kronos-base:
+    {family: kronos, adapter: kronos:Kronos, env: kronos, tier: B,
+     weights: NeoQuasar/Kronos-base, caps: [forecast, panel_in, paths, finetune],
+     loss: vendor, license: mit, max_context: 512,
+     needs: [open, high, low, close, volume]}
+
+  # ------------------------------------------- 2025/2026 releases (open weights)
+  kairos-10m:
+    {family: kairos, adapter: kairos:Kairos, env: vendor, tier: A,
+     weights: mldi-lab/Kairos_10m, caps: [forecast, quantiles, finetune],
+     loss: quantile, license: apache-2.0, max_context: 2048, max_horizon: 64,
+     notes: "encoder-decoder, tokenization decouples heterogeneity from capacity; its
+      supervised forward returns one loss per window, the trainer optimises the mean"}
+  kairos-50m:
+    {family: kairos, adapter: kairos:Kairos, env: vendor, tier: B,
+     weights: mldi-lab/Kairos_50m, caps: [forecast, quantiles, finetune],
+     loss: quantile, license: apache-2.0, max_context: 2048, max_horizon: 64}
+  timestral-5m:
+    {family: timestral, adapter: timestral:Timestral, env: vendor, tier: B,
+     weights: mistralai/Timestral-5M, caps: [forecast, quantiles, multivariate, covariates],
+     loss: quantile, license: "modified-MIT", max_context: 4096, max_horizon: 1024,
+     install: "pip install git+https://github.com/mistralai/timestral.git"}
+  timestral-28m:
+    {family: timestral, adapter: timestral:Timestral, env: vendor, tier: A,
+     weights: mistralai/Timestral-28M, caps: [forecast, quantiles, multivariate, covariates, finetune],
+     loss: quantile, license: "modified-MIT", max_context: 4096, max_horizon: 1024,
+     install: "pip install git+https://github.com/mistralai/timestral.git"}
+  timestral-123m:
+    {family: timestral, adapter: timestral:Timestral, env: vendor, tier: B,
+     weights: mistralai/Timestral-123M, caps: [forecast, quantiles, multivariate, covariates],
+     loss: quantile, license: "modified-MIT", max_context: 4096, max_horizon: 1024}
+  timestral-209m:
+    {family: timestral, adapter: timestral:Timestral, env: vendor, tier: C,
+     weights: mistralai/Timestral-209M, caps: [forecast, quantiles, multivariate, covariates],
+     loss: quantile, license: "modified-MIT", max_context: 4096, max_horizon: 1024}
+  hirondel-7m:
+    {family: hirondel, adapter: hirondel:Hirondel, env: vendor, tier: A,
+     weights: Tncrd/Hirondel-7M, caps: [forecast, quantiles, covariates, finetune],
+     loss: quantile, license: apache-2.0, max_context: 2048, max_horizon: 720,
+     install: 'pip install "hirondel @ git+https://github.com/tncrd/hirondel@v1.1.0"'}
+  t0-alpha:
+    {family: t0, adapter: t0:T0, env: vendor, tier: B,
+     weights: theforecastingcompany/t0-alpha, caps: [forecast, quantiles, covariates, finetune],
+     loss: quantile, license: apache-2.0, max_context: 4096,
+     notes: "torch backend's _single_pass (scale→forward→rescale) is differentiable and returns data-space per-patch quantiles; the head is next-patch AR, so fine-tune supervises the patch after the last context patch. LoRA targets wQKV/wO/mlp",
+     install: 'pip install "tfc-t0[torch]"'}
+  t0-beta:
+    {family: t0, adapter: t0:T0, env: vendor, tier: B,
+     weights: theforecastingcompany/t0-beta, caps: [forecast, quantiles, covariates, finetune],
+     loss: quantile, license: apache-2.0, max_context: 4096,
+     notes: "torch backend's _single_pass (scale→forward→rescale) is differentiable and returns data-space per-patch quantiles; the head is next-patch AR, so fine-tune supervises the patch after the last context patch. LoRA targets wQKV/wO/mlp",
+     install: 'pip install "tfc-t0[torch]"'}
+  t0-gamma:
+    {family: t0, adapter: t0:T0, env: vendor, tier: A,
+     weights: theforecastingcompany/t0-gamma, caps: [forecast, quantiles, covariates, finetune],
+     loss: quantile, license: apache-2.0, max_context: 4096,
+     install: 'pip install "tfc-t0[torch]"'}
+  yug:
+    {family: yug, adapter: yug:Yug, env: vendor, tier: B,
+     weights: birlaailabs/yug, caps: [forecast, quantiles, covariates],
+     loss: quantile, license: "cc-by-nc-4.0 (weights)", max_context: 4096, install: "pip install yug"}
+  aurora:
+    {family: aurora, adapter: aurora:Aurora, env: vendor, tier: B,
+     weights: DecisionIntelligence/Aurora, caps: [forecast, finetune],
+     loss: none, license: mit, max_context: 512,
+     notes: "multimodal (text tower + flow-matching head): own loss family, not pinball"}
+  visiontspp-base:
+    {family: visionts, adapter: visionts:VisionTSpp, env: new, tier: C,
+     weights: Lefei/VisionTSpp, caps: [forecast], loss: none, license: mit, max_context: 2048,
+     notes: "MAE-style patch-projection; weights are .ckpt files needing the upstream code"}

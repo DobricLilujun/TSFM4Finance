@@ -1,0 +1,93 @@
+{
+ "generated": "2026-11-17 19:04:54",
+ "python": "3.11.15",
+ "machine": "ubadmin-Precision-3591",
+ "n": 3,
+ "rows": [
+  {
+   "model": "chronos-bolt-small",
+   "family": "chronos_bolt",
+   "tier": "A",
+   "env": "core",
+   "weights": "amazon/chronos-bolt-small",
+   "license": "apache-2.0",
+   "weights_present": true,
+   "load": "ok",
+   "predict": "ok",
+   "quantiles": "ok",
+   "embed": "skip",
+   "finetune": "ok",
+   "ft_loss_first": 5.397097,
+   "ft_loss_last": 5.140373,
+   "ft_params": 47718016,
+   "classify": "fail",
+   "clf_metrics": {},
+   "anomaly": "skip",
+   "reward": "skip",
+   "seconds": 4.3,
+   "reasons": {
+    "classify": "ValueError: cannot reshape array of size 8160 into shape (16,)"
+   },
+   "machine": "ubadmin-Precision-3591/x86_64",
+   "python": "3.11.15",
+   "device": "cuda"
+  },
+  {
+   "model": "chronos-t5-small",
+   "family": "chronos_t5",
+   "tier": "A",
+   "env": "core",
+   "weights": "amazon/chronos-t5-small",
+   "license": "apache-2.0",
+   "weights_present": true,
+   "load": "ok",
+   "predict": "ok",
+   "quantiles": "ok",
+   "embed": "skip",
+   "finetune": "failed",
+   "ft_loss_first": NaN,
+   "ft_loss_last": NaN,
+   "ft_params": 0,
+   "classify": "fail",
+   "clf_metrics": {},
+   "anomaly": "skip",
+   "reward": "skip",
+   "seconds": 1.5,
+   "reasons": {
+    "finetune": "RuntimeError: Expected all tensors to be on the same device, but got boundaries is on cpu, different from other tensors on cuda:0 (when checking argument in method wrapper_CUDA_Tensor_bucketize)",
+    "classify": "OutOfMemoryError: CUDA out of memory. Tried to allocate 3.77 GiB. GPU 0 has a total capacity of 5.64 GiB of which 1.04 GiB is free. Process 915373 has 163.04 MiB memory in use. Including non-PyTorch memory, this process has 4.40 GiB memory in use. Of the allocated memory 4.18 GiB is allocated by PyT"
+   },
+   "machine": "ubadmin-Precision-3591/x86_64",
+   "python": "3.11.15",
+   "device": "cuda"
+  },
+  {
+   "model": "timesfm-2.5-200m",
+   "family": "timesfm25",
+   "tier": "A",
+   "env": "core",
+   "weights": "google/timesfm-2.5-200m-pytorch",
+   "license": "apache-2.0",
+   "weights_present": true,
+   "load": "ok",
+   "predict": "ok",
+   "quantiles": "ok",
+   "embed": "skip",
+   "finetune": "ok",
+   "ft_loss_first": 0.586454,
+   "ft_loss_last": 0.612078,
+   "ft_params": 231289280,
+   "classify": "fail",
+   "clf_metrics": {},
+   "anomaly": "skip",
+   "reward": "skip",
+   "seconds": 5.2,
+   "reasons": {
+    "classify": "ValueError: cannot reshape array of size 8160 into shape (16,)"
+   },
+   "machine": "ubadmin-Precision-3591/x86_64",
+   "python": "3.11.15",
+   "device": "cuda"
+  }
+ ]
+}

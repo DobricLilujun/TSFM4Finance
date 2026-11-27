@@ -1,0 +1,65 @@
+{
+ "generated": "2026-11-17 19:03:26",
+ "python": "3.11.15",
+ "machine": "ubadmin-Precision-3591",
+ "n": 2,
+ "rows": [
+  {
+   "model": "chronos-bolt-small",
+   "family": "chronos_bolt",
+   "tier": "A",
+   "env": "core",
+   "weights": "amazon/chronos-bolt-small",
+   "license": "apache-2.0",
+   "weights_present": true,
+   "load": "ok",
+   "predict": "ok",
+   "quantiles": "ok",
+   "embed": "skip",
+   "finetune": "ok",
+   "ft_loss_first": 6.62541,
+   "ft_loss_last": 5.106551,
+   "ft_params": 47718016,
+   "classify": "fail",
+   "clf_metrics": {},
+   "anomaly": "skip",
+   "reward": "skip",
+   "seconds": 4.1,
+   "reasons": {
+    "classify": "TypeError: only integer scalar arrays can be converted to a scalar index"
+   },
+   "machine": "ubadmin-Precision-3591/x86_64",
+   "python": "3.11.15",
+   "device": "cuda"
+  },
+  {
+   "model": "chronos-t5-small",
+   "family": "chronos_t5",
+   "tier": "A",
+   "env": "core",
+   "weights": "amazon/chronos-t5-small",
+   "license": "apache-2.0",
+   "weights_present": true,
+   "load": "ok",
+   "predict": "ok",
+   "quantiles": "ok",
+   "embed": "skip",
+   "finetune": "failed",
+   "ft_loss_first": NaN,
+   "ft_loss_last": NaN,
+   "ft_params": 0,
+   "classify": "fail",
+   "clf_metrics": {},
+   "anomaly": "skip",
+   "reward": "skip",
+   "seconds": 0.4,
+   "reasons": {
+    "finetune": "AttributeError: 'ChronosModel' object has no attribute 'input_tokenizer'",
+    "classify": "TypeError: only integer scalar arrays can be converted to a scalar index"
+   },
+   "machine": "ubadmin-Precision-3591/x86_64",
+   "python": "3.11.15",
+   "device": "cuda"
+  }
+ ]
+}

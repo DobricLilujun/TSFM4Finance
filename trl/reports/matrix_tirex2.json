@@ -1,0 +1,36 @@
+{
+ "generated": "2026-11-17 22:03:03",
+ "python": "3.12.13",
+ "machine": "ubadmin-Precision-3591",
+ "n": 1,
+ "rows": [
+  {
+   "model": "tirex-2",
+   "family": "tirex2",
+   "tier": "B",
+   "env": "tirex2",
+   "weights": "NX-AI/TiRex-2",
+   "license": "apache-2.0",
+   "weights_present": true,
+   "load": "fail",
+   "predict": "skip",
+   "quantiles": "skip",
+   "embed": "skip",
+   "finetune": "skip",
+   "ft_loss_first": NaN,
+   "ft_loss_last": NaN,
+   "ft_params": 0,
+   "classify": "skip",
+   "clf_metrics": {},
+   "anomaly": "skip",
+   "reward": "skip",
+   "seconds": 1.2673251628875732,
+   "reasons": {
+    "load": "UnavailableError: tirex-2: UnavailableError: tirex-2: needs either the Triton kernels (GPU sm8.9 below sm10.0) or a CUDA toolchain for the native fallback (nvcc not found)  [install: run it on a Blackwell-class GPU (sm >= 10.0) with CUDA 13 + Triton >= 3.4, or install the full CUDA toolkit (nvcc) fo"
+   },
+   "machine": "ubadmin-Precision-3591/x86_64",
+   "python": "3.12.13",
+   "device": "auto"
+  }
+ ]
+}

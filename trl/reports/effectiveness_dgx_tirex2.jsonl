@@ -1,0 +1,1 @@
+{"model": "tirex-2", "env": "tirex2", "tier": "B", "family": "tirex2", "interpreter": "envs/tirex2/bin/python", "rows": [], "error": "        matC_k); the native fallback needs a working JIT build and failed too (RuntimeError: Ninja is required to load C++ extensions (pip install ninja to get it))"}

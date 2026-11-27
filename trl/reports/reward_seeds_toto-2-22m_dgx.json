@@ -1,0 +1,56 @@
+{
+ "model": "toto-2-22m",
+ "seeds": 3,
+ "runs": [
+  {
+   "status": "failed",
+   "reason": "tsfm_trl.errors.UnavailableError: toto-2-22m: AssertionError: Torch not compiled with CUDA enabled",
+   "seed": 0
+  },
+  {
+   "status": "failed",
+   "reason": "tsfm_trl.errors.UnavailableError: toto-2-22m: AssertionError: Torch not compiled with CUDA enabled",
+   "seed": 1
+  },
+  {
+   "status": "failed",
+   "reason": "tsfm_trl.errors.UnavailableError: toto-2-22m: AssertionError: Torch not compiled with CUDA enabled",
+   "seed": 2
+  }
+ ],
+ "protocol": {
+  "machine": "gpu7",
+  "code_sha": "",
+  "python": "3.11.14",
+  "argv": [
+   "--python",
+   "envs/toto/bin/python",
+   "--model",
+   "toto-2-22m",
+   "--mode",
+   "rft",
+   "--seeds",
+   "0,1,2",
+   "--steps",
+   "48",
+   "--bs",
+   "4",
+   "--budget",
+   "fs64",
+   "--peft",
+   "lora",
+   "--device",
+   "cuda",
+   "--out",
+   "reports/reward_seeds_toto-2-22m_dgx.json",
+   "--fresh"
+  ]
+ },
+ "delta_mean": null,
+ "delta_sd": null,
+ "n_improved": 0,
+ "modes": [
+  "None"
+ ],
+ "verdict": "no seed produced reward quartile means (see reasons)"
+}

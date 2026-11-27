@@ -1,0 +1,61 @@
+{
+ "model": "chronos-t5-small",
+ "seeds": 3,
+ "runs": [
+  {
+   "status": "ok",
+   "mode": "grpo",
+   "steps": 96,
+   "reward_first": 1.61701,
+   "reward_last": 1.86086,
+   "reward_early_mean": 1.75342,
+   "reward_late_mean": 1.8247,
+   "improved": true,
+   "fallbacks": [],
+   "mean_loss": 123.998756,
+   "reason": "",
+   "trainable_parameters": 1081344,
+   "checkpoint": "reports/ft/chronos-t5__grpo__fs64__chronos-t5-small.pt",
+   "seed": 0
+  },
+  {
+   "status": "ok",
+   "mode": "grpo",
+   "steps": 96,
+   "reward_first": 1.51343,
+   "reward_last": 1.88613,
+   "reward_early_mean": 1.80214,
+   "reward_late_mean": 1.86038,
+   "improved": true,
+   "fallbacks": [],
+   "mean_loss": 126.676628,
+   "reason": "",
+   "trainable_parameters": 1081344,
+   "checkpoint": "reports/ft/chronos-t5__grpo__fs64__chronos-t5-small.pt",
+   "seed": 1
+  },
+  {
+   "status": "ok",
+   "mode": "grpo",
+   "steps": 96,
+   "reward_first": 1.81606,
+   "reward_last": 1.67819,
+   "reward_early_mean": 1.71427,
+   "reward_late_mean": 1.76064,
+   "improved": true,
+   "fallbacks": [],
+   "mean_loss": 119.876389,
+   "reason": "",
+   "trainable_parameters": 1081344,
+   "checkpoint": "reports/ft/chronos-t5__grpo__fs64__chronos-t5-small.pt",
+   "seed": 2
+  }
+ ],
+ "delta_mean": 0.05863,
+ "delta_sd": 0.01246,
+ "n_improved": 3,
+ "modes": [
+  "grpo"
+ ],
+ "verdict": "late-minus-early reward +0.0586 \u00b1 0.0125 over 3 seeds; 3/3 seeds improved"
+}

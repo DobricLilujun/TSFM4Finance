@@ -1,0 +1,37 @@
+{
+ "generated": "2026-11-21 04:11:46",
+ "python": "3.11.14",
+ "machine": "gpu7",
+ "n": 1,
+ "rows": [
+  {
+   "model": "chronos-2",
+   "family": "chronos2",
+   "tier": "A",
+   "env": "core",
+   "weights": "amazon/chronos-2",
+   "license": "apache-2.0",
+   "weights_present": true,
+   "load": "ok",
+   "predict": "ok",
+   "quantiles": "ok",
+   "embed": "skip",
+   "finetune": "ok",
+   "ft_loss_first": NaN,
+   "ft_loss_last": NaN,
+   "ft_params": 119477664,
+   "classify": "skip",
+   "clf_metrics": {},
+   "anomaly": "skip",
+   "reward": "ok",
+   "reward_mode": "rft",
+   "reward_early": NaN,
+   "reward_late": NaN,
+   "seconds": 11.7,
+   "reasons": {},
+   "machine": "gpu7/aarch64",
+   "python": "3.11.14",
+   "device": "cuda"
+  }
+ ]
+}

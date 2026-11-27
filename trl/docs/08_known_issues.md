@@ -719,3 +719,21 @@ reading arena directories (`reports/pass4_watson_arena`: RTX A6000, CUDA, 16 mod
 | sedan-gpu1 \| trux-tsubame | A6000 CUDA \| x86 CPU | 8 of 9 families at 0.000% | T5 only |
 
 Two CUDA stacks that share nothing - different GPU architecture, different torch build - reproduce each other exactly. That is the strongest form of the claim available, and it locates the exception in the *decoding path*: `chronos-t5-base` ran only on watson in this pass, so it still has no cross-machine pair.
+
+## A 2 MB documentation page is published but not served
+
+`scripts/build_docs.sh` builds strictly and CI commits the site to `gh-pages`. The benchmark
+page used to be the full per-cell table (3,628 rows -> 2.19 MB of HTML). GitHub Pages returned
+404 for `/effectiveness/` while `/matrix/` and every other page served, and the file itself
+was reachable at `/effectiveness/index.html` - a URL nothing links to, because mkdocs uses
+directory URLs. The page was invisible exactly where the navigation pointed.
+
+`--summary-only` now generates aggregates for the site (headline ranking, provenance,
+interpreter table); the full per-cell table stays in the repo's merged report, which is also
+the readable choice.
+
+Separately, `actions/deploy-pages` never worked on this account: every attempt failed with
+"Failed to create deployment (status: 404) ... Cannot find any run with github.run_id", both
+before and after the repository went public and after recreating Pages with
+`build_type=workflow`. The branch-push route (`git push HEAD:gh-pages`) does publish - the
+same mechanism the TSFM4Finance leaderboard site uses - so the docs workflow does that now.

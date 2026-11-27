@@ -770,6 +770,23 @@ on trux: 11 models ok / 0 failed over 66 series), and the file I re-dispatched w
 duplicate of my own making. Housekeeping rule: a dispatch is a new number or nothing; if a
 name has a log, the answer is already in that log.
 
+## A hand-written file on a remote clone blocks the pull that brings the next job
+
+Both remote harness clones stopped fast-forwarding for the same reason, an hour apart. On trux:
+`reports/pass4_watson_arena/lane_arena.jsonl`, left there as scratch output in an earlier session and
+committed from the laptop afterwards. On watson: `probes/watson/watson_pass5_66.sh`, written by hand
+on the remote box and committed from the laptop afterwards. Git refuses to overwrite an untracked
+file during a merge, so `git pull --ff-only` aborts with "The following untracked working tree files
+would be overwritten" - and a dispatch script that pipes its own output through `tail -4` shows the
+pull line but not the abort, so the job runs on the *old* code and records an old `code_sha`.
+
+The fix is mechanical (move the file aside, pull, compare, delete if identical), and in both cases
+the scratch copy was byte-identical to the committed one. The lesson is about direction of travel:
+artifacts written on a compute box have to come back to the control machine and into git, or they
+turn the compute box into an island whose pull is permanently broken. Anything worth keeping on a
+remote lane belongs in the repo; anything not worth keeping belongs in a directory git does not
+track (`/scratch/<job>/`).
+
 ## `--max-windows` draws the test windows at random, so a different seed is a different measurement
 
 Reproducibility work had ruled out hardware, code drift and data path. What it had not measured

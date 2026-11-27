@@ -1,0 +1,11 @@
+# Merge order for the pass-6 effectiveness table (the merge is newest-wins per cell).
+# trux CPU lanes come before the watson CUDA lanes so the A6000 row is what the table shows
+# for the cells both machines scored; the trux rows still appear as stack re-measurements.
+reports/trux_rep12/lane.jsonl
+reports/trux_rep12/lane_timesfm.jsonl
+reports/pass4_gpu7_full/lane_full66.jsonl
+reports/pass4_watson_arena/lane_arena.jsonl
+reports/pass6_trux_mt/lane_cuda-a.jsonl
+reports/pass6_trux_mt/lane_cuda-b.jsonl
+reports/pass5_watson_66/lane.jsonl
+reports/pass6_watson_mt/lane.jsonl

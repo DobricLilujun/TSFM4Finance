@@ -239,13 +239,13 @@ where the model beat naive:
   cross_machine_check.py`), and 254 repeated cell comparisons on one machine - pass-3 lanes
   at code sha `1d2f3ae` re-scored at `28fd7e7` - agree to within 0.143%. That is the first
   time this benchmark has had a consistency check rather than an assumption.
-* **Cross-machine, same data path: bit-exact for eight of nine families.** The 12-series
-  GB10 lane re-run against a trux lane (gpu7 on CUDA, trux on CPU, both reading arena
-  directories) gives 216 shared cells: naive, seasonal_naive, arima, chronos-2,
-  chronos-bolt-small/-base, timesfm-2.5-200m and ttm-r2 agree to 0.000% on all 24 cells each;
-  chronos-t5-small - the only generative decoding path in the set - sits at 3.48% median,
-  13.4% max. See
-  docs/08 for the table and the reason.
+* **Cross-machine, same data path: bit-exact for eight of nine families.** Three machines
+  (GB10 CUDA, RTX A6000 CUDA, x86 CPU) over 216 shared cells of the 12-series replication
+  stratum: naive, seasonal_naive, arima, chronos-2, chronos-bolt-small/-base,
+  timesfm-2.5-200m and ttm-r2 agree to 0.000% on all 24 cells each, on every pairing;
+  chronos-t5-small - the only generative decoding path in the set - sits at 3.5-5.4%
+  median, 13.4% max. Two CUDA stacks that share nothing reproduce each other exactly, so
+  the variance tracks the decoding path, not the hardware. See docs/08 for the tables.
 * **Scaled metrics are only comparable within a data path.** The 12-series GB10 overlap
   looked like 212 machine disagreements: MASE off by 15%-123% while RMSE agreed to the
   eighth decimal. Cause: watson's pass-3 lane read exported CSVs (so `SeriesDataset`

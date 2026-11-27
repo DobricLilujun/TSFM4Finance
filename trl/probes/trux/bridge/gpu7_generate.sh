@@ -33,7 +33,11 @@ import re
 left = sorted(set(re.findall(r"@@[A-Z_]+@@", text)))
 if left:
     sys.exit(f"FATAL: template still contains {left}; the generator does not fill them")
-pathlib.Path(out).write_text(text)
+import time
+stamp = f"# GENERATED {time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())} by gpu7_generate.sh from {pathlib.Path(tpl).name}\n"
+lines = text.splitlines(keepends=True)
+lines.insert(1, stamp)          # right after the shebang, where dispatch looks for it
+pathlib.Path(out).write_text("".join(lines))
 print(f"generated {out}: {len(series.split())} series, endpoints from bridge.env")
 PY
 bash -n "$out" && echo "syntax ok"

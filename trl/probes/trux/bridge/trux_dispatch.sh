@@ -28,6 +28,19 @@ name="job_${n}.sh"
 if [ -f "$BRIDGE/outbox/$name.log" ]; then
   echo "FATAL: $name.log already exists - the worker would skip this job" >&2; exit 5
 fi
+# Queueing a file that was generated in an earlier attempt is how job_021 ended up running the
+# pre-fix template: the generator had aborted on a malformed bridge.env under set -e, its previous
+# output was still sitting in /tmp, and dispatch happily shipped it. A generated job carries a
+# stamp line; if it is missing or stale, what is being queued is not what the template says.
+if ! head -2 "$job" | grep -q "^# GENERATED "; then
+  echo "FATAL: $job carries no GENERATED stamp - run gpu7_generate.sh, do not queue a hand-kept copy" >&2
+  exit 7
+fi
+gen_age=$(( $(date +%s) - $(sed -n '2s/^# GENERATED \([^ ]*\).*/\1/p' "$job" | xargs -I{} date -d {} +%s) ))
+if [ "$gen_age" -gt 1800 ]; then
+  echo "FATAL: $job was generated ${gen_age}s ago; regenerate it - the template may have changed since" >&2
+  exit 7
+fi
 install -m 0644 "$job" "$BRIDGE/inbox/$name"
 echo "queued $name -> $BRIDGE/inbox/"
 [ "$wait" = 0 ] && exit 0

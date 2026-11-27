@@ -6,6 +6,7 @@ passed on an ungenerated file), job_014 because TRUX/TRUX_SSH/SRC were read from
 exists on trux and nowhere on the worker. Both are the same rule - one file crosses the bridge - and
 both should fail in a test rather than on a far machine at 03:00.
 """
+import os
 import subprocess
 from pathlib import Path
 
@@ -107,3 +108,33 @@ def test_the_shipped_templates_generate_clean(tmp_path):
             # the newer jobs pull the corpus with the worker's own credentials; that value must
             # arrive filled, because no bridge.env exists on the worker
             assert 'ssh -o BatchMode=yes' in job, f"{tpl.name}: worker-side ssh not inlined"
+
+
+def test_dispatch_refuses_a_file_that_was_never_generated(tmp_path):
+    """The generator aborting and the old output surviving in /tmp is how a superseded template got
+    dispatched once (job_021). Dispatch reads the stamp the generator writes."""
+    disp = REPO / "probes" / "trux" / "bridge" / "trux_dispatch.sh"
+    bridge = tmp_path / "bridge"
+    (bridge / "inbox").mkdir(parents=True)
+    (bridge / "outbox").mkdir()
+    env = tmp_path / "disp.sh"
+    env.write_text(f'BRIDGE="{bridge}"\n')
+    stale = tmp_path / "job_old.sh"
+    stale.write_text("#!/usr/bin/env bash\necho hi\n")
+    r = subprocess.run(["bash", str(disp), str(stale)], capture_output=True, text=True,
+                       env={**os.environ, "BRIDGE": str(bridge)})
+    assert r.returncode == 7 and "no GENERATED stamp" in r.stderr, r.stderr
+
+
+def test_dispatch_refuses_a_stale_generated_file(tmp_path):
+    disp = REPO / "probes" / "trux" / "bridge" / "trux_dispatch.sh"
+    bridge = tmp_path / "bridge"
+    (bridge / "inbox").mkdir(parents=True)
+    (bridge / "outbox").mkdir()
+    old = tmp_path / "job_old.sh"
+    old.write_text("#!/usr/bin/env bash\n"
+                   "# GENERATED 2020-01-01T00:00:00Z by gpu7_generate.sh from x.sh\n"
+                   "echo hi\n")
+    r = subprocess.run(["bash", str(disp), str(old)], capture_output=True, text=True,
+                       env={**os.environ, "BRIDGE": str(bridge)})
+    assert r.returncode == 7 and "generated" in r.stderr, r.stderr

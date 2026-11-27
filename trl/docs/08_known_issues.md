@@ -770,6 +770,61 @@ on trux: 11 models ok / 0 failed over 66 series), and the file I re-dispatched w
 duplicate of my own making. Housekeeping rule: a dispatch is a new number or nothing; if a
 name has a log, the answer is already in that log.
 
+## The job that ran is not the job you wrote: five failures, one bridge
+
+A lane for five model families on the Spark worker took six dispatches and six diagnoses to start.
+Nothing in it was exotic; each layer hid the previous one.
+
+**1. An unquoted value in the endpoint file silently truncated a command.** `bridge.env` carried
+`TRUX_SSH=ssh -i /raid/yewei/.ssh/id_ed25519_gm_transfer -o StrictHostKeyChecking=accept-new`.
+Sourcing that line assigns `TRUX_SSH="ssh"` and then tries to *run* `-i /raid/... ` as a command:
+
+```
+bridge.env: line 12: -o: command not found
+```
+
+The variable was non-empty, so every "is it set" check passed. The key had quietly disappeared.
+
+**2. The generator died, and its previous output was still in `/tmp`.** `gpu7_generate.sh` runs
+under `set -e`, so the sourcing error above killed it before it wrote anything. The next command in
+the same shell was `trux_dispatch.sh /tmp/job_extra5.sh` - and that file existed, from the previous
+attempt, generated from the *previous* template. Dispatch queued it. The job that ran printed a
+corpus line the current template no longer contains, which is the only reason the mismatch was
+detectable at all.
+
+**3. A key path from the control plane sat in the worker's ssh config.** The rsync then fell back to
+default ssh, and gpu7's `~/.ssh/config` names `IdentityFile /raid/yewei/.ssh/...` - a path that
+exists only on trux:
+
+```
+Warning: Identity file /raid/yewei/.ssh/id_ed25519_gm_transfer not accessible: No such file or directory.
+Permission denied, please try again.
+```
+
+Same symptom in job_015 and job_021, different cause each time (wrong variable in one, truncated
+variable in the other).
+
+**4. The corpus pull was unconditional.** All 66 arena directories were already on gpu7 (`missing=0
+of 66` in a diagnostic job), yet the template rsynced every one of them before scoring. A two-hour
+lane died in its first second over bytes that did not need moving.
+
+**5. Two diagnostics were wrong before one was right.** `pgrep -fa inbox` reported "two pollers" on
+gpu7; the second match was an rsync child whose command line contains the word `inbox`. A job that
+grepped for `TRUX_KEY=` in the templates found nothing, because the template uses `$TRUX_SSH`, not a
+key variable. The diagnostic that finally settled it printed the *generated* file's own header and
+the corpus line the job had emitted - i.e. it compared the artifact to its source instead of
+describing the symptom.
+
+What the bridge does now, in order: the generator fills every placeholder (series list, control-plane
+endpoints, and `GPU_SSH`, the credential the *worker* holds) and refuses to emit a file containing
+any remaining `@@TOKEN@@`; it stamps the output with a generation timestamp; `trux_dispatch.sh`
+refuses a file with no stamp or a stamp older than 30 minutes; and the job itself refuses to score on
+a machine whose hostname is not the Spark box, because every row it writes will claim that machine as
+its origin. Existing corpus directories are skipped instead of re-pulled.
+
+The general shape: a pipeline with more than one stage must refuse to consume the previous stage's
+leftovers. A filename in `/tmp` is not a proof of provenance.
+
 ## A hand-written file on a remote clone blocks the pull that brings the next job
 
 Both remote harness clones stopped fast-forwarding for the same reason, an hour apart. On trux:

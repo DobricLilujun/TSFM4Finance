@@ -752,6 +752,42 @@ on trux: 11 models ok / 0 failed over 66 series), and the file I re-dispatched w
 duplicate of my own making. Housekeeping rule: a dispatch is a new number or nothing; if a
 name has a log, the answer is already in that log.
 
+## `--max-windows` draws the test windows at random, so a different seed is a different measurement
+
+Reproducibility work had ruled out hardware, code drift and data path. What it had not measured
+was the sampling design. `windows()` strides the test span and, when `max_windows` caps the
+count, picks the subset **uniformly at random** (same seed, same windows — which is exactly why
+the fleet never noticed: every model on every machine used seed 0 and therefore the *same*
+windows, so cross-machine comparisons stayed bit-exact).
+
+What seed 0 vs seed 1 means on four arena series (x86 CPU, identical bytes, identical code):
+
+| windows/cell | naive's own MASE, seed-to-seed | chronos-bolt MASE | paired ratio model/naive |
+|---:|---|---|---|
+| 8 (fleet default) | median **55%**, max 100% | median 54%, max 124% | median **12%**, max 25% |
+| 32 | median 21%, max 57% | median 13%, max 69% | median **7%**, max 17% |
+
+Read the first column again: the *naive baseline's own MASE* doubles between seeds. A per-cell
+MASE at 8 windows is a one-digit estimate, not a measurement.
+
+What survives: paired comparisons inside one seed (every model sees the same windows), and
+aggregate shares over hundreds of cells — the leaderboard's "41% vs 40%" is a count across
+~1,400 cells, so its noise is far smaller than any single cell's. What does not survive: calling
+one cell a win or a loss when its ratio sits within ~12% of parity, and any per-cell number
+quoted without its window count.
+
+Two fixes, both about not letting the merge machinery blur the sample:
+
+* `proto()` — the merge's protocol signature — now carries `n_windows` and the lane `seed`, so a
+  32-window row cannot silently supersede an 8-window row; it becomes a supersession whose gap
+  measures the protocol change.
+* `cross_machine_check.py` refuses to compare rows whose `n_windows` differ, as it already
+  refuses rows whose `data_hash` differ.
+
+The ranking table prints `win` per model and states the paired-ratio noise next to itself. For
+any pass whose per-cell numbers will be quoted individually, raise `--max-windows` to 32+ and
+budget roughly double the wall time.
+
 ## A partitioned corpus makes a merged report look cross-checked when it is not
 
 The multi-machine fleet was designed to avoid duplicate work: watson scored 35 series,

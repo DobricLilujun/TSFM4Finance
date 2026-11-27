@@ -124,6 +124,15 @@ tsfm-trl doctor --all-envs --tasks load,predict,quantiles \
 `predict` is the benchmark's inference half: every row that is ✅ there can be dropped
 into `forecast_eval` without further adaptation work.
 
+### Sampling noise (measured 2026-11-27, four arena series, same bytes, same code)
+
+`--max-windows` draws the test windows **uniformly at random**; same seed, same windows. At the
+fleet default of 8 windows per cell, seed 0 vs seed 1 moves naive's own MASE by ~55% median
+(max 100%), a model's MASE by ~54%, and the paired model/naive ratio by ~12% (max 25%). At 32
+windows: ~21%, ~13%, ~7%. So aggregate shares over hundreds of cells are trustworthy, a single
+cell within ~12% of parity is not a win or a loss, and `n_windows` + lane `seed` are part of the
+merge protocol signature (`proto`) and a hard precondition in `cross_machine_check.py`.
+
 ## Reporting rules (what goes in a table, what does not)
 
 1. **Report the metric family the model can serve.** A point-only head (TTM r2/r3) has no

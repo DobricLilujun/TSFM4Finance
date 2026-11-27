@@ -226,7 +226,14 @@ def proto(row: dict) -> tuple:
             pr.get("code_sha"), str(pr.get("torch")),
             # the data path is part of the protocol: the same forecast on a CSV and on the
             # arena directory of the same series differs by the MASE denominator alone
-            row.get("data_kind"), row.get("data_hash"))
+            row.get("data_kind"), row.get("data_hash"),
+            # the window sample is part of the protocol too. max_windows subsamples the test
+            # span uniformly at random (same seed, same windows), so seed 0 vs seed 1 is a
+            # different sample of the same series, not a re-measurement: naive's own MASE
+            # moves ~51% median at 8 windows and ~19% at 32 (measured 2026-11-27). A row
+            # scored on 32 windows silently replacing one scored on 8 would look like the
+            # model got worse.
+            row.get("n_windows"), pr.get("seed"))
 
 
 def stamp_rows(rows: list, key: str) -> list:
@@ -277,7 +284,8 @@ def report(args) -> int:
             prov = {"interpreter": rec.get("interpreter") or "",
                     "device": rec.get("device") or "?", "torch": rec.get("torch"),
                     "machine": fm.get("machine", "?"), "code_sha": fm.get("code_sha"),
-                    "started": fm.get("started")}
+                    "started": fm.get("started"), "seed": fm.get("seed"),
+                    "max_windows": fm.get("max_windows")}
             for r in rec.get("rows", []):
                 r.setdefault("model_key", model)   # registry key, not the adapter's family key
                 r.setdefault("dataset", rec.get("dataset"))  # gaps are computed on merged rows
@@ -418,10 +426,12 @@ def report(args) -> int:
     per_model: dict = {}
     for (m, srs, sp, h), r in cells.items():
         d = per_model.setdefault(m, {"n": 0, "beat": 0, "cmp": 0, "ratio": [], "mase": [],
-                                     "rmse": [], "ctx": set(), "none": 0})
+                                     "rmse": [], "ctx": set(), "win": [], "none": 0})
         d["n"] += 1
         if isinstance(r.get("ctx"), (int, float)):
             d["ctx"].add(int(r["ctx"]))
+        if isinstance(r.get("n_windows"), int):
+            d["win"].append(r["n_windows"])
         mv = r.get("mase")
         if isinstance(mv, (int, float)) and mv == mv:
             d["mase"].append(float(mv))
@@ -447,19 +457,27 @@ def report(args) -> int:
             "column is the median of per-cell `mase_model / mase_naive`, which is comparable "
             "across data paths (same bytes, same split, same denominator on both sides); raw "
             "median MASE is scoped to this pass. `ctx` prints the context lengths actually "
-            "used - different ctx is a different measurement. `no measurement` counts cells "
-            "whose windows were all non-finite or unscored; those never enter a median.", "",
-            "| model_key | cells | beat naive | med MASE/naive | median MASE | median RMSE | ctx | no measurement |",
-            "|---|--:|--:|--:|--:|--:|---|--:|"]
+            "used - different ctx is a different measurement. `win` is the number of windows "
+            "sampled per cell, and `--max-windows` draws them **uniformly at random** from the "
+            "test span, so the window count is part of the measurement, not a knob: switching "
+            "seed at 8 windows moves naive's own MASE ~55% median (max 100%) and the paired "
+            "model/naive ratio ~12% (max 25%); at 32 windows those fall to ~21% and ~7% "
+            "(measured 2026-11-27 on four arena series, same bytes, same code). A single cell "
+            "within ~12% of parity is neither a win nor a loss - read aggregate shares, not "
+            "cells. `no measurement` counts cells whose windows were all non-finite or "
+            "unscored; those never enter a median.", "",
+            "| model_key | cells | beat naive | med MASE/naive | median MASE | median RMSE | ctx | win | no measurement |",
+            "|---|--:|--:|--:|--:|--:|---|--:|--:|"]
     def _num(vals):
         # an empty list is "no measurement", not a zero and not a nan to be averaged later
         return f"{_median(vals):.3g}" if vals else "—"
     for m, d in ranked:
         share = 100.0 * d["beat"] / d["cmp"] if d["cmp"] else 0.0
         ctxs = ", ".join(str(c) for c in sorted(d["ctx"])) or "—"
+        wins = int(_median(d["win"])) if d["win"] else 0
         out.append(f"| `{m}` | {d['n']} | {share:.0f}% ({d['beat']}/{d['cmp']}) "
                    f"| {_num(d['ratio'])} | {_num(d['mase'])} | {_num(d['rmse'])} "
-                   f"| {ctxs} | {d['none']} |")
+                   f"| {ctxs} | {wins} | {d['none']} |")
     out += [""]
     if getattr(args, "summary_only", False):
         out += ["_Per-cell tables are omitted (`--summary-only`): a 3,600-row page is ~2 MB "

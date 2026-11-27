@@ -137,6 +137,7 @@ def main() -> int:
     diffs: list[float] = []
     offenders: list[tuple] = []
     data_gap: list[tuple] = []
+    sample_gap: list[tuple] = []
     pairs: dict[str, int] = {}
     for k, by_machine in sorted(overlap.items()):
         ms = sorted(by_machine)
@@ -148,6 +149,14 @@ def main() -> int:
                 pairs[pair] = pairs.get(pair, 0) + 1
                 va, vb = x.get(a.metric), y.get(a.metric)
                 if not isinstance(va, (int, float)) or not isinstance(vb, (int, float)):
+                    continue
+                w1, w2 = x.get("n_windows"), y.get("n_windows")
+                if w1 and w2 and w1 != w2:
+                    # max_windows subsamples the test span at random, so a 8-window row and a
+                    # 32-window row are different samples of the same series: naive's own MASE
+                    # moves ~51% median between seeds at 8 windows. Comparing them as a machine
+                    # disagreement would blame the hardware for the sampling design.
+                    sample_gap.append((k, pair, va, vb, w1, w2))
                     continue
                 h1, h2 = x.get("data_hash"), y.get("data_hash")
                 if not (h1 and h2) and len(kind_of[label_a]) > 0 and kind_of[label_a] != kind_of[label_b]:
@@ -185,6 +194,14 @@ def main() -> int:
             print(f"  {k[0]:18s} {k[1]:24s} span={k[2]} h{k[3]:<4} {pair}")
             print(f"    {a.metric} {va!r} vs {vb!r}  ({100*rel:.2f}%)   {row}")
         return 1
+    if sample_gap:
+        print(f"\n{len(sample_gap)} cell(s) not comparable: same cell key, different window "
+              f"sample (n_windows). A different --max-windows/--seed is a different protocol, "
+              f"not a hardware difference.")
+        for k, pair, va, vb, w1, w2 in sample_gap[:6]:
+            print(f"  {k[0]:18s} {k[1]:24s} h{k[3]:<4} {pair:24s} {a.metric} {va:.4f} vs {vb:.4f}"
+                  f"   n_windows {w1} != {w2}")
+
     if data_gap:
         # exit 2, not 1: nothing here proves the machines disagree. It proves the two lanes
         # did not read the same bytes, which makes the comparison uninterpretable until one

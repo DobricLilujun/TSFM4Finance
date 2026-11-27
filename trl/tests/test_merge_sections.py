@@ -247,3 +247,35 @@ def test_summary_only_keeps_aggregates_and_drops_per_cell_tables(tmp_path):
     assert "## Which interpreter produced which row" in text
     assert "· horizon 21" not in text, "per-cell tables must be absent in summary mode"
     assert "--summary-only" in text, "the page must say what it left out and why"
+
+
+def test_the_window_sample_is_part_of_the_protocol_signature():
+    """`--max-windows` subsamples the test span at random (same seed, same windows), so two
+    rows of the same cell with different n_windows are different measurements. Without this
+    in the signature, a 32-window re-run silently replaces an 8-window row and the merge
+    report calls the difference run variance."""
+    mod = _load()
+    base = {"ctx": 256, "ctx_note": "", "data_kind": "arena_dir", "data_hash": "abc123",
+            "n_windows": 8, "_prov": {"device": "cuda", "code_sha": "aaaaaaa",
+                                      "torch": "2.7.1", "seed": 0}}
+    r1 = dict(base)
+    r2 = dict(base, n_windows=32)
+    r3 = dict(base, _prov=dict(base["_prov"], seed=1))
+    assert mod.proto(r1) != mod.proto(r2), "8 windows vs 32 windows is a different protocol"
+    assert mod.proto(r1) != mod.proto(r3), "a different seed is a different window sample"
+    assert mod.proto(r1) == mod.proto(dict(base)), "same protocol must still compare equal"
+
+
+def test_the_ranking_publishes_the_window_sample(tmp_path):
+    """`--max-windows` subsamples the test span uniformly at random, so the window count is part
+    of what a row measured. A ranking that hides it hides the sampling design: at 8 windows the
+    paired model/naive ratio moves ~12% median between seeds, at 32 windows ~7%."""
+    lane = tmp_path / "lane.jsonl"
+    lane.write_text(json.dumps(_meta("m1")) + "\n"
+                    + json.dumps(_rec("chronos-bolt-small", "s1", "ok")) + "\n"
+                    + json.dumps(_rec("naive", "s1", "ok")) + "\n")
+    md = tmp_path / "r.md"
+    _report([lane], md, summary_only=True)
+    out = md.read_text()
+    assert "| win |" in out, out[-500:]
+    assert "max-windows" in out, "the sampling caveat must sit next to the table"

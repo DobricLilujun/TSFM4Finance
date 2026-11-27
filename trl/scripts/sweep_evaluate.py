@@ -83,8 +83,9 @@ def sweep(args) -> int:
     # A published table has to say which machine and which code produced each row;
     # without this line the same model measured in two venvs is one indistinguishable
     # number. Written once, as the first record of the file.
-    if fh.tell() == 0:
-        fh.write(json.dumps({"meta": {
+    # Built whether or not it gets written: a resumed lane keeps its original meta line,
+    # but every row it appends still names the machine and commit that produced it.
+    lane_meta = {
             "started": time.strftime("%Y-%m-%d %H:%M:%S"), "machine": socket.gethostname(),
             "code_sha": _sha(), "python": sys.version.split()[0],
             "series": [os.path.basename(x) for x in series],
@@ -99,7 +100,9 @@ def sweep(args) -> int:
             "horizons": [int(h) for h in args.horizons.split(",")],
             "spans": args.spans, "max_windows": int(args.max_windows),
             "ctx": int(args.ctx), "batch": int(args.batch), "seed": int(args.seed),
-            "device": args.device}}, default=float) + "\n")
+            "device": args.device}
+    if fh.tell() == 0:
+        fh.write(json.dumps({"meta": lane_meta}, default=float) + "\n")
         fh.flush()
     # Does this env's torch even see a GPU? Recording it turns "device auto" into a
     # claim: a family env built from a lock that resolved a CPU wheel silently runs the
@@ -205,7 +208,7 @@ def sweep(args) -> int:
         # which venv produced which row.
         rec = {"model": k, "env": spec.env, "tier": spec.tier, "family": spec.family,
                "interpreter": py, "device": args.device, "torch": tt,
-               "rows": stamp_rows(rows, k), "error": err,
+               "rows": stamp_rows(rows, k, lane_meta), "error": err,
                "series_errors": series_err}
         fh.write(json.dumps(rec, default=float) + "\n")
         fh.flush()
@@ -235,7 +238,7 @@ def proto(row: dict) -> tuple:
             pr.get("seed"))
 
 
-def stamp_rows(rows: list, key: str) -> list:
+def stamp_rows(rows: list, key: str, lane: dict | None = None) -> list:
     """Put the registry key on every row.
 
     An adapter writes its *family* key into a row's `model` field, so `chronos-bolt-small`
@@ -248,6 +251,15 @@ def stamp_rows(rows: list, key: str) -> list:
     for r in rows:
         if isinstance(r, dict):
             r.setdefault("model_key", key)
+    # Machine and commit belong on the row, not only on the lane's meta line. Lanes get
+    # filtered, split, and merged by hand; a row that has lost its header is a number with
+    # no origin, and "which machine ran this" is the first question a reviewer asks.
+    if lane:
+        for r in rows:
+            if isinstance(r, dict):
+                for f in ("machine", "code_sha"):
+                    if lane.get(f) is not None:
+                        r.setdefault(f, lane[f])
     return rows
 
 

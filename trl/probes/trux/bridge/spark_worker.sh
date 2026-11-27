@@ -2,17 +2,23 @@
 # Run this ON THE SPARK (gpu7). It is the only side that can dial trux, so the worker
 # pulls its command from trux and pushes results back. Nothing listens on the Spark.
 #
-#   BRIDGE_SSH='ssh -i ~/.ssh/id_ed25519_gm_transfer' BRIDGE_USER=yewei \
-#   BRIDGE_HOST=trux-tsubame.uni.lux BRIDGE_DIR=/raid/yewei/spark_bridge \
+#   BRIDGE_SSH='ssh -i ~/.ssh/id_ed25519_bridge' BRIDGE_USER=you \
+#   BRIDGE_HOST=control.example.edu BRIDGE_DIR=/scratch/you/spark_bridge \
 #   nohup ./spark_worker.sh > ~/spark_worker.log 2>&1 &
 #
 # One job at a time, sequence-numbered, with a heartbeat that carries this machine's
 # environment — cross-machine rows are only meaningful with that context attached.
+# Machine-specific endpoints (host, user, path, key) come from an untracked sibling
+# file so this public tree carries no lab hostnames or internal IPs; the example
+# next to it lists the variables. Fail fast if the file is missing.
+_BRIDGE_DIR="$(cd "$(dirname "$0")" && pwd)"
+[ -f "$_BRIDGE_DIR/bridge.env" ] && . "$_BRIDGE_DIR/bridge.env"
+
 set -u
-BRIDGE_SSH=${BRIDGE_SSH:-"ssh -i $HOME/.ssh/id_ed25519_gm_transfer -o StrictHostKeyChecking=accept-new"}
-BRIDGE_USER=${BRIDGE_USER:-yewei}
-BRIDGE_HOST=${BRIDGE_HOST:-trux-tsubame.uni.lux}
-BRIDGE_DIR=${BRIDGE_DIR:-/raid/yewei/spark_bridge}
+BRIDGE_SSH=${BRIDGE_SSH:?BRIDGE_SSH unset - copy bridge.env.example to bridge.env}
+BRIDGE_USER=${BRIDGE_USER:?BRIDGE_USER unset - copy bridge.env.example to bridge.env}
+BRIDGE_HOST=${BRIDGE_HOST:?BRIDGE_HOST unset - copy bridge.env.example to bridge.env}
+BRIDGE_DIR=${BRIDGE_DIR:?BRIDGE_DIR unset - copy bridge.env.example to bridge.env}
 POLL=${POLL:-60}
 TRANSPORT=${TRANSPORT:-remote}
 LOCAL=${LOCAL:-$HOME/spark_bridge}

@@ -28,3 +28,6 @@ docs/effectiveness.md
 # never the directory: reports/*/csv/MANIFEST.json records what was scored and must stay
 # tracked, and a gitignored *directory* pattern would silently drop it too.
 reports/**/*.csv
+
+# machine endpoints for the bridge probes (host, user, path, key) - never tracked
+probes/trux/bridge/bridge.env

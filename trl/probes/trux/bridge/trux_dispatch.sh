@@ -1,8 +1,12 @@
 #!/usr/bin/env bash
 # trux side: enqueue a job for the Spark worker, optionally wait for its log.
 #   trux_dispatch.sh job.sh [--wait] [--timeout 5400]
+# endpoints (bridge dir, hosts, keys) live in an untracked sibling file; see
+# bridge.env.example. Public tree carries no lab hostnames or scratch paths.
+_BRIDGE_DIR="$(cd "$(dirname "$0")" && pwd)"
+[ -f "$_BRIDGE_DIR/bridge.env" ] && . "$_BRIDGE_DIR/bridge.env"
 set -u
-BRIDGE=${BRIDGE:-/raid/yewei/spark_bridge}
+BRIDGE=${BRIDGE:?BRIDGE unset - copy bridge.env.example to bridge.env}
 job=${1:?job script required}; shift || true
 wait=0; timeout_s=5400
 while [ $# -gt 0 ]; do case $1 in --wait) wait=1;; --timeout) timeout_s=$2; shift;; esac; shift; done

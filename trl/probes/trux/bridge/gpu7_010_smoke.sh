@@ -11,6 +11,12 @@
 #
 # Protocol is pass-3's exactly (ctx 256, horizons 21/63, 8 windows, seed 0) so these
 # cells join the existing merge key instead of sitting beside it.
+# Machine-specific endpoints (host, user, path, key) come from an untracked sibling
+# file so this public tree carries no lab hostnames or internal IPs; the example
+# next to it lists the variables. Fail fast if the file is missing.
+_BRIDGE_DIR="$(cd "$(dirname "$0")" && pwd)"
+[ -f "$_BRIDGE_DIR/bridge.env" ] && . "$_BRIDGE_DIR/bridge.env"
+
 set -euo pipefail
 ENVROOT=${ENVROOT:-$HOME/envs/tsfm-trl}
 REPO=${REPO:-}
@@ -19,9 +25,9 @@ for c in "$HOME/TSFM4Finance-trl/trl" "$HOME/TSFM4Finance-trl" "$HOME/tsfm-trl";
 done
 [ -n "$REPO" ] || { echo "FATAL: no harness clone (looked for scripts/sweep_evaluate.py under \$HOME)"; exit 6; }
 
-TRUX=${TRUX:-yewei@trux-tsubame.uni.lux}
-TRUX_SSH=${TRUX_SSH:-"ssh -i $HOME/.ssh/id_ed25519_gm_transfer -o StrictHostKeyChecking=accept-new"}
-TRUX_CSV=${TRUX_CSV:-/raid/yewei/projects_yewei/TSFM4Finance-trl/trl/reports/pass3_trux/csv}
+TRUX=${TRUX:?TRUX unset - copy bridge.env.example to bridge.env}
+TRUX_SSH=${TRUX_SSH:?TRUX_SSH unset - copy bridge.env.example to bridge.env}
+TRUX_CSV=${TRUX_CSV:?TRUX_CSV unset - copy bridge.env.example to bridge.env}
 CSVROOT=${CSVROOT:-$HOME/spark_bridge/csv}
 OUT=${OUT:-$HOME/spark_bridge/outbox/results/gpu7_smoke.jsonl}
 # names, not a directory copy: a smoke test should fail for the real reason instead of

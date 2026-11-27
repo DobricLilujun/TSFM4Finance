@@ -1,9 +1,9 @@
-# trux probes (yewei@trux-tsubame.uni.lux)
+# trux probes (the control plane: `ssh trux`, user/path in `bridge.env`)
 
 Things established on this machine, which the `tsfm-trl` benchmark run still has to
 absorb. Everything here was produced without the harness, because the harness code is on
-another machine and **trux has no route to it** (laptop unreachable; DGX `10.6.32.13`
-unreachable; `watson.uni.lux:22` times out from trux — the watson path only exists from
+another machine and **trux has no route to it** (the laptop is unreachable from it,
+the DGX Spark's private address has no route, and the cluster's login node times out on port 22 from trux — the watson path only exists from
 the laptop). The repo now has a remote, so the code can arrive by git:
 
 ```bash
@@ -195,7 +195,7 @@ soon as a real pass produces them.
 
 ## Spark (DGX Spark / gpu7) as a dial-in worker
 
-The Spark cannot be reached *from* trux (10.6.32.13:22 has no route, re-checked twice),
+The Spark cannot be reached *from* trux (its private address has no route on port 22, re-checked twice),
 but it can ssh *into* trux with the dedicated transfer key. So trux is the control plane
 and the Spark is a worker that dials in: `bridge/spark_worker.sh` polls, pulls the next
 queued job, runs it, pushes the log back, and posts a heartbeat carrying its own
@@ -209,8 +209,9 @@ gpu7:~/spark_bridge/                             <- worker's local mirror
 Start the worker **once on the Spark** (from the laptop session, which can reach gpu7):
 
 ```bash
-scp -i ~/.ssh/id_ed25519_gm_transfer \
-    yewei@trux-tsubame.uni.lux:/raid/yewei/projects_yewei/trux_probes/bridge/spark_worker.sh \
+# endpoints come from probes/trux/bridge/bridge.env (see bridge.env.example)
+scp -i ~/.ssh/id_ed25519_bridge \
+    "$TRUX":<repo>/probes/trux/bridge/spark_worker.sh \
     ~/spark_worker.sh
 chmod +x ~/spark_worker.sh
 REPO=$HOME/tsfm-trl PY=$HOME/envs/tsfm-trl/core/bin/python \

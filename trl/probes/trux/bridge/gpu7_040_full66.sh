@@ -22,6 +22,12 @@
 #   pathlib.Path("/tmp/job_full66.sh").write_text(job.replace("@@SERIES@@", ser))
 #   PY
 #   probes/trux/bridge/trux_dispatch.sh /tmp/job_full66.sh
+# Machine-specific endpoints (host, user, path, key) come from an untracked sibling
+# file so this public tree carries no lab hostnames or internal IPs; the example
+# next to it lists the variables. Fail fast if the file is missing.
+_BRIDGE_DIR="$(cd "$(dirname "$0")" && pwd)"
+[ -f "$_BRIDGE_DIR/bridge.env" ] && . "$_BRIDGE_DIR/bridge.env"
+
 set -euo pipefail
 ENVROOT=${ENVROOT:-$HOME/envs/tsfm-trl}
 REPO=${REPO:-}
@@ -32,9 +38,9 @@ done
 timeout 200 git -C "$REPO" pull -q --ff-only origin trl-integration 2>/dev/null \
   || echo "WARN: repo not advanced (offline or diverged); rows carry the sha printed below"
 
-TRUX=${TRUX:-yewei@trux-tsubame.uni.lux}
-TRUX_SSH=${TRUX_SSH:-"ssh -i $HOME/.ssh/id_ed25519_gm_transfer -o StrictHostKeyChecking=accept-new"}
-SRC=${SRC:-/raid/yewei/projects_yewei/TSFM4Finance/assets/data/standard}
+TRUX=${TRUX:?TRUX unset - copy bridge.env.example to bridge.env}
+TRUX_SSH=${TRUX_SSH:?TRUX_SSH unset - copy bridge.env.example to bridge.env}
+SRC=${SRC:?SRC unset - copy bridge.env.example to bridge.env}
 DATA=${DATA:-$HOME/tsfm_data/standard}
 OUT=${OUT:-$HOME/spark_bridge/outbox/results/gpu7_pass4_full.jsonl}
 # inlined at generation time from probes/trux/gpu7_full66.series (trux's pass-3 66 series)

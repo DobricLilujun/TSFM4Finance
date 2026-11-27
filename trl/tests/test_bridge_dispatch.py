@@ -21,7 +21,11 @@ def _bridge(tmp_path):
 
 def _dispatch(b, tmp_path):
     job = tmp_path / "job.sh"
-    job.write_text("#!/usr/bin/env bash\necho hi\n")
+    import datetime as _dt
+    stamp = _dt.datetime.now(_dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    job.write_text("#!/usr/bin/env bash\n"
+                   f"# GENERATED {stamp} by gpu7_generate.sh from fixture.sh\n"
+                   "echo hi\n")
     r = subprocess.run(["bash", str(SCRIPT), str(job)],
                        env={"BRIDGE": str(b), "PATH": "/usr/bin:/bin"},
                        capture_output=True, text=True, timeout=30)

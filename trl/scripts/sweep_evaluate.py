@@ -216,24 +216,23 @@ def sweep(args) -> int:
     return 0
 
 
+def proto_core(row: dict) -> tuple:
+    """What was measured: context, its note, the data bytes, the window sample. Two rows that
+    agree here asked the *same question of the same data*; if their full ``proto`` differs the
+    gap is what the stack (machine, torch build, commit) costs - reproducibility, not a fix."""
+    return (row.get("ctx"), row.get("ctx_note") or "",
+            row.get("data_kind"), row.get("data_hash"), row.get("n_windows"))
+
+
 def proto(row: dict) -> tuple:
     """What protocol produced this cell. Two measurements with the same signature that
-    disagree are run variance; different signatures mean one replaced the other (a context
-    contract applied, a device switched, a fixed commit), and the gap between them measures
-    the fix, not noise."""
+    disagree are run variance; different signatures mean one replaced the other - and the
+    merge prose must say *which kind* of replacement, because a cross-machine re-measurement
+    and a context-contract fix mean opposite things."""
     pr = row.get("_prov") or {}
-    return (row.get("ctx"), row.get("ctx_note") or "", pr.get("device"),
+    return proto_core(row) + (pr.get("device"),
             pr.get("code_sha"), str(pr.get("torch")),
-            # the data path is part of the protocol: the same forecast on a CSV and on the
-            # arena directory of the same series differs by the MASE denominator alone
-            row.get("data_kind"), row.get("data_hash"),
-            # the window sample is part of the protocol too. max_windows subsamples the test
-            # span uniformly at random (same seed, same windows), so seed 0 vs seed 1 is a
-            # different sample of the same series, not a re-measurement: naive's own MASE
-            # moves ~51% median at 8 windows and ~19% at 32 (measured 2026-11-27). A row
-            # scored on 32 windows silently replacing one scored on 8 would look like the
-            # model got worse.
-            row.get("n_windows"), pr.get("seed"))
+            pr.get("seed"))
 
 
 def stamp_rows(rows: list, key: str) -> list:
@@ -301,7 +300,7 @@ def report(args) -> int:
                     dupes.setdefault(key, []).append(
                         (prev.get("mase"), r.get("mase"),
                          prev["_prov"].get("started"), prov.get("started"),
-                         proto(prev), proto(r)))
+                         proto(prev), proto(r), proto_core(prev), proto_core(r)))
                 cells[key] = r
             if rec.get("error"):
                 err_by_model.setdefault(model, rec["error"])
@@ -532,15 +531,22 @@ def report(args) -> int:
                 ""] + [f"- {m} (env {e}) ran with `{i}`" for m, e, i in mismatch] + [""]
     if dupes:
         spread, superseded, by_model, sup_gap = [], [], {}, []
+        stacked, stack_num = [], []
         for (model, _series, _span, _h), pairs in dupes.items():
             # every recorded pair, not just the one the merge resolved last: a key can be
             # measured three times (artifact run, retry, contract run), and the interesting
             # gap is usually in the earlier pair
-            for a, b, _t0, _t1, p0, p1 in pairs:
+            for a, b, _t0, _t1, p0, p1, c0, c1 in pairs:
                 if p0 != p1:
-                    superseded.append(model)
+                    # Same bytes, same context, same window sample (c0 == c1)? Then a different
+                    # full signature means a different *stack*, and the gap is reproducibility
+                    # spread - pass 4/5 has 1,452 such pairs and they are mostly 0.000%. A gap in
+                    # c0/c1 means the cell measured something else (context contract, data path,
+                    # window count): the gap is the size of that change, never noise.
+                    stack = c0 == c1
+                    (stacked if stack else superseded).append(model)
                     if isinstance(a, (int, float)) and isinstance(b, (int, float)):
-                        sup_gap.append(abs(a - b) / max(abs(b), 1e-9))
+                        (stack_num if stack else sup_gap).append(abs(a - b) / max(abs(b), 1e-9))
                     continue
                 if isinstance(a, (int, float)) and isinstance(b, (int, float)):
                     rel = abs(a - b) / max(abs(b), 1e-9)
@@ -548,22 +554,32 @@ def report(args) -> int:
                     by_model.setdefault(model, []).append(rel)
         sec = [f"## Repeated cell keys: {len(dupes)}", "",
                f"These `(model, series, span, horizon)` keys were measured more than once in "
-               f"the merge inputs; the table keeps the newest. Classifying every measurement "
-               f"pair by protocol signature (ctx, ctx_note, device, code_sha, torch): "
-               f"**{len(superseded)}** pairs sit under a *different* signature - an earlier "
-               f"measurement superseded by a fix, where the gap is the size of that fix - "
-               f"and **{len(spread)}** share a signature, so their gap is run variance."]
+               f"the merge inputs; the table keeps the newest. Every pair is classified by what "
+               f"changed. **{len(stacked)}** pairs asked the same question of the same bytes "
+               f"(same ctx, `data_hash`, window count) on a different stack - machine, torch "
+               f"build or commit - so their gap is the **reproducibility spread**. "
+               f"**{len(superseded)}** pairs changed what was measured (context contract, data "
+               f"path, window sample): their gap is the size of that change, not noise. "
+               f"**{len(spread)}** pairs share a full signature, so their gap is run variance."]
         if superseded:
             cnt = collections.Counter(superseded)
-            sec += ["", "Superseded by a protocol change: "
+            sec += ["", "Superseded by a protocol change (what was measured differs): "
                         + ", ".join(f"{m} ({n})" for m, n in cnt.most_common(6))]
             if sup_gap:
                 sec += ["", f"Gap between a superseded cell and the one that replaced it: "
                             f"median {100*sorted(sup_gap)[len(sup_gap)//2]:.2f}%, max "
-                            f"{100*max(sup_gap):.1f}%. Some of these only differ by a code "
-                            f"sha (gap ~0.0002%) and are plain re-runs; the large ones are "
-                            f"a protocol fix, which is why the number is quoted and not "
-                            f"averaged away."]
+                            f"{100*max(sup_gap):.1f}%. Some differ only because a window count "
+                            f"or ctx changed and are quoted, not averaged away."]
+
+        if stacked:
+            cnt = collections.Counter(stacked)
+            sec += ["", "Re-measured on another stack (same bytes, same protocol): "
+                        + ", ".join(f"{m} ({n})" for m, n in cnt.most_common(8))]
+            if stack_num:
+                sec += ["", f"Stack-to-stack gap on those pairs: median "
+                            f"{100*sorted(stack_num)[len(stack_num)//2]:.3f}%, max "
+                            f"{100*max(stack_num):.3f}% - the per-family version of this number "
+                            f"is `probes/trux/cross_machine_check.py`."]
         if spread:
             sec += ["", f"Run variance under an identical protocol: median "
                         f"{100*sorted(spread)[len(spread)//2]:.2f}%, max "
@@ -574,8 +590,10 @@ def report(args) -> int:
             for m, v in sorted(by_model.items(), key=lambda kv: -sorted(kv[1])[len(kv[1]) // 2]):
                 sec.append(f"| {m} | {len(v)} | {100*sorted(v)[len(v)//2]:.2f}% "
                            f"| {100*max(v):.2f}% |")
-        sec += ["", "Quote a model's ranking only where its gap to the next model exceeds "
-                "the run-variance spread above.", ""]
+        sec += ["", "Quote a model's ranking only where its gap to the next model exceeds the "
+                "spread above and the series-level confidence interval from "
+                "`probes/pass4_share_bootstrap.py`; a share is a resample of ~100 series, so two "
+                "models whose intervals overlap are tied however the table orders them.", ""]
         out += sec
     # a table that leaves models out is read as "they were fine"; say who is missing
     try:

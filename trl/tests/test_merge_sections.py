@@ -32,12 +32,13 @@ def _report(files, md_path, summary_only=False):
                                       summary_only=summary_only))
 
 
-def _meta(machine):
+def _meta(machine, code_sha="deadbeef", torch="2.7.1+cu128", device="cuda"):
     # real lane files nest the block: {"meta": {...}}, and the reader takes r["meta"]
-    # keys mirror a real lane file's meta block; the report header reads them directly
+    # keys mirror a real lane file's meta block; the report header reads them directly.
+    # The stack fields are per-call because the stack-vs-protocol split hinges on them.
     return {"meta": {"started": "2026-01-01 00:00:00", "machine": machine,
-                     "code_sha": "deadbeef", "python": "3.11.0", "torch": "2.7.1+cu128",
-                     "device": "cuda", "ctx": 256, "horizons": [21, 63], "spans": ["test"],
+                     "code_sha": code_sha, "python": "3.11.0", "torch": torch,
+                     "device": device, "ctx": 256, "horizons": [21, 63], "spans": ["test"],
                      "max_windows": 8, "batch": 16, "seed": 0}}
 
 
@@ -146,8 +147,8 @@ def test_a_repeated_key_under_a_changed_protocol_is_not_run_variance(tmp_path, c
     md = tmp_path / "out.md"
     _report([a, b], md)
     text = md.read_text()
-    assert "Superseded by a protocol change: ttm-r2 (1)" in text, text
-    assert "**0** share a signature" in text, text
+    assert "Superseded by a protocol change (what was measured differs): ttm-r2 (1)" in text, text
+    assert "**0** pairs share a full signature" in text, text
     assert "appear more than once" in capsys.readouterr().err
 
 
@@ -183,8 +184,8 @@ def test_a_cell_read_from_another_data_path_is_a_supersession_not_run_variance(t
     md = tmp_path / "out.md"
     _report([a, b], md)
     text = md.read_text()
-    assert "Superseded by a protocol change: chronos-bolt-small (1)" in text, text
-    assert "**0** share a signature" in text, text
+    assert "Superseded by a protocol change (what was measured differs): chronos-bolt-small (1)" in text, text
+    assert "**0** pairs share a full signature" in text, text
 
 
 def _row(model, series, mase, rmse=1.0, ctx=256):
@@ -279,3 +280,59 @@ def test_the_ranking_publishes_the_window_sample(tmp_path):
     out = md.read_text()
     assert "| win |" in out, out[-500:]
     assert "max-windows" in out, "the sampling caveat must sit next to the table"
+
+
+def test_the_same_bytes_on_another_machine_is_not_called_a_fix(tmp_path):
+    """Pass 4/5 produced 1,452 cross-machine re-measurements of identical cells. Filing them
+    under "superseded by a fix" would tell the reader the earlier numbers were wrong; they are
+    a reproducibility measurement, so the report has to name which case it is showing."""
+    def row(mase):
+        return {"model": "chronos-bolt-small", "family": "fam", "env": "core",
+                "interpreter": "/venv/bin/python", "torch": None, "cuda": None,
+                "dataset": "d", "task": "forecast", "status": "ok", "detail": "",
+                "error": None, "series_errors": {},
+                "rows": [{"series": "s1", "span": "all", "horizon": 21, "ctx": 512,
+                          "mase": mase, "rmse": 5.0, "mda": 0.4, "nd": 0.0,
+                          "no_leakage": True, "ctx_note": "", "n_windows": 8,
+                          "data_kind": "arena_dir", "data_hash": "abc123abc123"}]}
+
+    a = tmp_path / "gpu7.jsonl"
+    b = tmp_path / "watson.jsonl"
+    a.write_text("\n".join([json.dumps(_meta("gpu7", code_sha="aaaaaaa",
+                                             torch="2.9.1+cu130", device="cuda")),
+                            json.dumps(row(4.2))]) + "\n")
+    b.write_text("\n".join([json.dumps(_meta("sedan-gpu3", code_sha="bbbbbbb",
+                                             torch="2.7.1+cu128", device="cuda")),
+                            json.dumps(row(4.2))]) + "\n")
+    md = tmp_path / "out.md"
+    _report([a, b], md)
+    text = md.read_text()
+    assert "Re-measured on another stack (same bytes, same protocol): chronos-bolt-small (1)" in text, text
+    assert "Superseded by a protocol change" not in text, text
+
+
+def test_a_different_window_sample_is_a_protocol_change_not_a_stack(tmp_path):
+    """Eight windows vs 32 windows on one machine is a different sample of the same series.
+    The gap between those rows is the sampling artifact (~12% median on the paired ratio), and
+    it must not be filed under reproducibility."""
+    def row(mase, nw):
+        return {"model": "naive", "family": "fam", "env": "core",
+                "interpreter": "/venv/bin/python", "torch": None, "cuda": None,
+                "dataset": "d", "task": "forecast", "status": "ok", "detail": "",
+                "error": None, "series_errors": {},
+                "rows": [{"series": "s1", "span": "all", "horizon": 21, "ctx": 512,
+                          "mase": mase, "rmse": 5.0, "mda": 0.4, "nd": 0.0,
+                          "no_leakage": True, "ctx_note": "", "n_windows": nw,
+                          "data_kind": "arena_dir", "data_hash": "abc123abc123"}]}
+
+    a = tmp_path / "w8.jsonl"
+    b = tmp_path / "w32.jsonl"
+    a.write_text("\n".join([json.dumps(_meta("gpu7")),
+                            json.dumps(row(4.0, 8))]) + "\n")
+    b.write_text("\n".join([json.dumps(_meta("gpu7")),
+                            json.dumps(row(5.2, 32))]) + "\n")
+    md = tmp_path / "out.md"
+    _report([a, b], md)
+    text = md.read_text()
+    assert "Superseded by a protocol change (what was measured differs): naive (1)" in text, text
+    assert "Re-measured on another stack" not in text, text

@@ -248,13 +248,14 @@ where the model beat naive:
   cross_machine_check.py`), and 254 repeated cell comparisons on one machine - pass-3 lanes
   at code sha `1d2f3ae` re-scored at `28fd7e7` - agree to within 0.143%. That is the first
   time this benchmark has had a consistency check rather than an assumption.
-* **Cross-machine, same data path: bit-exact for eight of nine families.** Three machines
-  (GB10 CUDA, RTX A6000 CUDA, x86 CPU) over 216 shared cells of the 12-series replication
-  stratum: naive, seasonal_naive, arima, chronos-2, chronos-bolt-small/-base,
-  timesfm-2.5-200m and ttm-r2 agree to 0.000% on all 24 cells each, on every pairing;
-  chronos-t5-small - the only generative decoding path in the set - sits at 3.5-5.4%
-  median, 13.4% max. Two CUDA stacks that share nothing reproduce each other exactly, so
-  the variance tracks the decoding path, not the hardware. See docs/08 for the tables.
+* **Cross-machine, same data path: bit-exact for ten of eleven families.** gpu7 (GB10, CUDA,
+  torch 2.9.1+cu130) vs watson (RTX A6000, CUDA, torch 2.7.1+cu128) over **1,452 shared cells**
+  (66 series x 2 horizons x 11 models, same arena parquet bytes): ten families agree at 0.000%
+  median and 0.000% max on all 132 cells each; `chronos-t5-small` is the only outlier (median
+  5.73%, max 17.4%, 109 of 132 cells). A third machine (trux, x86 CPU) reproduces the same
+  numbers bit-exactly for the same families. The exception tracks the *decoding path* (T5 samples
+  tokens; nothing else in the fleet does), not the hardware.
+
 * **Scaled metrics are only comparable within a data path.** The 12-series GB10 overlap
   looked like 212 machine disagreements: MASE off by 15%-123% while RMSE agreed to the
   eighth decimal. Cause: watson's pass-3 lane read exported CSVs (so `SeriesDataset`
@@ -314,38 +315,46 @@ initialised and fine-tuning is the only way it becomes a forecaster. 12 series, 
 - Every fine-tuned row carries `head_from_checkpoint: false, head_trained_here: true`, so
   the table cannot be misread as a pretrained forecast head.
 
-## What pass 4 shows (101 series on one data path, with intervals)
+## What pass 4 (and pass 5) show: 101 series on one data path, with intervals
 
-Pass 4 re-scored the corpus on a single arena-parquet data path (`gpu7` 66 series + `watson` the
-other 35, horizons 21/63, 2,572 rows), so the merged table is one protocol rather than pass 3's
-mix of CSV and arena. The ranking is published in `EFFECTIVENESS.md`; what belongs here is the
-uncertainty around it (`probes/pass4_share_bootstrap.py`, cluster bootstrap over *series*, each
-series moving as a block because its two horizons are not independent):
+Pass 4 scored the corpus on a single arena-parquet data path (`gpu7` 66 series + `watson` the other
+35, horizons 21/63). Pass 5 then had `watson` re-score `gpu7`'s 66 series, so the merged table is
+**3,232 rows over 101 series from 5 lane files on 4 machines**, and 66 of those series - 1,452 cells -
+were measured twice on two CUDA stacks that share nothing. That is what turns the corpus from a
+partition into a sample with replication, and it is why the merge report can call 1,668 repeated pairs
+"same bytes, different stack, median gap 0.000%" instead of hand-waving.
 
-| model | cells | beat naive | 95% CI |
+The ranking lives in `EFFECTIVENESS.md`; what belongs here is the uncertainty around it
+(`probes/pass4_share_bootstrap.py`, cluster bootstrap over *series*, each series moving as a block
+because its two horizons are not independent):
+
+| model | cells | beat naive | 95% CI (over 101 series) |
 |---|--:|---|---|
-| `arima` | 202 | 55.4% | 48.5 .. 61.9 |
-| `chronos-bolt-small` | 202 | 41.1% | 34.2 .. 47.5 |
-| `chronos-2` | 202 | 39.6% | 34.2 .. 46.0 |
-| `chronos-t5-base` | 70 | 32.9% | 21.4 .. 44.3 |
+| `arima` | 202 | 55.4% | 48.0 .. 62.9 |
+| `chronos-bolt-small` | 202 | 41.1% | 34.7 .. 48.0 |
+| `chronos-2` | 202 | 39.6% | 33.7 .. 45.5 |
 | `chronos-bolt-base` | 202 | 32.2% | 25.7 .. 38.6 |
-| `ttm-r3` | 44 | 0.0% | 0.0 .. 0.0 |
+| `chronos-t5-small` | 202 | 31.7% | 25.2 .. 39.1 |
+| `chronos-t5-base` | 202 | 30.7% | 24.3 .. 37.1 |
+| `theta` | 202 | 30.2% | 24.3 .. 36.6 |
+| `ttm-r2` | 202 | 26.7% | 20.8 .. 33.2 |
+| `ttm-r3` | 126 | 0.8% | 0.0 .. 2.4 (63 series) |
 
 What that says, and what it does not:
 
 * **`arima` over every foundation model is real.** It wins the paired comparison against
-  `chronos-bolt-small` in 100.0% of resamples and `chronos-2` in 99.8%. Intervals barely touch.
-* **`chronos-bolt-small` vs `chronos-2` is a tie, not 41% > 40%.** Pairwise 61.8% - a mildly
+  `chronos-bolt-small` in 99.9% of resamples and `chronos-2` in 100.0%. Intervals barely touch.
+* **`chronos-bolt-small` vs `chronos-2` is a tie, not 41% > 40%.** Pairwise 61.6% - a mildly
   favoured coin flip. Publishing them as ranks 2 and 3 is over-precision.
-* **`chronos-t5-base` vs `chronos-bolt-base` is 50.0%**: with 35 series, no ordering exists.
-* **`ttm-r3` at 0/44 is not noise.** Every cell lost to naive; that one is a property of the
-  checkpoint on these series, and its interval is exactly a point.
+* **`chronos-bolt-base` vs `chronos-t5-small` is 53.8%:** no ordering. With `chronos-t5-base` now
+  scored corpus-wide (pass 5 supplied its 66 missing series), the whole T5/bolt-base cluster sits
+  inside one another's intervals.
+* **`ttm-r3` at ~1% is not noise.** It loses essentially every cell to naive; the interval is near a
+  point because the outcome is constant, not because the sample is large.
 
 A model whose interval overlaps a neighbour's is tied *as far as this pass can see*. Raising
-`--max-windows` narrows these intervals; scoring more series narrows them further, and only
-`watson` re-scoring `gpu7`'s half (pass 5) turns the corpus from a partition into a sample with
-replication.
-
+`--max-windows` narrows these intervals roughly as `1/sqrt(windows)`; scoring more series narrows the
+series-level part, which is the part the bootstrap measures.
 ## What is *not* done yet (so nobody reads it in)
 
 * The effectiveness sweep that *has* been run is zero-shot only: 46 registry models ×

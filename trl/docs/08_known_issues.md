@@ -720,6 +720,24 @@ reading arena directories (`reports/pass4_watson_arena`: RTX A6000, CUDA, 16 mod
 
 Two CUDA stacks that share nothing - different GPU architecture, different torch build - reproduce each other exactly. That is the strongest form of the claim available, and it locates the exception in the *decoding path*: `chronos-t5-base` ran only on watson in this pass, so it still has no cross-machine pair.
 
+**The 66-series replication (pass 5, 2026-11-27) settles it.** Watson re-scored gpu7's 66 series
+on an A6000 (`reports/pass5_watson_66`, node `sedan-gpu3`), giving **1,452 shared cells** —
+66 series x 2 horizons x 11 models — with `gpu7` (GB10, CUDA, torch 2.9.1+cu130) and watson
+(A6000, CUDA, torch 2.7.1+cu128) reading the same arena bytes:
+
+| model_key | cells | median diff | max diff | cells > 2% |
+|---|--:|--:|--:|--:|
+| naive, seasonal_naive, arima, theta, moving_average, chronos-2, chronos-bolt-small, chronos-bolt-base, timesfm-2.5-200m, ttm-r2 | 132 each | 0.000% | 0.000% | 0 |
+| chronos-t5-small | 132 | 5.730% | 17.406% | 109 |
+
+Ten of eleven families are bit-identical to the last decimal on 132 cells each; every out-of-tolerance
+cell in the whole 1,452-cell stratum belongs to `chronos-t5-small` (rmse behaves the same way: median
+0.000% everywhere except T5, where it reaches 23.2%). The same generator produced `ttm-r2` bit-exactly,
+and TTM had been suspected of device sensitivity earlier — it was the context-length contract, not the
+device. So the rule to carry forward is narrow and checkable: **anything that samples tokens at decode
+time may differ across stacks by several percent; everything else should be compared to zero.**
+
+
 ## A 2 MB documentation page is published but not served
 
 `scripts/build_docs.sh` builds strictly and CI commits the site to `gh-pages`. The benchmark
@@ -802,3 +820,27 @@ measurement applies; too few rows per cell silently removes the ability to check
 `probes/watson/watson_pass5_66.sh` re-scores gpu7's 66 series on the A6000 (different GPU
 architecture, different torch build, same arena parquet bytes) so the bit-exactness claim
 that currently rests on 12 series rests on 66.
+
+**Resolved the same day (pass 5).** Watson re-scored gpu7's 66 series (`reports/pass5_watson_66`,
+SLURM 3291, 16 models, 0 failures). The cross-machine stratum went from 216 cells to **1,452**, and
+the merged arena report now contains real replication for 66 of 101 series rather than a partition
+dressed up as coverage. The lesson generalises: a fleet that avoids duplicate work is efficient and
+unfalsifiable at the same time — decide *before* dispatching which cells will be measured twice.
+
+
+## "Superseded by a fix" and "re-measured on another machine" are not the same sentence
+
+The merge report classifies repeated `(model, series, span, horizon)` keys by their protocol
+signature, and until now every differing pair was described as *superseded by a fix*, with the gap
+called "the size of that fix". That was true of pass 3 (ctx 256 vs 512, CSV vs arena) and false of
+pass 4/5, where **1,668** pairs differ only in `device`, `torch` build and `code_sha`: same context,
+same `data_hash`, same window count. Calling those a correction tells a reader the older numbers were
+wrong; they are the reproducibility measurement, and their gap (median 0.000%, max 17.4%, all of it
+`chronos-t5-small`) is the answer to "how much does the hardware cost".
+
+`proto()` is now `proto_core()` (what was measured: ctx, ctx_note, data_kind, data_hash, n_windows)
+plus the stack fields, and the report prints three buckets that mean different things: **re-measured
+on another stack** (gap = reproducibility), **superseded by a protocol change** (gap = the size of
+that change), **identical signature** (gap = run variance). Two tests pin the direction: the same
+bytes on two machines must not say "protocol change", and 8-vs-32 windows on one machine must not say
+"another stack".

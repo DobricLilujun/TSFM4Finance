@@ -1,0 +1,104 @@
+#!/usr/bin/env bash
+# gpu7 (DGX Spark, GB10) scoring the five families pass 4 left one-sided on the 66-series half.
+#
+# Why: gpu7's full66 lane (job_013) covered 11 models, watson's pass-5 lane covered 16, and the
+# five families only watson scored - chronos-t5-base, flowstate-r1, timesfm-3.0, ttm-r3,
+# patchtst-fm-r2 - therefore have no cross-machine pair at all. The 1,452-cell bit-exactness claim
+# is only as wide as the model set both machines scored. This lane adds those pairs, and it is also
+# the honest test of the exception: the T5 *family* claim currently rests on chronos-t5-small alone.
+# If chronos-t5-base also moves across stacks while flowstate/timesfm-3.0/patchtst stay bit-exact,
+# "sampling at decode time" is doing the work, not the checkpoint size.
+#
+# ttm-r3 is expected to produce non-finite windows on this corpus (docs/08); those rows carry None
+# metrics on purpose, and the checker treats them as no-measurement rather than as a disagreement.
+#
+# GENERATED before dispatch (one file crosses the bridge):
+#
+#   cd trl && python3 - <<'GEN'
+#   import pathlib
+#   job = pathlib.Path("probes/trux/bridge/gpu7_050_extra5.sh").read_text()
+#   ser = " ".join(pathlib.Path("probes/trux/gpu7_full66.series").read_text().split())
+#   pathlib.Path("/tmp/job_extra5.sh").write_text(job.replace("@@SERIES@@", ser))
+#   GEN
+#   probes/trux/bridge/trux_dispatch.sh /tmp/job_extra5.sh
+# Machine-specific endpoints (host, user, path, key) come from an untracked sibling
+# file so this public tree carries no lab hostnames or internal IPs; the example
+# next to it lists the variables. Fail fast if the file is missing.
+_BRIDGE_DIR="$(cd "$(dirname "$0")" && pwd)"
+[ -f "$_BRIDGE_DIR/bridge.env" ] && . "$_BRIDGE_DIR/bridge.env"
+
+set -euo pipefail
+ENVROOT=${ENVROOT:-$HOME/envs/tsfm-trl}
+REPO=${REPO:-}
+for c in "$HOME/TSFM4Finance-trl/trl" "$HOME/TSFM4Finance-trl" "$HOME/tsfm-trl"; do
+  [ -f "$c/scripts/sweep_evaluate.py" ] && { REPO=$c; break; }
+done
+[ -n "$REPO" ] || { echo "FATAL: no harness clone (looked for scripts/sweep_evaluate.py under \$HOME)"; exit 6; }
+timeout 200 git -C "$REPO" pull -q --ff-only origin trl-integration 2>/dev/null \
+  || echo "WARN: repo not advanced (offline or diverged); rows carry the sha printed below"
+
+TRUX=${TRUX:?TRUX unset - copy bridge.env.example to bridge.env}
+TRUX_SSH=${TRUX_SSH:?TRUX_SSH unset - copy bridge.env.example to bridge.env}
+SRC=${SRC:?SRC unset - copy bridge.env.example to bridge.env}
+DATA=${DATA:-$HOME/tsfm_data/standard}
+OUT=${OUT:-$HOME/spark_bridge/outbox/results/gpu7_pass5_extra5.jsonl}
+# inlined at generation time from probes/trux/gpu7_full66.series (trux's pass-3 66 series)
+SERIES_LIST=${SERIES_LIST:-"@@SERIES@@"}
+# The guard must not contain the placeholder itself: the generator substitutes EVERY
+# occurrence, so a guard that compares against "@@SERIES@@" becomes `[ list != list ]`
+# and fails a perfectly good job (job_012 died exactly this way). Test for a leftover
+# marker instead - and note the marker here is spelled with the sigil split from the
+# word so this file cannot self-trigger it.
+MARKER='@@'
+case " $SERIES_LIST " in
+  *"$MARKER"*) echo "FATAL: SERIES_LIST still holds a generator marker; generate this job"; exit 6 ;;
+esac
+n_ser=$(echo $SERIES_LIST | wc -w)
+echo "host=$(hostname) repo=$REPO sha=$(git -C "$REPO" rev-parse --short HEAD 2>/dev/null || echo unknown)"
+echo "date=$(date -u +%FT%TZ)  series=$n_ser"
+
+echo "-- corpus: $n_ser arena dirs from $TRUX:$SRC"
+mkdir -p "$DATA"
+for s in $SERIES_LIST; do
+  rsync -e "$TRUX_SSH" -a "$TRUX:$SRC/$s" "$DATA/" || { echo "FATAL: corpus pull failed for $s"; exit 5; }
+done
+ls -1 "$DATA" | wc -l | sed 's/^/  series dirs present: /'
+
+# GB10 answers [N/A] to nvidia-smi memory queries and the box is shared, so the device comes
+# from torch. Free at launch is not free during the run: a CUDA row can still die mid-lane.
+DEVICE=${DEVICE:-}
+if [ -z "$DEVICE" ]; then
+  DEVICE=$("$ENVROOT/core/bin/python" -c '
+import sys, torch
+if not torch.cuda.is_available():
+    print("cpu"); sys.exit()
+print("cuda" if (torch.cuda.mem_get_info(0)[0] >> 20) >= 4000 else "cpu")
+' 2>/dev/null || echo cpu)
+fi
+echo "-- device: $DEVICE (torch-selected, 4 GiB floor)"
+
+ARGS=()
+for s in $SERIES_LIST; do ARGS+=(--series "$DATA/$s"); done
+"$ENVROOT/core/bin/python" -u "$REPO/scripts/sweep_evaluate.py" \
+  "${ARGS[@]}" \
+  --envs "$ENVROOT" \
+  --models chronos-t5-base,flowstate-r1,timesfm-3.0,ttm-r3,patchtst-fm-r2 \
+  --horizons 21,63 --max-windows 8 --ctx 256 --seed 0 \
+  --out "$OUT" --device "$DEVICE" --fresh
+
+echo "rows=$(wc -l < "$OUT")"
+"$ENVROOT/core/bin/python" - "$OUT" <<'PY'
+import json, sys
+recs = [json.loads(l) for l in open(sys.argv[1]) if l.strip()]
+scored = [r for r in recs if r.get("rows")]
+print(f"  records={len(recs)} scored={len(scored)} "
+      f"cells={sum(len(r['rows']) for r in scored)} "
+      f"errors={[r['model'] for r in recs if not r.get('rows')]}")
+if scored:
+    r = scored[0]; row = r["rows"][0]
+    for k in ("model", "model_key", "machine", "device", "code_sha", "torch", "data_kind", "data_hash"):
+        v = row.get(k, r.get(k))
+        if v is not None:
+            print(f"  {k}={v}")
+PY
+cp "$OUT" "$HOME/spark_bridge/outbox/" 2>/dev/null || true

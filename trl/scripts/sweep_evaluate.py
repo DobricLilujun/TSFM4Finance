@@ -358,8 +358,15 @@ def report(args) -> int:
     notrun = [rec["model"] for rec in recs if not rec["rows"] and not rec["error"]]
     series = sorted({r["series"] for r in rows})
     hz = sorted({int(r["horizon"]) for r in rows})
+    # a merged report has to name every lane it folded, not just the first: one filename
+    # next to "3628 rows over 101 series" hides that nine lanes and three machines are in
+    # the table, which is exactly the provenance a reader needs to discount a row
+    srcs_note = ", ".join(
+        f"`{f}`" + (f" ({m.get('machine')})" if m and m.get("machine") else "")
+        for f, m in zip(srcs, metas))
     out = ["# Effectiveness benchmark", "",
-           f"Generated {time.strftime('%Y-%m-%d %H:%M:%S')} from `{src}` — "
+           f"Generated {time.strftime('%Y-%m-%d %H:%M:%S')} from {len(srcs)} lane file"
+           f"{'s' if len(srcs) > 1 else ''}: {srcs_note} — "
            f"{len(rows)} evaluation rows over {len(series)} series, horizons "
            f"{', '.join(map(str, hz))}. Protocol: `docs/09_benchmark.md`.", "",
            "Rows are **zero-shot** (no adaptation) and slide windows over the span(s) "

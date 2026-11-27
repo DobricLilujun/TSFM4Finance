@@ -9,7 +9,7 @@ cd "$SLURM_SUBMIT_DIR"
 MODEL=${MODEL:?}  SERIES=${SERIES:?}  BUDGET=${BUDGET:-full}
 CTX=${CTX:-512}   HORIZON=${HORIZON:-21}
 
-export HF_HOME=${HF_HOME:-/home/lujun.li/hf_cache}
+export HF_HOME=${HF_HOME:-$HOME/hf_cache}
 export PYTHONUNBUFFERED=1 OMP_NUM_THREADS=4
 unset TSFM_OFFLINE HF_HUB_OFFLINE TRANSFORMERS_OFFLINE   # this box HAS network
 

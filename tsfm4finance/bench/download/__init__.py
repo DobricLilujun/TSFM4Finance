@@ -12,35 +12,25 @@ import json
 
 from .common import FAILURES, MANIFEST, manifest_read
 
-# Imported lazily inside prefetch(): the external benchmark tier pulls in
-# ``datasets`` and the scraper pulls in Scrapling - optional heavy deps that must
-# not be required by ``from ...download.common import load_dataset``.
-#
-# The loaded modules live in ``_M`` on purpose: a module-level name like
-# ``fred = None`` would *shadow the submodule of the same name*, so
-# ``from . import fred`` handed back None and every tier died on an
-# AttributeError instead of an ImportError.
-_M: dict[str, object] = {}
-
-
-def _load(*names: str):
-    import importlib
-    out = []
-    for n in names:
-        if n not in _M:
-            _M[n] = importlib.import_module(f".{n}", __package__)
-        out.append(_M[n])
-    return out if len(out) > 1 else out[0]
+# imported inside prefetch(): the external benchmark tier pulls in ``datasets``
+# and the scraper pulls in Scrapling - optional heavy deps that must not be
+# required by ``from ...download.common import load_dataset``.
+binance = external = fred = t4_scrape = yf_panel = None
 
 
 def prefetch(tiers: tuple[str, ...] = ("t1", "t2", "t3", "t4"), *, force: bool = False,
              xs_limit: int = 0, intraday_interval: str = "1h",
              intraday_start: str = "2019-01", download_t4: bool = True) -> dict:
-    fred, yf_panel = _load("fred", "yf_panel") if "t1" in tiers else (None, None)
-    if "t2" in tiers:
-        external = _load("external")
-    if "t3" in tiers:
-        crypto = _load("crypto")
+    global binance, external, fred, t4_scrape, yf_panel
+    if "t1" in tiers and yf_panel is None:
+        from . import fred as _f, yf_panel as _y
+        fred, yf_panel = _f, _y
+    if ("t2" in tiers and external is None) or ("t3" in tiers and binance is None):
+        from . import binance as _b, external as _e
+        binance, external = _b, _e
+    if "t4" in tiers and t4_scrape is None:
+        from . import t4_scrape as _t
+        t4_scrape = _t
     out: dict[str, object] = {}
     if "t1" in tiers:
         out["t1.yf_long12"] = yf_panel.run_long12(force=force)
@@ -50,9 +40,8 @@ def prefetch(tiers: tuple[str, ...] = ("t1", "t2", "t3", "t4"), *, force: bool =
         out["t2.cross_section"] = yf_panel.run_cross_section(limit=xs_limit, force=force)
         out["t2.external"] = external.run(force=force)
     if "t3" in tiers:
-        # t3 is the crypto expansion of docs/11_data_plan.md (N1/N3/N4/N5/N6)
-        out["t3.crypto"] = crypto.run({"pegs", "spot_daily", "spot_1h",
-                                       "fut_klines", "funding", "fresh"})
+        out["t3.binance"] = binance.run(interval=intraday_interval, start=intraday_start,
+                                        force=force)
     if "t4" in tiers:
         out["t4.scrape"] = t4_scrape.run(force=force, download=download_t4)
     return out

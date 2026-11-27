@@ -9,7 +9,7 @@
 # Resumable per cell (reports/state.sqlite3), so re-submitting continues where it stopped.
 set -uo pipefail
 cd "$SLURM_SUBMIT_DIR"
-export HF_HOME=${HF_HOME:-/home/lujun.li/hf_cache} PYTHONUNBUFFERED=1
+export HF_HOME=${HF_HOME:-$HOME/hf_cache} PYTHONUNBUFFERED=1
 G=${GROUPS:-long12,core12,newx}   H=${HORIZONS:-5,21}   AD=${ADAPTATIONS:-zero,fs16,fs64,full}
 envs/core/.venv/bin/python -m tsfm4finance.bench.sweep --stage plan --tiers A,B --groups $G \
     --horizons $H --contexts 512 --adaptations $AD 2>&1 | tail -3

@@ -9,9 +9,13 @@
 # endpoints (bridge dir, hosts, keys) live in an untracked sibling file; see
 # bridge.env.example. Public tree carries no lab hostnames or scratch paths.
 _BRIDGE_DIR="$(cd "$(dirname "$0")" && pwd)"
+# bridge.env supplies defaults; an exported BRIDGE is an explicit override and must survive
+# sourcing it. Without this, the same script reads the live bridge on trux and the fixture bridge
+# in a test, and the bridge tests fail on the compute box while passing on the laptop.
+_EXPLICIT_BRIDGE=${BRIDGE:-}
 [ -f "$_BRIDGE_DIR/bridge.env" ] && . "$_BRIDGE_DIR/bridge.env"
 set -u
-BRIDGE=${BRIDGE:?BRIDGE unset - copy bridge.env.example to bridge.env}
+BRIDGE=${_EXPLICIT_BRIDGE:-${BRIDGE:?BRIDGE unset - copy bridge.env.example to bridge.env}}
 # flags first or last, both work: `--hold job.sh` is how the operator types it, and a job
 # named --hold is not a thing worth supporting
 job=""; wait=0; timeout_s=5400; hold=0

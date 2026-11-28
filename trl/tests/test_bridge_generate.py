@@ -7,6 +7,7 @@ exists on trux and nowhere on the worker. Both are the same rule - one file cros
 both should fail in a test rather than on a far machine at 03:00.
 """
 import os
+import shutil
 import subprocess
 from pathlib import Path
 
@@ -246,3 +247,26 @@ def test_the_bridge_example_assigns_values_the_shell_will_not_execute(tmp_path):
     assert p.returncode == 0, p.stderr[-300:]
     assert "command not found" not in p.stderr
     assert p.stdout.strip().startswith("BRIDGE_SSH=[ssh ")
+
+
+def test_an_explicit_BRIDGE_beats_the_bridge_env_next_to_the_script(tmp_path):
+    """On trux a bridge.env sits beside these scripts, so a test that exports its own BRIDGE must
+    win. If sourcing wins instead, the same test passes on the laptop and reads the live queue on
+    the compute box - which is how five bridge tests came to fail on trux while passing everywhere
+    else."""
+    script = REPO / "probes" / "trux" / "bridge" / "trux_dispatch.sh"
+    home = tmp_path / "repo_bridge"          # a copy of the scripts, with its own bridge.env
+    home.mkdir()
+    shutil.copy(script, home / "trux_dispatch.sh")
+    (home / "bridge.env").write_text("BRIDGE=%s\nTRUX=spark7\n" % (tmp_path / "from_env_file"))
+    override = tmp_path / "from_environment"
+    (override / "hold").mkdir(parents=True)
+    job = tmp_path / "job.sh"
+    job.write_text("#!/usr/bin/env bash\necho hi\n")
+    p = subprocess.run(["bash", str(home / "trux_dispatch.sh"), str(job), "--hold"],
+                       capture_output=True, text=True, timeout=120,
+                       env={**os.environ, "BRIDGE": str(override)})
+    assert p.returncode == 0, p.stderr[-300:]
+    assert (override / "hold" / "job.sh").exists(), (
+        f"the job landed in the env-file bridge, not the exported one: {p.stdout}")
+    assert not (tmp_path / "from_env_file").exists(), "the env file must not be created either"

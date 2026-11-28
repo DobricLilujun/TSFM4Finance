@@ -51,6 +51,7 @@ FT_VARIANTS = [("fs16", 16), ("fs64", 64), ("full", None)]
 FT_LR = 1e-5                                # chosen by the LR pilot (see report §fine-tuning)
 CONTEXTS = [128, 256, 512]                  # zero-shot context ablation
 FT_CONTEXT = FT.CONTEXT                     # 256, matched against zero-shot @256
+FT_EPOCHS: int | None = None              # None = the auto epoch count in bench.finetune; --ft-epochs overrides
 
 
 # --------------------------------------------------------------------------- #
@@ -150,7 +151,7 @@ def stage_finetune(res: dict, limit: int | None = None) -> None:
             t0 = time.time()
             try:
                 r = FT.finetune(close, out, dataset=base, k_windows=K, lr=FT_LR,
-                                context=FT_CONTEXT, batch_size=FT_BS, epochs=args.ft_epochs,
+                                context=FT_CONTEXT, batch_size=FT_BS, epochs=FT_EPOCHS,
                                 device=args_ft["device"], amp=args_ft["amp"])
                 res["finetune"][key] = r.to_dict()
             except Exception as e:
@@ -290,7 +291,7 @@ def stage_valcheck(res: dict, limit: int | None = None, with_ft: bool = True) ->
                 try:
                     FT.finetune(tr["close"].to_numpy(dtype=float), ck, dataset=base,
                                 k_windows=None, lr=FT_LR, context=FT_CONTEXT,
-                                batch_size=FT_BS, epochs=args.ft_epochs,
+                                batch_size=FT_BS, epochs=FT_EPOCHS,
                                 device=args_ft["device"], amp=args_ft["amp"])
                 except Exception as e:
                     print(f"[valcheck] fine-tune failed for {base}: {e}", flush=True)
@@ -734,7 +735,7 @@ def _acquire_lock(force: bool = False) -> None:
 
 
 def main(argv=None) -> int:
-    global FT_LR, FT_CONTEXT, FT_BS, HORIZONS, CONTEXTS
+    global FT_LR, FT_CONTEXT, FT_BS, FT_EPOCHS, HORIZONS, CONTEXTS
     ap = argparse.ArgumentParser(prog="tsfm4finance.bench.run")
     ap.add_argument("--stage", action="append", default=None,
                     choices=["tasks", "finetune", "forecast", "classify", "anomaly",
@@ -760,6 +761,7 @@ def main(argv=None) -> int:
     stages = args.stage or ["tasks", "finetune", "forecast", "classify", "anomaly",
                             "trading", "valcheck", "derive", "leaderboard", "report"]
     FT_LR, FT_CONTEXT, FT_BS = args.ft_lr, args.ft_context, args.ft_bs
+    FT_EPOCHS = args.ft_epochs
     if args.horizons:
         HORIZONS = [int(x) for x in args.horizons.split(",") if x.strip()]
     if args.contexts:

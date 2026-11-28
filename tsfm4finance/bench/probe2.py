@@ -84,6 +84,7 @@ def _safe_fit(clf, X, y):
 
 def _cv_predict(clf, X, y, n_splits: int = 5):
     """Out-of-fold probabilities (the anti-contamination rule for probes)."""
+    from sklearn.base import clone
     from sklearn.model_selection import StratifiedKFold, cross_val_predict
     y = np.asarray(y)
     n_splits = int(min(n_splits, max(2, min(np.bincount(y.astype(int)).max(), len(y)))))

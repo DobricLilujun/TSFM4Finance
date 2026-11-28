@@ -33,6 +33,10 @@ def prepare(job: TrainJob) -> dict:
     cfg_dir.mkdir(parents=True, exist_ok=True)
     cfg_path = cfg_dir / f"{job.model_key}__{job.series}__{job.budget}.json"
     epochs = 1 if job.smoke else max(1, job.effective_epochs())
+    from tsfm4finance.bench.weights import resolve as _resolve
+    from tsfm4finance.bench.config import load_grid
+    spec = load_grid().models().get(job.model_key)
+    model_id = (spec.weights if spec and spec.weights else job.model_key)
     cfg = {
         "data_path": f"data/{job.series}.csv",
         "train_ratio": 1.0,                     # the arena already split the data
@@ -41,8 +45,8 @@ def prepare(job: TrainJob) -> dict:
         "stride": max(1, job.bs),
         "d_model": 256, "d_ff": 512, "n_layers": 4, "n_heads": 4,
         "patch_len": 16, "stride_patch": 8,
-        "tokenizer_ckpt": "NeoQuasar/Kronos-Tokenizer-base",
-        "init_from": job.model_key,              # start from the arena checkpoint
+        "tokenizer_ckpt": _resolve("NeoQuasar/Kronos-Tokenizer-base"),
+        "init_from": _resolve(model_id),         # arena checkpoint (Hub id or local dir)
         "batch_size": job.bs, "lr": job.effective_lr(), "epochs": epochs,
         "use_amp": job.amp in ("bf16", "fp16"), "seed": job.seed,
         "save_dir": str(Path(job.out_dir) / f"{job.model_key}__{job.series}__{job.budget}_kronos"),

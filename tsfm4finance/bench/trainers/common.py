@@ -1,6 +1,11 @@
 """Shared plumbing for the per-family trainers in this package."""
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    import torch
+
 import json
 import math
 import time

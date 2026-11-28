@@ -10,6 +10,7 @@ import time
 
 import numpy as np
 
+from tsfm4finance.bench.weights import resolve
 from .common import (TrainJob, autocast, count_trainable, free_gpu, log_step,
                      save_ckpt, set_trainable, train_windows)
 
@@ -22,7 +23,7 @@ def train(job: TrainJob) -> dict:
     from tsfm4finance.bench.config import load_grid
 
     spec = load_grid().models()[job.model_key]
-    p = MOMENTPipeline.from_pretrained(spec.weights,
+    p = MOMENTPipeline.from_pretrained(resolve(spec.weights),
                                        model_kwargs={"task_name": "forecasting",
                                                      "n_channels": 1,
                                                      "forecast_horizon": job.horizon})

@@ -55,14 +55,42 @@ class Grid:
     def envs(self) -> dict[str, str]:
         return dict(self.cfg.get("envs") or {})
 
-    def python_for(self, m: ModelSpec) -> str:
-        env = self.envs.get(m.env, self.envs.get("core", sys.executable))
-        p = Path(env)
-        if not p.is_absolute():
-            p = REPO / p
-        return str(p)
+    def interpreter(self, env_name: str) -> str:
+        """Interpreter for an env *name* (used by the dispatcher: a worker must run
+        in the family's own environment, never in the driver's)."""
 
-    # ---------------------------------------------------------------- models
+        class _E:
+            env = env_name
+        return self.python_for(_E())
+
+    def python_for(self, m: ModelSpec) -> str:
+        """Resolve an ``envs:`` entry to an interpreter.
+
+        Accepts a path (``.venv2/bin/python``, ``envs/core/.venv/bin/python``) or a
+        bare name (``core``), in which case the usual layouts are tried in order:
+        the uv project env (``envs/<name>/.venv``), the ad-hoc venv
+        (``.venv-<name>``) and ``.venv``.  That way the same config.yaml works on a
+        machine built with ``scripts/setup_envs.sh`` and on one with the older
+        hand-made venvs.
+        """
+        raw = self.envs.get(m.env, self.envs.get("core", sys.executable))
+        raw = str(raw)
+        root = Path(__file__).resolve().parents[2]
+        cand: list[Path] = []
+        p = Path(raw)
+        if p.is_absolute() or ".venv" in str(p) or str(p).endswith("python"):
+            cand.append(p)
+        for name in dict.fromkeys((m.env, raw)):
+            cand += [root / "envs" / name / ".venv" / "bin" / "python",
+                     root / f".venv-{name}" / "bin" / "python"]
+            if name in ("core", "sweep"):
+                cand.append(root / ".venv2" / "bin" / "python")
+            cand.append(root / ".venv" / "bin" / "python")
+        for c in cand:
+            if c.exists():
+                return str(c)
+        return raw
+
     def models(self, tiers: tuple[str, ...] | None = None,
                only: tuple[str, ...] | None = None) -> dict[str, ModelSpec]:
         out: dict[str, ModelSpec] = {}

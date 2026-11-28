@@ -12,6 +12,7 @@ import time
 
 import numpy as np
 
+from tsfm4finance.bench.weights import resolve
 from .common import (TrainJob, autocast, count_trainable, free_gpu, log_step,
                      save_ckpt, set_trainable, train_windows)
 
@@ -24,7 +25,7 @@ def train(job: TrainJob) -> dict:
     from tsfm4finance.bench.engines.toto import Toto2Engine
 
     spec = load_grid().models()[job.model_key]
-    eng = Toto2Engine(checkpoint=spec.weights, device=job.device, amp="fp32",
+    eng = Toto2Engine(checkpoint=resolve(spec.weights), device=job.device, amp="fp32",
                       batch=job.bs, ctx_cap=job.ctx)
     model = eng.model
     model.train()

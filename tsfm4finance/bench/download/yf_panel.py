@@ -131,9 +131,12 @@ STOOQ_FALLBACK = {
     "sp500_long": "^spx", "nasdaq_long": "^ndq", "dow_long": "^dji",
     "russell2000_long": "^rut", "eurusd_long": "eurusd", "gbpusd_long": "gbpusd",
     "gold_long": "xauusd", "crude_oil_long": "cl.f", "vix": "^vix",
-    "dxy": "dx.f", "brent": "cb.f", "copper": "hg.f", "nikkei225": "^nkx",
+    # Every other entry here is a Stooq *index* symbol, so the index spelling wins where a key
+    # was listed twice (dx.f/^nkx are the futures); a repeated key in a literal is not an error
+    # in Python - the last one simply wins, which is how the two spellings coexisted.
+    "dxy": "usdx", "brent": "cb.f", "copper": "hg.f", "nikkei225": "^nky",
     "hang_seng": "^hsi", "dax": "^dax", "ftse100": "^ukx",
-    "shanghai_composite": "^shc", "dxy": "usdx", "nikkei225": "^nky",
+    "shanghai_composite": "^shc",
 }
 
 

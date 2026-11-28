@@ -84,6 +84,42 @@ def cap_context(contexts: Sequence[np.ndarray], cap: int) -> list[np.ndarray]:
 
 
 class Engine:
+    # ---- adapted (fine-tuned) checkpoints -------------------------------------
+    # Family trainers save {"model": state_dict, "meta": {...}} under
+    # reports/ft_ckpts/<model>__<series>__<budget>.pt.  An adapted engine is built
+    # from the BASE weights and then gets that state dict loaded into its module,
+    # so every family shares one contract instead of bespoke loading code.
+    _FT_ATTRS = ("module", "model", "net", "predictor", "pipe")
+
+    def _ft_target(self):
+        for attr in self._FT_ATTRS:
+            m = getattr(self, attr, None)
+            if m is None:
+                continue
+            inner = getattr(m, "model", m)      # Chronos: pipe.model
+            if hasattr(inner, "load_state_dict"):
+                return inner, f"{attr}"
+        return None, None
+
+    def load_finetuned(self, path: str) -> dict:
+        import torch
+        obj = torch.load(str(path), map_location="cpu", weights_only=False)
+        state = obj.get("model", obj) if isinstance(obj, dict) else obj
+        target, via = self._ft_target()
+        if target is None or not hasattr(state, "keys"):
+            raise RuntimeError(f"{type(self).__name__}: cannot apply fine-tuned "
+                               f"checkpoint {path} (no torch module / no state dict)")
+        full = dict(target.state_dict())
+        missing, unexpected = target.load_state_dict(state, strict=False)
+        if len(missing) == len(full):
+            raise RuntimeError(f"{type(self).__name__}: fine-tuned checkpoint keys do "
+                               f"not match this module via '{via}' "
+                               f"(missing={len(missing)} unexpected={len(unexpected)})")
+        meta = obj.get("meta", {}) if isinstance(obj, dict) else {}
+        self.ft_meta = meta
+        self.ft_load = {"via": via, "missing": len(missing), "unexpected": len(unexpected),
+                        "checkpoint": str(path)}
+        return self.ft_load
     """Base class. Subclasses set ``key``, ``caps`` and implement ``predict``."""
     key: str = "engine"
     family: str = "engine"

@@ -359,3 +359,37 @@ def test_a_wider_window_request_is_a_different_protocol_even_when_the_series_cap
         "the requested window budget belongs in what-was-measured, not in the stack half")
     assert sweep.proto_core(a)[:5] == sweep.proto_core(b)[:5], (
         "everything else is identical on purpose: the request is the only difference")
+
+
+def test_a_ranking_that_mixes_window_budgets_says_so(tmp_path):
+    """The table can be wrong with no wrong number in it: if 8 models come from a 32-window lane and
+    the rest from an 8-window lane, the shares are different measurements and the ranking is not a
+    comparison. Newest-wins merging makes that easy to do by accident once pass 7 lanes exist, so the
+    report has to refuse to present it silently."""
+    a = tmp_path / "lane8.jsonl"
+    recs = [json.dumps(_meta("trux"))]
+    for srs, nm in (("s1", 1.4), ("s2", 1.4)):
+        recs.append(json.dumps(_row("naive", srs, nm)))
+    recs.append(json.dumps(_row("chronos-bolt-small", "s1", 1.2)))
+    recs.append(json.dumps(_row("moment-1-large", "s2", 1.1)))
+    a.write_text("\n".join(recs) + "\n")
+    b = tmp_path / "lane32.jsonl"
+    recs = [json.dumps(_meta("gpu7", code_sha="other"))]
+    for srs, nm in (("s3", 1.4), ("s4", 1.4)):
+        recs.append(json.dumps(_row("naive", srs, nm)))
+    recs.append(json.dumps(_row("chronos-t5-base", "s3", 1.2)))
+    b.write_text("\n".join(recs) + "\n")
+    # give each lane its requested budget, the field pass 7 introduced
+    for path, mw in ((a, 8), (b, 32)):
+        lines = path.read_text().splitlines()
+        mrow = json.loads(lines[0])
+        mrow["meta"]["max_windows"] = mw
+        lines[0] = json.dumps(mrow)
+        path.write_text("\n".join(lines) + "\n")
+    md = tmp_path / "M.md"
+    _report((a, b), md)
+    text = md.read_text()
+    h = text.index("## Headline ranking")
+    rank = text[h:text.index("## ", h + 5)]
+    assert "mixes window budgets" in rank, rank[-900:]
+    assert "not comparable" in rank

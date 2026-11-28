@@ -443,12 +443,19 @@ def report(args) -> int:
     per_model: dict = {}
     for (m, srs, sp, h), r in cells.items():
         d = per_model.setdefault(m, {"n": 0, "beat": 0, "cmp": 0, "ratio": [], "mase": [],
-                                     "rmse": [], "ctx": set(), "win": [], "none": 0})
+                                     "rmse": [], "ctx": set(), "win": [], "req": set(),
+                                     "none": 0})
         d["n"] += 1
         if isinstance(r.get("ctx"), (int, float)):
             d["ctx"].add(int(r["ctx"]))
         if isinstance(r.get("n_windows"), int):
             d["win"].append(r["n_windows"])
+            # the requested budget, not the scored count: a short series scores fewer windows than
+            # the lane asked for, and it is the request that decides whether two models' shares are
+            # comparable at all (docs/08, "A row's `n_windows` is what survived scoring")
+            req = r.get("max_windows") or (r.get("_prov") or {}).get("max_windows")
+            if req is not None:
+                d["req"].add(int(req))
         mv = r.get("mase")
         if isinstance(mv, (int, float)) and mv == mv:
             d["mase"].append(float(mv))
@@ -495,11 +502,24 @@ def report(args) -> int:
     for m, d in ranked:
         share = 100.0 * d["beat"] / d["cmp"] if d["cmp"] else 0.0
         ctxs = ", ".join(str(c) for c in sorted(d["ctx"])) or "—"
-        wins = int(_median(d["win"])) if d["win"] else 0
+        wins = int(_median(d["req"])) if len(d["req"]) == 1 else (
+            ",".join(str(x) for x in sorted(d["req"])) if d["req"]
+            else int(_median(d["win"])) if d["win"] else 0)
         out.append(f"| `{m}` | {d['n']} | {share:.0f}% ({d['beat']}/{d['cmp']}) "
                    f"| {_num(d['ratio'])} | {_num(d['mase'])} | {_num(d['rmse'])} "
                    f"| {ctxs} | {wins} | {d['none']} |")
     out += [""]
+    budgets = {m: sorted(d["req"]) for m, d in per_model.items() if len(d["req"]) > 1}
+    distinct = {tuple(sorted(d["req"])) for m, d in per_model.items() if d["req"]}
+    if len(distinct) > 1:
+        # the one way this table can be wrong without any number in it being wrong: a share at 32
+        # windows and a share at 8 are different measurements, so ranking them together is not a
+        # comparison. The `win` column shows it; this line says it in words.
+        out += [f"**WARNING: this ranking mixes window budgets** - {'; '.join(f'`{m}` at ' + '/'.join(map(str, v)) for m, v in sorted(budgets.items())) if budgets else 'different models sit at different budgets'} "
+                "(per-model requested budgets across the table: "
+                + ", ".join(f"`{m}`={'/'.join(map(str, sorted(d['req'])))}" for m, d in sorted(per_model.items()) if d["req"])
+                + "). Beat-naive shares at different window counts are not comparable: at 8 windows "
+                "every model's share is inflated by 10-27 pp (docs/08). Re-merge with one protocol.", ""]
     if getattr(args, "summary_only", False):
         out += ["_Per-cell tables are omitted (`--summary-only`): a 3,600-row page is ~2 MB "
                 "of HTML, and GitHub Pages does not serve the directory URL for a page that "

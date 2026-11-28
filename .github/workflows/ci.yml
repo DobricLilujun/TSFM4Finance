@@ -36,5 +36,10 @@ jobs:
       - name: Build datasets
         run: python scripts/build_datasets.py
 
+      - name: Build derived task datasets
+        # the spec-4.1 task views (dir5 / volreg / extreme / trade) are what the trading,
+        # classification and anomaly bench tests read; build_datasets.py only makes the base series
+        run: python -c "from tsfm4finance.bench.tasks import build_for_series; build_for_series('sp500_daily', 'equity')"
+
       - name: Run tests
         run: pytest tests/ -q

@@ -26,6 +26,12 @@ models = [
     "chronos-forecasting>=1.0",
     "pmdarima>=2.0",
 ]
+# the corpus downloader pulls HF-hosted panels; `datasets` is heavy (pyarrow + hub client) and
+# only the download path needs it, so it is not in the core install
+download = [
+    "huggingface_hub>=0.23",
+    "datasets>=2.20",
+]
 dev = [
     "pytest>=8.0",
     "httpx2>=2.12",

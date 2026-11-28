@@ -14,6 +14,7 @@ from tsfm_eval.metrics import (
     auc_roc,
     composite_score,
     directional_accuracy,
+    directional_accuracy_change,
     f1_score,
     mae,
     mape,
@@ -26,6 +27,9 @@ from tsfm_eval.metrics import (
     smape,
 )
 from tsfm_eval.evaluation.evaluator import evaluate
+from tsfm_eval.metrics import TRADING_COST_GRID, ic_signal, max_drawdown, trading_metrics
+from tsfm_eval.metrics import (QUANTILE_LEVELS, crps_from_quantiles, normalized_difference,
+                                   pinball, quantile_coverage, var_es_from_quantiles, wql)
 
 __all__ = [
     "accuracy",
@@ -35,6 +39,7 @@ __all__ = [
     "auc_roc",
     "composite_score",
     "directional_accuracy",
+    "directional_accuracy_change",
     "evaluate",
     "f1_score",
     "mae",
@@ -46,4 +51,15 @@ __all__ = [
     "rank_corr",
     "rmse",
     "smape",
+    "QUANTILE_LEVELS",
+    "crps_from_quantiles",
+    "normalized_difference",
+    "pinball",
+    "quantile_coverage",
+    "var_es_from_quantiles",
+    "wql",
+    "TRADING_COST_GRID",
+    "ic_signal",
+    "max_drawdown",
+    "trading_metrics",
 ]

@@ -11,6 +11,10 @@ class TaskType(str, Enum):
     FORECAST = "forecast"
     CLASSIFY = "classify"
     ANOMALY = "anomaly"
+    # the arena's quant-trading task: a model emits positions/signals and is scored on what they
+    # would have earned after costs. Datasets carry this task string, so the enum has to accept it
+    # or such a dataset cannot be loaded at all (`bench/tasks.py` builds them).
+    TRADING = "trading"
 
 
 class Frequency(str, Enum):

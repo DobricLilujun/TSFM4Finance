@@ -91,11 +91,14 @@ def build_engine(spec, *, adaptation: str = "zero", ft_ckpt: str | None = None,
 
     if fam == "tirex":
         from .tirex import TiRexEngine
-        return TiRexEngine(checkpoint=spec.weights, **kw)
+        # `primary` is the resolved path (TSFM_WEIGHTS_ROOT / offline); `spec.weights` is the hub id.
+        # Passing the hub id here meant a machine that has the weights on disk still reached for the
+        # network, which is exactly what the offline contract forbids.
+        return TiRexEngine(checkpoint=primary, **kw)
 
     if fam == "tirex2":
         from .tirex import TiRex2Engine
-        return TiRex2Engine(checkpoint=spec.weights, **kw)
+        return TiRex2Engine(checkpoint=primary, **kw)
 
     if fam == "timemoe":
         from .timemoe import TimeMoEEngine

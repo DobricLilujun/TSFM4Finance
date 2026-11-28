@@ -188,7 +188,8 @@ def dataset_dir_names() -> set[str]:
     try:
         return set(dataset_names())
     except Exception:                                              # noqa: BLE001
-        root = REPO / "data" / "open"
+        from tsfm4finance.paths import DATA
+        root = DATA / "open"
         return {p.name for p in root.iterdir() if p.is_dir()} if root.exists() else set()
 
 

@@ -23,7 +23,14 @@ from pathlib import Path
 import pandas as pd
 
 REPO = Path(__file__).resolve().parents[3]
-DATA = REPO / "data"
+# The evaluator, the task builder and the arena all read `assets/data` (tsfm4finance.paths.DATA).
+# Acquisition used to write `<repo>/data`, so a "successful" download produced series that every
+# consumer then reported missing. Same constant everywhere, with one legacy fallback so an old
+# checkout with data under `<repo>/data` keeps working instead of looking empty.
+from tsfm4finance.paths import DATA as CANONICAL_DATA  # noqa: E402
+DATA = CANONICAL_DATA
+if not DATA.exists() and (REPO / "data").exists():
+    DATA = REPO / "data"
 RAW = DATA / "raw"
 OPEN = DATA / "open"
 PANELS = OPEN / "_panels"
@@ -95,28 +102,63 @@ def sha256_file(path: Path) -> str:
     return h.hexdigest()[:16]
 
 
+def _locked_json(path: Path, mutate):
+    """Read-modify-write a small JSON sidecar under a whole-file lock, then publish atomically.
+
+    Crypto prefetch runs several workers against the same manifest and failure log. The old code
+    read the file, edited it in memory and wrote it back: two workers, and whichever finished last
+    replaced the other's entries wholesale - and a reader could see a half-written file. The lock
+    serialises the transaction; the temp-file rename means a reader never sees a partial JSON.
+    """
+    import fcntl
+    import os
+    import tempfile
+
+    path.parent.mkdir(parents=True, exist_ok=True)
+    lock_path = path.with_suffix(path.suffix + ".lock")
+    with lock_path.open("w") as lock:
+        fcntl.flock(lock, fcntl.LOCK_EX)
+        try:
+            cur = json.loads(path.read_text()) if path.exists() else {}
+            out = mutate(cur)
+            fd, tmp = tempfile.mkstemp(dir=str(path.parent), prefix=path.name + ".", suffix=".tmp")
+            try:
+                with os.fdopen(fd, "w") as fh:
+                    fh.write(json.dumps(out, indent=1))
+                os.replace(tmp, path)
+            finally:
+                if os.path.exists(tmp):
+                    os.unlink(tmp)
+        finally:
+            fcntl.flock(lock, fcntl.LOCK_UN)
+
+
 def record_failure(source: str, key: str, error: str) -> None:
-    cur = json.loads(FAILURES.read_text()) if FAILURES.exists() else {}
-    cur[f"{source}:{key}"] = {"at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
-                              "error": str(error)[:500]}
-    FAILURES.write_text(json.dumps(cur, indent=1))
+    def _m(cur):
+        cur[f"{source}:{key}"] = {"at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+                                  "error": str(error)[:500]}
+        return cur
+    _locked_json(FAILURES, _m)
 
 
 def clear_failure(source: str, key: str) -> None:
     if not FAILURES.exists():
         return
-    cur = json.loads(FAILURES.read_text())
-    if cur.pop(f"{source}:{key}", None) is not None:
-        FAILURES.write_text(json.dumps(cur, indent=1))
+
+    def _m(cur):
+        cur.pop(f"{source}:{key}", None)
+        return cur
+    _locked_json(FAILURES, _m)
 
 
 def manifest_update(name: str, **fields) -> None:
-    cur = json.loads(MANIFEST.read_text()) if MANIFEST.exists() else {}
-    entry = cur.get(name, {})
-    entry.update(fields)
-    entry["updated_at"] = datetime.now(timezone.utc).isoformat(timespec="seconds")
-    cur[name] = entry
-    MANIFEST.write_text(json.dumps(cur, indent=1))
+    def _m(cur):
+        entry = cur.get(name, {})
+        entry.update(fields)
+        entry["updated_at"] = datetime.now(timezone.utc).isoformat(timespec="seconds")
+        cur[name] = entry
+        return cur
+    _locked_json(MANIFEST, _m)
 
 
 def manifest_read() -> dict:
@@ -155,7 +197,16 @@ def write_open_dataset(name: str, df: pd.DataFrame, *, freq: str, domain: str,
         "n_features": int(df.shape[1] - 1), "feature_names": [c for c in df.columns if c != "timestamp"],
         "n_obs": n,
         "date_range": [str(df.timestamp.min())[:10], str(df.timestamp.max())[:10]],
-        "split": {"train": n_train, "validation": n_val, "test": n - n_train - n_val},
+        # DatasetMeta.split is dict[str, list[str]]: the timestamp boundaries of each split. Raw
+        # counts made every downloaded dataset fail schema validation in the evaluator, which reads
+        # the boundaries to know what it is allowed to touch. Counts stay alongside them.
+        "split": {
+            "train": [str(df.timestamp.iloc[0]), str(df.timestamp.iloc[max(n_train - 1, 0)])],
+            "validation": [str(df.timestamp.iloc[n_train]),
+                           str(df.timestamp.iloc[max(n_train + n_val - 1, n_train)])],
+            "test": [str(df.timestamp.iloc[n_train + n_val]), str(df.timestamp.iloc[n - 1])],
+        },
+        "split_counts": {"train": n_train, "validation": n_val, "test": n - n_train - n_val},
         "license": license_, "source": source, "open": True, "requires_download": False,
         "target": target, "lookback": 512, "horizon": 63, "rolling": True,
         "notes": notes,

@@ -140,11 +140,18 @@ def test_crps_lower_for_sharper_correct_forecast():
 
 
 def test_normalized_difference_one_equals_seasonal_naive():
+    """`normalized_difference(...) == 1` must mean "as good as seasonal naive", so the baseline this
+    test feeds in has to *be* seasonal naive. The old version passed a lagged block of history
+    (hist[-11:-1]), which is the definition the old implementation guessed - the test agreed with the
+    bug instead of with the metric. Season 1 means: repeat the last observation."""
     hist = np.cumsum(np.random.RandomState(0).randn(80)) + 100
     truth = hist[-10:]
-    naive = hist[-11:-1]
-    nd = normalized_difference(naive, truth, history=hist)
+    naive = np.repeat(hist[-1:], len(truth))
+    nd = normalized_difference(naive, truth, history=hist, season=1)
     assert abs(nd - 1.0) < 1e-9
+    # and the lagged block is a different baseline: it must not score 1 under this definition
+    block = normalized_difference(hist[-11:-1], truth, history=hist, season=1)
+    assert abs(block - 1.0) > 1e-6, "the block-of-history baseline is not seasonal naive"
 
 
 # ---------------- task datasets ----------------#

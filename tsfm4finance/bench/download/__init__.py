@@ -36,7 +36,11 @@ def _load(*names: str):
 def prefetch(tiers: tuple[str, ...] = ("t1", "t2", "t3", "t4"), *, force: bool = False,
              xs_limit: int = 0, intraday_interval: str = "1h",
              intraday_start: str = "2019-01", download_t4: bool = True) -> dict:
-    fred, yf_panel = _load("fred", "yf_panel") if "t1" in tiers else (None, None)
+    # yf_panel serves both tiers: t1 wants the long/newx panels, t2 wants the cross-section. Loading
+    # it only for t1 leaves `--tiers t2` (the data.sbatch default) dying on `None.run_cross_section`.
+    need_panel = "t1" in tiers or "t2" in tiers
+    fred, yf_panel = _load("fred", "yf_panel") if "t1" in tiers else (
+        (None, _load("yf_panel")) if need_panel else (None, None))
     if "t2" in tiers:
         external = _load("external")
     if "t3" in tiers:

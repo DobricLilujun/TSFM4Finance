@@ -11,7 +11,10 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
 CFG = REPO / "tsfm4finance" / "bench" / "config.yaml"
-OPEN = REPO / "data" / "open"
+# the canonical corpus root: the evaluator and the task builder read assets/data, so the group
+# refresh must list the same directory they do (it used to be <repo>/data)
+from tsfm4finance.paths import DATA as OPEN  # noqa: E402
+OPEN = OPEN / "open"
 
 KEEP = ("core12", "long12", "newx")          # hand-curated, never rewritten
 

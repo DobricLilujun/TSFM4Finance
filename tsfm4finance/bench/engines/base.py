@@ -69,10 +69,18 @@ def to_levels(q: np.ndarray, src_levels: Sequence[float]) -> np.ndarray:
 
 
 def quantiles_from_samples(samples: np.ndarray) -> np.ndarray:
+    """(n_windows, n_samples, horizon) -> (n_windows, horizon, n_levels).
+
+    The last axis must be the level axis: `median_of` takes [..., 4], the scorer indexes
+    `q[t, k]`, and every quantile metric in `tsfm_eval.metrics` is told the same layout. The old
+    transpose produced (n_windows, n_levels, horizon), so a sample-based engine scored horizons as
+    if they were quantile levels - the numbers were plausible and the columns were wrong.
+    """
     s = np.asarray(samples, dtype=float)
     if s.ndim == 2:
         s = s[:, None, :]
-    return np.quantile(s, LEVELS, axis=1).transpose(1, 0, 2)
+    # np.quantile inserts the level axis first: (n_levels, n_windows, horizon)
+    return np.quantile(s, LEVELS, axis=1).transpose(1, 2, 0)
 
 
 def median_of(quantiles: np.ndarray) -> np.ndarray:

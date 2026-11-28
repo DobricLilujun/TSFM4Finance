@@ -10,12 +10,14 @@
 set -uo pipefail
 cd "$SLURM_SUBMIT_DIR"
 export HF_HOME=${HF_HOME:-$HOME/hf_cache} PYTHONUNBUFFERED=1
-G=${GROUPS:-long12,core12,newx}   H=${HORIZONS:-5,21}   AD=${ADAPTATIONS:-zero,fs16,fs64,full}
-envs/core/.venv/bin/python -m tsfm4finance.bench.sweep --stage plan --tiers A,B --groups $G \
+# DS_GROUPS, not GROUPS: bash populates GROUPS with the user's numeric group ids, so ${GROUPS:-...}
+# takes the first gid and the planner is asked for --groups 1000, which selects no series at all
+DS_GROUPS=${DS_GROUPS:-long12,core12,newx}   H=${HORIZONS:-5,21}   AD=${ADAPTATIONS:-zero,fs16,fs64,full}
+envs/core/.venv/bin/python -m tsfm4finance.bench.sweep --stage plan --tiers A,B --groups $DS_GROUPS \
     --horizons $H --contexts 512 --adaptations $AD 2>&1 | tail -3
 for S in forecast trading classify anomaly; do
   echo "==== $S $(date -Is)"
-  envs/core/.venv/bin/python -m tsfm4finance.bench.sweep --stage $S --tiers A,B --groups $G \
+  envs/core/.venv/bin/python -m tsfm4finance.bench.sweep --stage $S --tiers A,B --groups $DS_GROUPS \
       --horizons $H --contexts 512 --adaptations $AD --workers 1 --device cuda 2>&1 | tail -4
 done
 envs/core/.venv/bin/python -m tsfm4finance.bench.sweep --stage status 2>&1 | tail -12

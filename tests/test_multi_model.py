@@ -191,3 +191,23 @@ def test_horizon_switch_matches_paper_spec():
     short, i1 = build_windows(tr, va, te, horizon=5, span="auto")
     longw, i2 = build_windows(tr, va, te, horizon=63, span="auto")
     assert i1["span"] == "test" and i2["span"] == "val+test"
+
+
+def test_sample_based_quantiles_keep_the_level_axis_last():
+    """(n_windows, n_samples, horizon) must become (n_windows, horizon, n_levels). With the old
+    transpose the level axis sat in the middle, so `median_of` picked a horizon and every quantile
+    metric silently scored horizons as if they were levels."""
+    import numpy as np
+
+    from tsfm4finance.bench.engines.base import median_of, quantiles_from_samples
+
+    rng = np.random.RandomState(0)
+    samples = rng.randn(3, 500, 7)                      # 3 windows, 500 samples, h=7
+    q = quantiles_from_samples(samples)
+    assert q.shape == (3, 7, len(__import__("tsfm4finance.bench.engines.base", fromlist=["LEVELS"]).LEVELS))
+    # the median column must match the per-cell sample median, not some other axis
+    med = median_of(q)
+    assert med.shape == (3, 7)
+    assert np.allclose(med, np.median(samples, axis=1), atol=0.2)
+    # levels must be monotone along the last axis
+    assert np.all(np.diff(q, axis=2) >= -1e-9)

@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
 # Inference-only pass over tiers A,B x core12+long12 x h in {5,21}, zero-shot.
 # Each stage is resumable: re-running after an interrupt continues where it stopped.
-cd /home/ubadmin/projects/TSFM4Finance
+# resolve the repo from where this script lives: an absolute personal path works on one laptop and
+# silently does nothing everywhere else (`cd` fails, the script keeps running, and $PWD-relative
+# weights, reports and .venv2 then resolve against whatever directory the caller happened to be in)
+cd "$(dirname "$0")/.." || { echo "FATAL: cannot reach the repository root" >&2; exit 7; }
 # local model weights only - nothing is downloaded during the run
 # (see docs/08_offline_models.md; drop these two lines if you DO want HF downloads)
 export TSFM_WEIGHTS_ROOT=$PWD/models TSFM_OFFLINE=1

@@ -133,6 +133,17 @@ windows: ~21%, ~13%, ~7%. So aggregate shares over hundreds of cells are trustwo
 cell within ~12% of parity is not a win or a loss, and `n_windows` + lane `seed` are part of the
 merge protocol signature (`proto`) and a hard precondition in `cross_machine_check.py`.
 
+**The noise does not average out symmetrically, because the headline statistic is a threshold.**
+Pass 7 re-scored the same 66 series on the same node at 32 windows: *every* model's beat-naive share
+fell (`chronos-bolt-small` 42.4% -> 15.2%, `arima` 56.1% -> 40.9%), the head-to-head
+`chronos-bolt-small > chronos-2` moved 53.8% -> 40.2%, and **32.3% of cells change winner** between
+the two window counts. Cause: the per-cell model/naive ratio is centred just *above* 1 with a wide
+spread at 8 windows, so counting cells below 1.0 collects more false wins than true ones. Table and
+mechanism in docs/08 ("The beat-naive share is a threshold on a noisy number"); reproduce with
+`probes/window_sensitivity.py`. Consequence for this document: **every share in the tables below is an
+8-window number and is labelled as such**; any pass whose numbers will be quoted runs at
+`--max-windows 32` at least.
+
 ## Reporting rules (what goes in a table, what does not)
 
 1. **Report the metric family the model can serve.** A point-only head (TTM r2/r3) has no
@@ -352,6 +363,12 @@ because its two horizons are not independent):
 | `ttm-r3` | 126 | 0.8% | 0.0 .. 2.4 (63 series) |
 | `moment-1-small` | 132 | 0.8% | 0.0 .. 2.3 (66 series) |
 | `moment-1-large` | 132 | 0.8% | 0.0 .. 2.3 (66 series) |
+
+**These shares are 8-window numbers.** Re-measured at 32 windows on the same 66 series and node,
+they fall across the board (`arima` 56.1% -> 40.9%, `chronos-bolt-small` 42.4% -> 15.2%,
+`chronos-2` 39.4% -> 22.0%) and one pairwise ordering flips (`chronos-bolt-small > chronos-2`,
+53.8% -> 40.2%). The intervals below measure corpus sampling, not window sampling; the two errors are
+independent and both are in the number. See docs/08 and `probes/window_sensitivity.py`.
 
 What that says, and what it does not:
 

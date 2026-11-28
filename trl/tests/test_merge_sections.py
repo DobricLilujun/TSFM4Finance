@@ -222,8 +222,10 @@ def test_headline_ranking_compares_against_the_naive_row_not_mase_below_one(tmp_
     text = md.read_text()
     h = text.index("## Headline ranking")
     rank = text[h:text.index("## ", h + 5)]
-    cb = next(l for l in rank.splitlines() if "chronos-bolt-small" in l)
-    mo = next(l for l in rank.splitlines() if "moment-1-large" in l)
+    # table rows only: the caveat paragraph also names these models now (it cites the real
+    # 8-window vs 32-window shares), so a bare substring match would pick the prose
+    cb = next(l for l in rank.splitlines() if l.startswith("| `chronos-bolt-small`"))
+    mo = next(l for l in rank.splitlines() if l.startswith("| `moment-1-large`"))
     assert rank.index("chronos-bolt-small") < rank.index("moment-1-large"), "better model sorts first"
     # 4 cells, 3 comparable (s3 had no measurement), 2 wins: s4 is comparable and LOST,
     # even though its MASE 0.9 is below 1.0
@@ -280,6 +282,9 @@ def test_the_ranking_publishes_the_window_sample(tmp_path):
     out = md.read_text()
     assert "| win |" in out, out[-500:]
     assert "max-windows" in out, "the sampling caveat must sit next to the table"
+    assert "32 windows" in out, ("the caveat must say that the share is a threshold on a noisy "
+                                 "ratio: more windows lowers every model's share, it does not "
+                                 "just tighten it")
 
 
 def test_the_same_bytes_on_another_machine_is_not_called_a_fix(tmp_path):

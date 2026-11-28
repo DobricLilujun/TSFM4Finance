@@ -473,9 +473,13 @@ def report(args) -> int:
             "test span, so the window count is part of the measurement, not a knob: switching "
             "seed at 8 windows moves naive's own MASE ~55% median (max 100%) and the paired "
             "model/naive ratio ~12% (max 25%); at 32 windows those fall to ~21% and ~7% "
-            "(measured 2026-11-27 on four arena series, same bytes, same code). A single cell "
-            "within ~12% of parity is neither a win nor a loss - read aggregate shares, not "
-            "cells. `no measurement` counts cells whose windows were all non-finite or "
+            "(measured 2026-11-27 on four arena series, same bytes, same code). Worse than "
+            "noise: the share is a **threshold on that noisy ratio**, and the ratio sits just "
+            "above 1, so a small window count inflates it. Re-scoring the same 66 series at 32 "
+            "windows instead of 8 lowered every model's share (`chronos-bolt-small` 42.4% -> "
+            "15.2%, `arima` 56.1% -> 40.9%) and moved one pairwise ordering; 32.3% of cells "
+            "change winner between 8 and 32 windows. A single cell within ~12% of parity is "
+            "neither a win nor a loss - read aggregate shares at 32 windows or more, not cells. `no measurement` counts cells whose windows were all non-finite or "
             "unscored; those never enter a median.", "",
             "| model_key | cells | beat naive | med MASE/naive | median MASE | median RMSE | ctx | win | no measurement |",
             "|---|--:|--:|--:|--:|--:|---|--:|--:|"]
@@ -683,7 +687,11 @@ def main() -> int:
     ap.add_argument("--series", action="append", default=[],
                     help="CSV with timestamp,close (repeatable)")
     ap.add_argument("--horizons", default="21,63,126")
-    ap.add_argument("--max-windows", type=int, default=16)
+    # 32, not 8: the beat-naive share is a threshold on a noisy per-cell ratio, and at 8 windows
+    # the noise is wide enough - and centred on the wrong side of parity - to inflate every model's
+    # share by 10-27 pp (measured 2026-11-27/28, same bytes, same seed, docs/08). Rows record
+    # `n_windows`, so older 8-window lanes stay honest as their own protocol.
+    ap.add_argument("--max-windows", type=int, default=32)
     # protocol knobs the child inherits, so the file states what was actually asked for
     ap.add_argument("--ctx", type=int, default=256)
     ap.add_argument("--batch", type=int, default=16)

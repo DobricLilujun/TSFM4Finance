@@ -220,6 +220,8 @@ def test_moment_adapted_checkpoint_cannot_be_silently_dropped_by_a_horizon_chang
     import sys
     import types
 
+    pytest.importorskip("torch", reason="MomentEngine imports torch at module level")
+
     # a stub momentfm: no weights, no download, just enough surface to exercise the engine
     class _Pipe:
         def __init__(self, horizon):
@@ -252,7 +254,6 @@ def test_moment_adapted_checkpoint_cannot_be_silently_dropped_by_a_horizon_chang
     assert target is not None and via == "_pipe", "the fine-tune target must be reachable"
     eng._ft_load = {"via": "_pipe"}                 # pretend an adapted checkpoint was applied
     eng._horizon = 96
-    import pytest
     with pytest.raises(RuntimeError, match="fixed at horizon"):
         eng._get(21)
 

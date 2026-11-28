@@ -221,10 +221,16 @@ def sweep(args) -> int:
 
 def proto_core(row: dict) -> tuple:
     """What was measured: context, its note, the data bytes, the window sample. Two rows that
-    agree here asked the *same question of the same data*; if their full ``proto`` differs the
+    agree here asked the *same question of the same data* (same requested window budget, same
+    number of windows actually scored); if their full ``proto`` differs the
     gap is what the stack (machine, torch build, commit) costs - reproducibility, not a fix."""
+    # `n_windows` is what survived scoring; `max_windows` is what was *asked for*. They are not
+    # the same field: a short series caps both lanes at its own window count, so an 8-window lane
+    # and a 32-window lane can both report n_windows=8 while asking different questions.
+    pr0 = row.get("_prov") or {}
     return (row.get("ctx"), row.get("ctx_note") or "",
-            row.get("data_kind"), row.get("data_hash"), row.get("n_windows"))
+            row.get("data_kind"), row.get("data_hash"), row.get("n_windows"),
+            row.get("max_windows", pr0.get("max_windows")))
 
 
 def proto(row: dict) -> tuple:
@@ -257,7 +263,7 @@ def stamp_rows(rows: list, key: str, lane: dict | None = None) -> list:
     if lane:
         for r in rows:
             if isinstance(r, dict):
-                for f in ("machine", "code_sha"):
+                for f in ("machine", "code_sha", "max_windows"):
                     if lane.get(f) is not None:
                         r.setdefault(f, lane[f])
     return rows

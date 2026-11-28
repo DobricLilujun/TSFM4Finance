@@ -341,3 +341,21 @@ def test_a_different_window_sample_is_a_protocol_change_not_a_stack(tmp_path):
     text = md.read_text()
     assert "Superseded by a protocol change (what was measured differs): naive (1)" in text, text
     assert "Re-measured on another stack" not in text, text
+
+
+def test_a_wider_window_request_is_a_different_protocol_even_when_the_series_caps_it():
+    """`n_windows` on a row is what survived scoring, `--max-windows` is what was requested. A short
+    series caps both, so an 8-window row and a 32-window row can share every scored-window field and
+    still be different measurements; if the signature only looks at the scored count, the 32-window
+    row silently supersedes the 8-window one and the corpus quietly changes under the table."""
+    a = _row("chronos-bolt-small", "short-series", 0.8)
+    b = _row("chronos-bolt-small", "short-series", 0.9)
+    for r, req in ((a, 8), (b, 32)):
+        r["n_windows"] = 6          # the span only holds 6 windows: both rows score 6
+        r["_prov"] = {"device": "cuda", "code_sha": "same", "torch": "2.7", "seed": 0,
+                      "max_windows": req}
+    sweep = _load()
+    assert sweep.proto_core(a) != sweep.proto_core(b), (
+        "the requested window budget belongs in what-was-measured, not in the stack half")
+    assert sweep.proto_core(a)[:5] == sweep.proto_core(b)[:5], (
+        "everything else is identical on purpose: the request is the only difference")

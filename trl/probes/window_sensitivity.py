@@ -22,18 +22,29 @@ from pathlib import Path
 
 
 def load(paths):
-    """n_windows -> cell key -> row. Grouped by window count so nothing is silently merged."""
+    """requested window budget -> cell key -> row.
+
+    The group key is what the lane *asked for* (`--max-windows`, in the meta line and stamped on
+    rows since pass 6), not the row's `n_windows`: that field counts the windows that survived
+    scoring, and a short series caps the sample below the request, so a 64-window lane would split
+    into 38/39/40/49/50/64 groups of the same protocol. Lanes predating both fields fall back to
+    the scored count and say so in the footer.
+    """
     out = defaultdict(dict)
     prov = defaultdict(set)
     for p in paths:
+        meta = {}
         for line in Path(p).read_text().splitlines():
             if not line.strip():
                 continue
             rec = json.loads(line)
             if "meta" in rec:
+                meta = rec["meta"]
                 continue
             for r in rec.get("rows", []):
-                nw = int(r.get("n_windows") or 0)
+                scored = int(r.get("n_windows") or 0)
+                req = r.get("max_windows") or meta.get("max_windows") or scored
+                nw = int(req)
                 key = (r.get("model_key") or rec.get("model"), r["series"],
                        r.get("span", "test"), int(r["horizon"]))
                 out[nw][key] = r
@@ -97,7 +108,7 @@ def main() -> int:
     a = ap.parse_args()
 
     by_nw, prov = load(a.lanes)
-    print("window counts present (machine, data_hash, code_sha sets per group):")
+    print("requested window budgets present (machine, data_hash, code_sha sets per group):")
     for nw in sorted(by_nw):
         print(f"  {nw:3d} windows: {len(by_nw[nw]):5d} cells  stacks={sorted(prov[nw])[:3]}")
 

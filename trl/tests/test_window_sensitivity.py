@@ -67,14 +67,40 @@ def test_two_window_counts_stay_two_groups_and_the_flips_are_named(tmp_path):
 def test_cells_without_the_window_field_are_called_out_not_silently_grouped(tmp_path):
     old = tmp_path / "old.jsonl"
     _lane(old, 8, {"naive": {"s1": (2.0, 2.0)}, "a": {"s1": (1.9, 2.0)}})
-    # strip n_windows from the old lane: it predates the field
+    # strip both window fields from the old lane: it predates them, and the probe must say so
+    # rather than quietly grouping those cells by whatever number survives
     recs = [json.loads(l) for l in old.read_text().splitlines()]
     for r in recs:
+        r.get("meta", {}).pop("max_windows", None)
         for row in r.get("rows", []):
-            row.pop("n_windows")
+            row.pop("n_windows", None)
     old.write_text("\n".join(json.dumps(r) for r in recs) + "\n")
     _lane(tmp_path / "new.jsonl", 32, {"naive": {"s1": (2.0, 2.0)}, "a": {"s1": (2.1, 2.0)}})
     p = subprocess.run([sys.executable, str(SCRIPT), str(old), str(tmp_path / "new.jsonl")],
                        capture_output=True, text=True, timeout=120)
     assert p.returncode == 0, p.stderr[-600:]
     assert "predate the n_windows field" in p.stdout
+
+
+def test_a_short_series_capping_the_sample_does_not_split_one_lane_into_two_groups(tmp_path):
+    """`n_windows` counts windows that survived scoring; `--max-windows` is the budget. On a series
+    whose test span holds fewer windows than the budget, a 64-window lane reports n_windows=39 for
+    that cell. Grouping by the scored number would scatter one protocol across 38/39/40/50/64
+    buckets and make the 8-vs-64 comparison look like six protocols."""
+    _lane(tmp_path / "big.jsonl", 64, {"naive": {"short": (2.0, 2.0), "long": (2.0, 2.0)},
+                                       "a": {"short": (2.4, 2.0), "long": (1.4, 2.0)}})
+    # the same lane, but the short-series cell scored fewer windows than requested
+    recs = [json.loads(l) for l in (tmp_path / "big.jsonl").read_text().splitlines()]
+    for r in recs:
+        for row in r.get("rows", []):
+            if row["series"] == "short":
+                row["n_windows"] = 39
+    (tmp_path / "big.jsonl").write_text("\n".join(json.dumps(r) for r in recs) + "\n")
+    _lane(tmp_path / "small.jsonl", 8, {"naive": {"short": (2.0, 2.0), "long": (2.0, 2.0)},
+                                        "a": {"short": (1.8, 2.0), "long": (1.9, 2.0)}})
+    p = subprocess.run([sys.executable, str(SCRIPT), str(tmp_path / "small.jsonl"),
+                        str(tmp_path / "big.jsonl")],
+                       capture_output=True, text=True, timeout=120)
+    assert p.returncode == 0, p.stderr[-600:]
+    assert "8 windows:" in p.stdout and "64 windows:" in p.stdout
+    assert "39 windows:" not in p.stdout, "the short cell leaked its scored count into the group key"

@@ -993,18 +993,31 @@ unknown-flag failure, and every multi-word value in the example is quoted and so
 
 Pass 7 re-scored the same 66 arena series on the same watson node at 32 windows instead of 8 (`reports/pass7_watson_win`, 8 models, same bytes, same seed, `n_windows` in the protocol signature so nothing merges across the two). The headline result is not a tie resolving - it is that **every model's beat-naive share falls**, and the ordering moves with it:
 
-| model | beat naive @ 8w | beat naive @ 32w | Δ |
-|---|--:|--:|--:|
-| `arima` | 56.1% | 40.9% | -15.2 pp |
-| `chronos-bolt-small` | 42.4% | 15.2% | -27.3 pp |
-| `chronos-2` | 39.4% | 22.0% | -17.4 pp |
-| `theta` | 34.1% | 15.9% | -18.2 pp |
-| `chronos-bolt-base` | 32.6% | 12.1% | -20.5 pp |
-| `seasonal_naive` | 17.4% | 6.8% | -10.6 pp |
+The 64-window pass (same node, same bytes) is included to show where it stops moving: 32 is
+already the plateau, so the extra cost of 64 buys nothing.
 
-Head-to-head on the same cells: `arima > chronos-bolt-small` goes **58.3% → 84.1%**, and
-`chronos-bolt-small > chronos-2` goes **53.8% → 40.2%** - the pair the 8-window pass left ambiguous
-is not a coin flip at 32 windows, it goes the *other* way.
+| model | beat naive @ 8w | @ 32w | @ 64w | 8w → 32w | 32w → 64w |
+|---|--:|--:|--:|--:|--:|
+| `arima` | 56.1% | 40.9% | 44.7% | -15.2 pp | +3.8 pp |
+| `chronos-bolt-small` | 42.4% | 15.2% | 15.9% | -27.3 pp | +0.7 pp |
+| `chronos-2` | 39.4% | 22.0% | 13.6% | -17.4 pp | -8.4 pp |
+| `theta` | 34.1% | 15.9% | 13.6% | -18.2 pp | -2.3 pp |
+| `chronos-bolt-base` | 32.6% | 12.1% | 11.4% | -20.5 pp | -0.7 pp |
+| `chronos-t5-small` | 33.3% | 9.1% | 9.8% | -24.2 pp | +0.7 pp |
+| `seasonal_naive` | 17.4% | 6.8% | 4.5% | -10.6 pp | -2.3 pp |
+
+Head-to-head on the same cells (8w / 32w / 64w):
+
+| pair | 8w | 32w | 64w | reading |
+|---|--:|--:|--:|---|
+| `arima` > `chronos-bolt-small` | 58.3% | 84.1% | 83.3% | real, and far bigger than 8 windows showed |
+| `chronos-2` > `chronos-t5-small` | 55.3% | 69.7% | 70.5% | real |
+| `chronos-bolt-small` > `chronos-2` | 53.8% | 40.2% | 38.6% | the 8-window "tie" resolves **against** bolt-small |
+| `chronos-bolt-base` > `chronos-t5-small` | 48.5% | 50.0% | 47.0% | genuinely a tie: it does not move |
+
+**The published table is internally inconsistent at 8 windows, not just noisy.** A tie that becomes a
+61%-to-39% gap when the window sample quadruples was never a tie; it was the sample. 33.0% of cells
+(305/924) change winner between 8 and 64 windows.
 
 Why: the share counts a cell as a win when `mase_model < mase_naive`, i.e. when a **noisy ratio lands
 below 1.0**. The ratio distributions show both halves of the problem at once - the 8-window draws are
@@ -1025,9 +1038,21 @@ this resolution was never a measurement of model quality; it was a measurement o
 indistinguishable from persistence on these series (median ratio 1.000, IQR 0.005), so it neither
 wins nor loses - it is naive with extra steps, and its "share" is pure coin-toss mass around parity.
 
+Cross-machine at the new protocol (`reports/pass7_watson_win/lane_win32.jsonl` vs
+`reports/pass7_trux_win/lane_cuda-?.jsonl`, 990 shared cells: watson A6000 CUDA vs trux RTX 6000 Ada
+CUDA and trux CPU, same bytes, seed 0): seven of eight families **0.000% median and 0.000% max**
+(132 cells each), `chronos-t5-small` again the only outlier - and its median falls from 5.73% (8
+windows, pass 5) to **2.165%** (32 windows). The generative family's stack sensitivity was partly
+window noise all along. `chronos-t5-small` OOM'd on trux's GPU mid-lane (another user's process held
+26.6 GiB of 47.4); the lane file records it as a `failed` model with the CUDA error, and the CPU lane
+covered those 33 series - which is why the surviving t5 pair is CUDA-vs-CPU, and why the device column
+is part of the number and not decoration.
+
 What this changes:
-* **The default window count for any pass whose numbers get quoted is 32, not 8.** 8 windows is fine
-  for a smoke test of whether a family runs at all (which is what it was used for).
+* **The default window count for any pass whose numbers get quoted is 32, not 8** (`sweep_evaluate.py`
+  defaults to 32 as of pass 7). 8 windows is fine for a smoke test of whether a family runs at all
+  (which is what it was used for). Pass 7b (`probes/watson/watson_pass7b_rest32.sh`) moves the other
+  11 model keys to 32 windows on the same 66 series so the published table shares one protocol.
 * Shares from an 8-window pass must be published with the window count next to them. The generator now
   prints `win` per model in the ranking table, and `proto()` keys on `n_windows`, so an 8-window row
   can never supersede a 32-window one.
@@ -1035,3 +1060,45 @@ What this changes:
   (`probes/window_sensitivity.py reports/pass5_watson_66/lane.jsonl reports/pass7_watson_win/lane_win32.jsonl`),
   and `tests/test_window_sensitivity.py` pins that the probe keeps window counts as separate groups
   and counts flips per cell.
+
+## A row's `n_windows` is what survived scoring, not what was asked for
+
+The first version of `probes/window_sensitivity.py` grouped cells by the row's `n_windows`, which is
+the obvious field and the wrong one. Three results came out of one 64-window lane: groups at 38, 39,
+40, 49, 50 and 64 windows. Nothing was broken in the sweep - `n_windows` is the number of windows that
+**survived scoring** (`evaluate.py` sets it to `len(kept)` after NaN/blank windows leave the set), and
+a series whose test span holds 39 candidate windows cannot score 64 no matter what was requested. So
+one protocol fragmented into six groups, and a short series scored under a 32-window budget looks
+*identical* to the same series under an 8-window budget.
+
+That second half is the dangerous part, and it reaches the merge, not just the probe: if the protocol
+signature only sees the scored count, a 32-window row silently supersedes an 8-window row for a capped
+series, and the corpus changes under the table while every duplicate-classification label stays
+"re-measured on another stack".
+
+Both are fixed at the source:
+* `proto_core()` now carries the **requested** budget (`max_windows`, from the lane meta and stamped on
+  every row by `stamp_rows`) alongside the scored count. The pinned case: two rows identical in every
+  scored field, requested 8 vs 32 → different `proto_core`, so different protocol
+  (`tests/test_merge_sections.py::test_a_wider_window_request_is_a_different_protocol_even_when_the_series_caps_it`).
+* The probe groups by the requested budget (row field, else lane meta, else scored count with a printed
+  note), and a test feeds a lane where one cell scored 39 under a 64-window request and asserts no
+  `39 windows:` group appears (`tests/test_window_sensitivity.py`).
+
+The general rule: a field that records *what happened during scoring* cannot stand in for *what was
+requested*. The request is the protocol; the score count is a property of the cell.
+
+## An untracked config file beside the script outranked the operator's own variable
+
+Five bridge tests passed on the laptop and failed on trux with no code change between them.
+`trux_dispatch.sh` sources `probes/trux/bridge/bridge.env` (untracked: hostnames, keys, the queue
+path) *after* the caller's environment is set, so on trux that file's `BRIDGE=` overwrote the fixture
+path a test exported - the test was reading the live inbox. Same script, two machines, two
+behaviours, and the failure looked like a bug in the numbering logic rather than in test isolation.
+
+`bridge.env` is now defaults only: an exported `BRIDGE` survives sourcing it, in both
+`trux_dispatch.sh` and `gpu7_generate.sh`, pinned by
+`tests/test_bridge_generate.py::test_an_explicit_BRIDGE_beats_the_bridge_env_next_to_the_script`. The
+same lesson as the hand-written file that pinned a remote clone to old code: config that lives outside
+git changes behaviour per machine, so it must be a default with an explicit override, never the last
+word.

@@ -140,9 +140,10 @@ fell (`chronos-bolt-small` 42.4% -> 15.2%, `arima` 56.1% -> 40.9%), the head-to-
 the two window counts. Cause: the per-cell model/naive ratio is centred just *above* 1 with a wide
 spread at 8 windows, so counting cells below 1.0 collects more false wins than true ones. Table and
 mechanism in docs/08 ("The beat-naive share is a threshold on a noisy number"); reproduce with
-`probes/window_sensitivity.py`. Consequence for this document: **every share in the tables below is an
+`probes/window_sensitivity.py`. The 64-window pass says where it stops: 32w vs 64w shares differ by at
+most 8 pp, so 32 is enough. Consequence for this document: **every share in the tables below is an
 8-window number and is labelled as such**; any pass whose numbers will be quoted runs at
-`--max-windows 32` at least.
+`--max-windows 32` (now the default of `sweep_evaluate.py`).
 
 ## Reporting rules (what goes in a table, what does not)
 
@@ -364,11 +365,18 @@ because its two horizons are not independent):
 | `moment-1-small` | 132 | 0.8% | 0.0 .. 2.3 (66 series) |
 | `moment-1-large` | 132 | 0.8% | 0.0 .. 2.3 (66 series) |
 
-**These shares are 8-window numbers.** Re-measured at 32 windows on the same 66 series and node,
-they fall across the board (`arima` 56.1% -> 40.9%, `chronos-bolt-small` 42.4% -> 15.2%,
-`chronos-2` 39.4% -> 22.0%) and one pairwise ordering flips (`chronos-bolt-small > chronos-2`,
-53.8% -> 40.2%). The intervals below measure corpus sampling, not window sampling; the two errors are
-independent and both are in the number. See docs/08 and `probes/window_sensitivity.py`.
+**These shares are 8-window numbers, and that is a level error, not just noise.** Pass 7 re-scored
+the 8-model tie cluster on the same 66 series and node at 32 and 64 windows: every share falls
+(`arima` 56.1% -> 40.9% -> 44.7%, `chronos-bolt-small` 42.4% -> 15.2% -> 15.9%, `chronos-2` 39.4% ->
+22.0% -> 13.6%), 33.0% of cells change winner between 8 and 64 windows, and 32 is already the
+plateau (32w -> 64w moves shares by <= 8 pp while 8w -> 32w moves them by 10-27 pp). Head-to-head on
+the same cells: `arima > chronos-bolt-small` 58.3% -> 83.3%, `chronos-2 > chronos-t5-small` 55.3% ->
+70.5%, and the "tie" `chronos-bolt-small` vs `chronos-2` resolves *against* bolt-small (53.8% ->
+38.6%). Only `chronos-bolt-base` vs `chronos-t5-small` stays a tie at every window count (48.5/50.0/
+47.0). The intervals below measure corpus sampling, not window sampling; the two errors are
+independent and both are in the number. Pass 7b (`probes/watson/watson_pass7b_rest32.sh`) moves the
+other 11 model keys to 32 windows so the whole table shares one protocol; until then the ranks below
+are 8-window ranks. See docs/08 and `probes/window_sensitivity.py`.
 
 What that says, and what it does not:
 
@@ -376,21 +384,8 @@ What that says, and what it does not:
   `chronos-bolt-small` in 99.9% of resamples and `chronos-2` in 100.0%. Intervals barely touch.
 * **`chronos-bolt-small` vs `chronos-2` is a tie, not 41% > 40%.** Pairwise 61.6% - a mildly
   favoured coin flip. Publishing them as ranks 2 and 3 is over-precision.
-* **`chronos-bolt-base` vs `chronos-t5-small` is 53.8%:** no ordering. With `chronos-t5-base` now
-  scored corpus-wide (pass 5 supplied its 66 missing series), the whole T5/bolt-base cluster sits
-  inside one another's intervals.
-* **`ttm-r3` at ~1% is not noise.** It loses essentially every cell to naive; the interval is near a
-  point because the outcome is constant, not because the sample is large. Its 126 scored cells out of
-  202 are the NaN policy talking: 76 cells had no finite forecast to score, on either machine.
-* **MOMENT and TimeMoE really are that far behind, and the interval now says so.** Both MOMENT sizes
-  sit at 0.8% (0.0 .. 2.3) with a median per-cell MASE ratio of 2.65, `timemoe-50m` at 6.1%
-  (2.3 .. 9.8). These are the families whose measurement was a single number for most of this project;
-  pass 6 gave them two machines and a second pass over 66 series, and nothing about the earlier
-  reading changed: MOMENT's checkpoint carries no trained forecasting head, and that is what the
-  benchmark measures.
-* **`seasonal_naive` beating most foundation models (19.3%) is a finding about the corpus**, not the
-  models: these are financial series with weak seasonality at h=21/63, so a weekly-lag repeat is a
-  hard baseline and `naive` itself scores MASE ~4.5.
+* **`chronos-bolt-base` vs `chronos-t5-small` is 53.8%** at 8 windows and stays a tie at 32 and 64
+  (50.0%, 47.0% head-to-head): this one is a real tie, which is why it survives the protocol change.
 
 A model whose interval overlaps a neighbour's is tied *as far as this pass can see*. Raising
 `--max-windows` narrows these intervals roughly as `1/sqrt(windows)`; scoring more series narrows the

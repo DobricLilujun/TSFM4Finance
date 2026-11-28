@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import io
 import time
+import zipfile
 
 import pandas as pd
 import requests
@@ -27,6 +28,43 @@ def _month_path(symbol: str, interval: str, ym: str):
     return RAW / f"{symbol}_{interval}_{ym}.csv"
 
 
+def parse_kline_payload(payload: bytes) -> pd.DataFrame:
+    """Decode a Binance monthly klines payload into the COLS frame.
+
+    The endpoint serves a ZIP archive; handing the compressed bytes to read_csv only "works" as an
+    error, because compression inference on an unnamed BytesIO cannot see the ZIP magic. So the
+    archive is opened explicitly, and a plain-CSV response is still accepted (the API has shipped
+    both depending on the mirror).
+    """
+    buf = io.BytesIO(payload)
+    if payload[:2] == b"PK":
+        with zipfile.ZipFile(buf) as zf:
+            member = zf.namelist()[0]
+            buf = io.BytesIO(zf.read(member))
+    df = pd.read_csv(buf, header=None)
+    if str(df.iloc[0, 0]).strip().lower().startswith("open"):
+        df = df.iloc[1:]
+    return df
+
+
+def to_timestamps(open_time: pd.Series) -> pd.Series:
+    """Convert Binance `open_time` to UTC datetimes, normalising the unit per series.
+
+    Binance monthly archives carry microseconds; the Kline API carries milliseconds. Detecting the
+    unit once over a *concatenation* of months is wrong when one file is ms and another us, so each
+    series is normalised before anything is joined.
+    """
+    v = pd.to_numeric(open_time, errors="coerce")
+    med = float(v.median()) if v.notna().any() else 0.0
+    if med >= 1e14:
+        unit = "us"
+    elif med >= 1e11:
+        unit = "ms"
+    else:
+        unit = "s"
+    return pd.to_datetime(v, unit=unit, utc=True)
+
+
 @retry(times=3, base_delay=2.0)
 def fetch_month(symbol: str, interval: str, ym: str) -> bool:
     """True if the file is present/created, False if that month does not exist."""
@@ -37,9 +75,7 @@ def fetch_month(symbol: str, interval: str, ym: str) -> bool:
     r = requests.get(url, timeout=120)
     if r.status_code == 404 or len(r.content) < 200:
         return False
-    df = pd.read_csv(io.BytesIO(r.content), header=None)
-    if str(df.iloc[0, 0]).strip().lower().startswith("open"):
-        df = df.iloc[1:]
+    df = parse_kline_payload(r.content)
     df.columns = COLS
     p.parent.mkdir(parents=True, exist_ok=True)
     df.to_csv(p, index=False)
@@ -73,9 +109,7 @@ def build_dataset(symbol: str, interval: str = "1h", start: str = "2019-01",
     df = pd.concat(frames, ignore_index=True)
     for c in ("open", "high", "low", "close", "volume", "quote_volume"):
         df[c] = pd.to_numeric(df[c], errors="coerce")
-    ot = pd.to_datetime(pd.to_numeric(df["open_time"], errors="coerce"), unit="ms", utc=True)
-    if pd.to_numeric(df["open_time"], errors="coerce").median() < 1e11:
-        ot = pd.to_datetime(pd.to_numeric(df["open_time"], errors="coerce"), unit="s", utc=True)
+    ot = to_timestamps(df["open_time"])
     out = pd.DataFrame({"timestamp": ot, "open": df["open"], "high": df["high"],
                         "low": df["low"], "close": df["close"], "volume": df["volume"],
                         "amount": df["quote_volume"]}).dropna(subset=["close"])

@@ -328,3 +328,48 @@ def test_finetune_contract_is_full_parameter_not_head_only():
     assert "prm.requires_grad_(True)" in src                 # every parameter trainable
     assert "AdamW(module.parameters()" in src                # optimizer sees all of them
     assert "requires_grad_(False)" not in src                # nothing is frozen
+
+
+def test_binance_payload_is_unzipped_and_the_time_unit_is_per_series():
+    """Two silent acquisition failures: the monthly endpoint serves a ZIP, and read_csv on the
+    compressed bytes fails *after* a successful download; and the epoch unit was detected once over
+    a concatenation of months, so a microsecond archive next to a millisecond one produced
+    out-of-bounds timestamps."""
+    import io
+    import zipfile
+
+    import pandas as pd
+
+    from tsfm4finance.bench.download.binance import parse_kline_payload, to_timestamps
+
+    cols = ["open_time", "open", "high", "low", "close", "volume", "close_time",
+            "quote_volume", "trades", "taker_buy_base", "taker_buy_quote", "ignore"]
+    rows = [[1_700_000_000_000 + i, 1, 2, 0.5, 1.5, 10, 0, 5, 3, 1, 1, 0] for i in range(4)]
+    csv = "\n".join(",".join(str(c) for c in r) for r in rows).encode()
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, "w") as zf:
+        zf.writestr("x.csv", csv.decode())
+    df = parse_kline_payload(buf.getvalue())
+    assert list(df.columns) == list(range(12)) and len(df) == 4
+    # a plain CSV response still parses (mirrors have shipped both)
+    assert len(parse_kline_payload(csv)) == 4
+    # microseconds and milliseconds must both land on real dates
+    us = pd.Series([1_700_000_000_000_000 + i for i in range(3)])
+    ms = pd.Series([1_700_000_000_000 + i for i in range(3)])
+    assert str(to_timestamps(us).iloc[0])[:4] == "2023"
+    assert str(to_timestamps(ms).iloc[0])[:4] == "2023"
+
+
+def test_scraped_links_resolve_the_way_a_browser_resolves_them():
+    """t4 scraping kept the href only if it was already absolute, otherwise it pasted the href onto
+    the index-page URL. An absolute-path href (/files/x.zip) dropped the directory the page lives in,
+    "../x.zip" was mangled into a name, and the reported "found link" pointed at a URL that never
+    existed - while download_found then saved the index HTML and called it a dataset."""
+    from tsfm4finance.bench.download.t4_scrape import abs_links
+
+    base = "https://example.org/pub/data/index.html"
+    out = abs_links(base, ["a.zip", "/files/b.zip", "../c.zip", "https://other.org/d.zip"])
+    assert out == ["https://example.org/pub/data/a.zip",
+                   "https://example.org/files/b.zip",
+                   "https://example.org/pub/c.zip",
+                   "https://other.org/d.zip"]

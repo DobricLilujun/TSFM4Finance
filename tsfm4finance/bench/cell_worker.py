@@ -356,7 +356,10 @@ def run_classify(store: CellStore, grid, rows, a) -> None:
                     emb = engine.encode([w.context for w in wins])
                     feats = np.asarray(emb, dtype=float)
                 elif route == "native_head":
-                    proba = engine.classify([w.context for w in wins], n_classes=len(labels))
+                    # the Engine contract is (contexts, labels): a native head has to be fitted on
+                    # something, and `n_classes=` matched no implementation in the tree, so every
+                    # clf_head cell died with TypeError before reaching the scorer
+                    proba = engine.classify([w.context for w in wins], labels)
                     cell = fit_eval(None, wins, proba, labels, route=route)
                     cell.update({"stage": "classify", "series": r["series"], "model": model,
                                  "adaptation": adaptation, "route": route,

@@ -56,21 +56,35 @@ class TiRexEngine(Engine):
         cs = self.trim(contexts)
         q0, _ = self._raw(cs, horizon)
         step = q0.shape[1]
-        qs, pts = [q0], [q0[:, :, int(np.argmin(np.abs(np.asarray(self.levels) - 0.5)))]]
+        nq = q0.shape[2] if q0.ndim == 3 else 1
+        # the median column of the (N, steps, nq) output, kept as one (N, produced) array per
+        # window: that is what gets rolled back into the context
+        mid = int(np.argmin(np.abs(np.asarray(self._patch_levels(nq)) - 0.5)))
+        qs = [q0]
+        med = q0[:, :, mid]                                   # (N, step)
         while step < horizon:
-            grown = [np.concatenate([c, p[:min(step, horizon)]]) for c, p in zip(cs, pts)]
-            grown = [c[-self.max_context:] for c in grown]
+            # grow each context by the median steps produced so far (never more than the patch just
+            # generated), then re-forecast. `p[:k]` sliced the *window* axis instead of the time
+            # axis, and the old update zipped windows against output patches, so np.concatenate
+            # raised for any horizon longer than one patch.
+            grown = [np.concatenate([c, m[:step]])[-self.max_context:] for c, m in zip(cs, med)]
             q, _ = self._raw(grown, horizon)
             qs.append(q)
-            pts = [np.concatenate([p, qq[:, :, int(np.argmin(np.abs(np.asarray(self.levels) - 0.5)))].squeeze(-1) if qq.ndim == 2 else qq[:, :, int(np.argmin(np.abs(np.asarray(self.levels) - 0.5)))]])
-                   for p, qq in zip(pts, qs)]
+            med = np.concatenate([med, q[:, :, mid]], axis=1)
             step += q.shape[1]
         full = np.concatenate(qs, axis=1)[:, :horizon, :]          # (N,H,nq)
         nq = full.shape[-1]
+        lv = self._patch_levels(nq)
+        mid = int(np.argmin(np.abs(np.asarray(lv) - 0.5)))
+        return Pred(point=full[:, :, mid], quantiles=to_levels(full, lv),
+                    meta={"rollout_steps": int(np.ceil(horizon / max(q0.shape[1], 1)))})
+
+    def _patch_levels(self, nq: int) -> list[float]:
+        """The level axis of one patch: the model's own grid when it matches, else a fresh grid of
+        the same width. Computed per call so a rolled-out patch with a different width cannot be
+        scored against the first patch's levels."""
         lv = self.levels if len(self.levels) == nq else list(np.linspace(0.001, 0.999, nq))
-        med = int(np.argmin(np.abs(np.asarray(lv) - 0.5)))
-        return Pred(point=full[:, :, med], quantiles=to_levels(full, lv),
-                    meta={"rollout_steps": int(np.ceil(horizon / max(step, 1)))})
+        return lv
 
 
 def _use_native_mlstm_kernels() -> None:

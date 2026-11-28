@@ -137,11 +137,22 @@ def probe(src: Source) -> dict:
         links = _links(body, pats)[:12]
         if links:
             entry["status"] = "found_index"
-            entry["found_links"] = [url if l.startswith("http") else f"{url.rstrip('/')}/{l.lstrip('/')}"
-                                    for l in links]
+            entry["found_links"] = abs_links(url, links)
             break
         entry["status"] = "reachable_no_links"
     return entry
+
+
+def abs_links(base: str, links: list[str]) -> list[str]:
+    """Resolve scraped hrefs against the page they came from.
+
+    The old expression kept the href only when it already started with http, and otherwise pasted it
+    onto the *index page URL* - so an absolute-path href (/files/x.zip) lost the server path it was
+    written against, "../x.zip" was mangled, and an absolute http href to a different host was kept
+    while its relative siblings were not. urljoin implements the rule the browser uses.
+    """
+    from urllib.parse import urljoin
+    return [urljoin(base, l) for l in links]
 
 
 def download_found(src: Source, entry: dict, limit: int = 3) -> dict:
@@ -154,12 +165,20 @@ def download_found(src: Source, entry: dict, limit: int = 3) -> dict:
             if r.status_code != 200:
                 continue
             n = 0
+            capped = False
             with open(p, "wb") as f:
                 for chunk in r.iter_content(1 << 16):
                     f.write(chunk)
                     n += len(chunk)
                     if n > 400 << 20:                      # 400 MB cap per file
+                        capped = True
                         break
+            if capped:
+                # a truncated archive is not a dataset: zip/tar/parquet readers reject it, and the
+                # old size check (>1000 bytes) then reported the acquisition as a success
+                p.unlink(missing_ok=True)
+                record_failure("t4", src.key, f"{u}: exceeded the 400 MB cap, discarded")
+                continue
             if p.stat().st_size > 1000:
                 got.append({"url": u, "path": str(p), "bytes": p.stat().st_size})
         except Exception as e:                             # noqa: BLE001

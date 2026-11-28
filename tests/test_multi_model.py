@@ -211,3 +211,132 @@ def test_sample_based_quantiles_keep_the_level_axis_last():
     assert np.allclose(med, np.median(samples, axis=1), atol=0.2)
     # levels must be monotone along the last axis
     assert np.all(np.diff(q, axis=2) >= -1e-9)
+
+
+def test_moment_adapted_checkpoint_cannot_be_silently_dropped_by_a_horizon_change(monkeypatch):
+    """MOMENT rebuilds its pipeline from base weights whenever the forecast horizon changes, and the
+    generic fine-tune attribute scan never saw the lazy pipeline at all: adapted MOMENT cells either
+    died with "no torch module" or, worse, ran the *base* model while being reported as adapted."""
+    import sys
+    import types
+
+    # a stub momentfm: no weights, no download, just enough surface to exercise the engine
+    class _Pipe:
+        def __init__(self, horizon):
+            self.horizon = horizon
+            self.model = types.SimpleNamespace(load_state_dict=lambda *a, **k: (0, 0),
+                                               state_dict=lambda: {"w": 1})
+
+        def init(self):
+            return self
+
+        def to(self, device):
+            return self
+
+        def eval(self):
+            return self
+
+    class _Pipeline:
+        @classmethod
+        def from_pretrained(cls, ckpt, model_kwargs=None):
+            return _Pipe(model_kwargs["forecast_horizon"])
+
+    stub = types.ModuleType("momentfm")
+    stub.MOMENTPipeline = _Pipeline
+    monkeypatch.setitem(sys.modules, "momentfm", stub)
+
+    from tsfm4finance.bench.engines.moment import MomentEngine
+
+    eng = MomentEngine(checkpoint="AutonLab/MOMENT-1-large", device="cpu")
+    target, via = eng._ft_target()
+    assert target is not None and via == "_pipe", "the fine-tune target must be reachable"
+    eng._ft_load = {"via": "_pipe"}                 # pretend an adapted checkpoint was applied
+    eng._horizon = 96
+    import pytest
+    with pytest.raises(RuntimeError, match="fixed at horizon"):
+        eng._get(21)
+
+
+def test_tirex_rollout_appends_patches_along_the_time_axis():
+    """Horizons longer than one TiRex output patch are produced by rolling the median back into the
+    context. The old loop sliced `p[:k]` - the *window* axis - and then zipped windows against output
+    patches, so np.concatenate raised for any multi-patch horizon (even a single window)."""
+    import numpy as np
+
+    from tsfm4finance.bench.engines.tirex import TiRexEngine
+
+    seen: list[list[int]] = []
+
+    class _Fake:
+        config = None
+
+        def forecast(self, cs, output_type="numpy", batch_size=16):
+            seen.append([len(c) for c in cs])
+            n = len(cs)
+            steps, nq = 32, 9
+            # a quantile fan that encodes each context's length, so context growth is observable
+            per = [np.array([[len(c) + t + 0.1 * k for k in range(nq)] for t in range(steps)])
+                   for c in cs]
+            q = np.stack(per)                                     # (N, 32, 9)
+            return q, q[:, :, 4]
+
+        @property
+        def model(self):
+            return self
+
+    eng = TiRexEngine.__new__(TiRexEngine)
+    eng.model = _Fake()
+    eng.batch = 8
+    eng.max_context = 512
+    eng.levels = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
+    ctx = [np.arange(100.0), np.arange(120.0)]
+    pred = eng.predict(ctx, horizon=80)
+    assert pred.point.shape == (2, 80), pred.point.shape
+    assert pred.quantiles.shape == (2, 80, 9)
+    # 32 + 32 + 32 >= 80: two follow-up patches, each grown by every step produced so far
+    assert len(seen) == 3, f"unexpected number of rollout passes: {seen}"
+    assert seen[1] == [132, 152] and seen[2] == [164, 184], seen
+
+
+def test_timesfm25_engine_constructs_against_the_vendor_api(monkeypatch):
+    """The engine imported `tsfm4finance.core.models.TimesFMFinetunedModel`, a class this tree does
+    not contain, so *every* TimesFM 2.5 cell died at construction - the family had no arena row at
+    all, and the failure looked like a missing checkpoint rather than a missing symbol."""
+    import sys
+    import types
+
+    import numpy as np
+
+    class _Wrapper:
+        def __init__(self):
+            self.model = types.SimpleNamespace(load_state_dict=lambda *a, **k: (0, 0),
+                                               state_dict=lambda: {"w": 1})
+            self.compiled = None
+
+        def compile(self, cfg):
+            self.compiled = cfg
+
+        def forecast(self, horizon, inputs):
+            n = len(inputs)
+            pts = np.tile(np.arange(horizon, dtype=float), (n, 1))
+            # vendor layout: (N, H, 10) = one spare channel then 0.1..0.9
+            q = np.stack([pts + 0.1 * k for k in range(1, 11)], axis=2)
+            return pts, q
+
+    stub = types.ModuleType("timesfm")
+    stub.TimesFM_2p5_200M_torch = types.SimpleNamespace(
+        DEFAULT_REPO_ID="google/timesfm-2.5-200m-pytorch",
+        from_pretrained=lambda ckpt, torch_compile=False: _Wrapper())
+    stub.ForecastConfig = lambda **kw: types.SimpleNamespace(**kw)
+    monkeypatch.setitem(sys.modules, "timesfm", stub)
+
+    from tsfm4finance.bench.engines.timesfm import TimesFM25Engine
+
+    eng = TimesFM25Engine(device="cpu")
+    assert "embed" not in eng.caps, "no embedding API in the 2.5 wrapper: do not advertise it"
+    pred = eng.predict([np.arange(60.0), np.arange(80.0)], horizon=21)
+    assert pred.point.shape == (2, 21)
+    assert pred.quantiles.shape[0] == 2 and pred.quantiles.shape[1] == 21
+    assert pred.quantiles.shape[2] == len(eng.levels) if hasattr(eng, "levels") else True
+    tgt, via = eng._ft_target()
+    assert tgt is not None, "adapted checkpoints need a torch module to load into"

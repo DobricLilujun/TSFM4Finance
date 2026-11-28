@@ -1,23 +1,38 @@
 """Tests for tsfm_eval data interface."""
 from __future__ import annotations
 
+import pathlib
+
 import pytest
 
 import tsfm_eval
 from tsfm_eval import TSDataset, load_dataset, load_meta, list_datasets
 
 
+# "real" here means *the arena corpus on disk*, which is not in git: `assets/data/open` is produced
+# by the downloader (or by the refresh_data workflow), so a fresh checkout - CI, a new clone, a
+# compute box before the corpus rsync - has no sp500_daily and these three were red for a reason
+# that says nothing about the code. Skip with the reason instead.
+CORPUS = pathlib.Path(__file__).resolve().parents[2] / "assets" / "data" / "open" / "sp500_daily"
+needs_corpus = pytest.mark.skipif(
+    not (CORPUS / "train.parquet").exists(),
+    reason=f"arena corpus {CORPUS} not present (run the bench downloader)")
+
+
+@needs_corpus
 def test_list_datasets_real():
     names = [m.name for m in list_datasets(open_only=True)]
     assert "sp500_daily" in names
 
 
+@needs_corpus
 def test_load_meta_real():
     meta = load_meta("sp500_daily")
     assert meta.task.value == "forecast"
     assert meta.target == "close"
 
 
+@needs_corpus
 def test_load_dataset_real():
     ds = load_dataset("sp500_daily")
     assert ds.name == "sp500_daily"

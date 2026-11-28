@@ -52,6 +52,13 @@ def run_one(job: TrainJob, family: str) -> dict:
         return {"model": job.model_key, "series": job.series, "budget": job.budget,
                 "status": "trainer-pending", "reason": PENDING.get(family, "no trainer")}
     mod = _import(family)
+    if job.heads_only and not getattr(mod, "HEADS_ONLY", False):
+        # a frozen-backbone ablation that quietly trains the whole model is worse than no result:
+        # the ablation table would compare two different interventions under one label
+        return {"model": job.model_key, "series": job.series, "budget": job.budget,
+                "status": "rejected",
+                "reason": f"{family}: trainer does not implement heads_only; "
+                          "refusing to report a full-model run as a head-only ablation"}
     out = mod.train(job)
     out.setdefault("status", "ok")
     return out
@@ -150,8 +157,14 @@ def main() -> None:
                                 "status": "failed", "error": f"{type(e).__name__}: {e}"[:400],
                                 "trace": traceback.format_exc()[-600:]})
             print(json.dumps(results[-1], default=str), flush=True)
-    print(json.dumps({"summary": {r["status"]: sum(1 for x in results if x["status"] == r["status"])
-                                  for r in results}}, indent=1))
+    summary = {r["status"]: sum(1 for x in results if x["status"] == r["status"])
+               for r in results}
+    print(json.dumps({"summary": summary}, indent=1))
+    # the shell runner retries on failure and Slurm chains stages with afterok: exiting 0 after
+    # failed training let both proceed as if the checkpoints existed
+    bad = summary.get("failed", 0) + summary.get("rejected", 0)
+    if bad:
+        raise SystemExit(1)
 
 
 if __name__ == "__main__":

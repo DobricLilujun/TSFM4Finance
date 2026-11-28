@@ -19,6 +19,9 @@ from .common import (TrainJob, autocast, count_trainable, free_gpu, log_step,
 HEADS = ("output_head", "head")
 
 
+# the trainer honours job.heads_only (frozen backbone, head-only updates)
+HEADS_ONLY = True
+
 def train(job: TrainJob) -> dict:
     import torch
     from tsfm4finance.bench.config import load_grid
@@ -71,11 +74,15 @@ def train(job: TrainJob) -> dict:
             _scaled, loc, scale = model.scaler(t, tm & torch.ones_like(tm))
             loc = loc[:, 0, :] if loc.ndim == 3 else loc            # (B,T)
             scale = scale[:, 0, :] if scale.ndim == 3 else scale
-        T = q.shape[1]
-        loc = loc[:, -T:]
-        scale = scale[:, -T:].clamp_min(1e-6)
-        tgt = torch.asinh((yfull[:, 0, -T:] - loc) / scale).unsqueeze(-1)   # (B,T,1)
-        q = q[:, -T:, :]
+        # `T = q.shape[1]` and `q[:, -T:, :]` is a no-op: the loss covered the context positions and
+        # the fabricated zero pad, so the model was supervised on the input it was given and on
+        # `pad - horizon` invented all-zero targets. Only the real future positions may carry loss.
+        fut = pad
+        keep = job.horizon
+        loc = loc[:, -fut:][:, :keep]
+        scale = scale[:, -fut:][:, :keep].clamp_min(1e-6)
+        tgt = torch.asinh((yfull[:, 0, -fut:][:, :keep] - loc) / scale).unsqueeze(-1)   # (B,h,1)
+        q = q[:, -fut:, :][:, :keep, :]
         loss = _pinball(q, tgt, eng.levels)
         opt.zero_grad(set_to_none=True)
         loss.backward()

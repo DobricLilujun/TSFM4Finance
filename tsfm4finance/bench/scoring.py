@@ -54,7 +54,11 @@ def per_window_metrics(wins, pred, *, train_hist: np.ndarray, levels=LEVELS) -> 
             "rmse": M.rmse(p, y), "mae": M.mae(p, y),
             "mape": M.mape(p, y), "smape": M.smape(p, y),
             "mase": M.mase(p, y, history=train_hist),
-            "dir_acc": M.directional_accuracy(p, y),
+            # level series: sign(price) is always +1, so the sign-based helper scores 1.0 for every
+            # forecast. Directional accuracy here is the accuracy of the *moves*, including the step
+            # from the last context price into the first forecast step.
+            "dir_acc": M.directional_accuracy_change(p, y, last_context=float(w.context[-1])),
+            "dir_acc_levels": M.directional_accuracy(p, y),   # kept for comparability with pass 1
         }
         if pred.quantiles is not None:
             q = np.asarray(pred.quantiles[i], float)[:H]          # (H, K)
@@ -63,10 +67,15 @@ def per_window_metrics(wins, pred, *, train_hist: np.ndarray, levels=LEVELS) -> 
                                levels=list(levels))
             row["pinball_mean"] = float(np.mean([M.pinball(y[t], q[t, k], levels[k])
                                                  for t in range(H) for k in range(len(levels))]))
+            # VaR/ES are P&L numbers, not price levels. The block above computed them through the
+            # canonical helper and then threw the result away, publishing q[-1, 0] (a price) under
+            # the name var90 and the mean of the 10/20/30% price quantiles (two of them outside the
+            # 10% loss tail) as es90.
             lower = M.var_es_from_quantiles(float(w.context[-1]), q[-1], levels=list(levels)) \
                 if hasattr(M, "var_es_from_quantiles") else {}
-            row["var90"] = float(q[-1, 0])
-            row["es90"] = float(np.mean(q[-1, :3]))
+            row["var90"] = float(lower.get("var_0.90", float("nan")))
+            row["es90"] = float(lower.get("es_0.90", float("nan")))
+            row["var90_price"] = float(q[-1, 0])       # the raw level, kept under its own name
             row["exceed_10"] = float(y[-1] < q[-1, 0])
             row["band_10_exceeds"] = float(np.mean(y < q[:, 0]))
             row["band_10_hits"] = float(np.mean((y >= q[:, 0]) & (y <= q[:, 8])))

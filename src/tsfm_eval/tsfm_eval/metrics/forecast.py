@@ -49,8 +49,37 @@ def mase(
 
 
 def directional_accuracy(pred: np.ndarray, truth: np.ndarray) -> float:
-    """Fraction of steps where sign(pred) == sign(truth)."""
+    """Fraction of steps where sign(pred) == sign(truth).
+
+    Only meaningful when the inputs are *moves* (returns, differences). For price levels it is a
+    constant: every price is positive, so sign(pred) == sign(truth) == +1 and a forecast that gets
+    every direction wrong still scores 1.0. Use `directional_accuracy_change` for level series.
+    """
     return float(np.mean(np.sign(pred) == np.sign(truth)))
+
+
+def directional_accuracy_change(pred: np.ndarray, truth: np.ndarray,
+                                last_context: float | None = None) -> float:
+    """Directional accuracy of the *changes*, for level series.
+
+    The first comparison is the move from the last observed context price to the first forecast step;
+    dropping it would score only the interior steps and quietly change the denominator depending on
+    whether a context was passed at all.
+    """
+    p = np.asarray(pred, dtype=float)
+    y = np.asarray(truth, dtype=float)
+    if p.size == 0 or y.size == 0 or p.shape != y.shape:
+        return float("nan")
+    if last_context is not None and np.isfinite(float(last_context)):
+        p = np.concatenate([[float(last_context)], p])
+        y = np.concatenate([[float(last_context)], y])
+    elif p.size < 2:
+        return float("nan")          # one step of levels carries no direction at all
+    dp, dy = np.diff(p), np.diff(y)
+    keep = (dp != 0) & (dy != 0)
+    if not keep.any():
+        return float("nan")
+    return float(np.mean(np.sign(dp[keep]) == np.sign(dy[keep])))
 
 
 def rank_corr(pred: np.ndarray, truth: np.ndarray) -> float:

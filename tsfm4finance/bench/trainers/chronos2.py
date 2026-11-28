@@ -12,12 +12,25 @@ import numpy as np
 from .common import TrainJob, free_gpu
 
 
+# this trainer updates the whole model: it cannot honour job.heads_only, so the CLI rejects
+# that combination instead of labelling a full-model run as an ablation
+HEADS_ONLY = False
+
 def _weights(job, spec) -> str:
     from tsfm4finance.bench.weights import resolve
     return resolve((spec.weights if spec and spec.weights else "amazon/chronos-2"))
 
 
 def train(job: TrainJob) -> dict:
+    # The registry sends the whole "chronos" family here, but this loop is Chronos-2's vendor `fit`
+    # API: Bolt (ChronosBoltForCausal2Seq) and the T5 encoder-decoder do not train through it.
+    # Falling through would have run an incompatible trainer and reported whatever came out.
+    key = (job.model_key or "").lower()
+    if "chronos-2" not in key and "chronos2" not in key:
+        return {"model": job.model_key, "series": job.series, "budget": job.budget,
+                "status": "trainer-pending",
+                "reason": f"{job.model_key}: chronos2 trainer fits Chronos-2 only; "
+                          "Bolt and T5 need their own training loops"}
     import torch
     from chronos import Chronos2Pipeline
 

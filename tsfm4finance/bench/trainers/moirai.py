@@ -10,6 +10,9 @@ from .common import TrainJob, autocast, count_trainable, free_gpu, log_step, sav
 HEADS = ("p21", "quantile_head", "head", "output_proj", "distribution_output")
 
 
+# the trainer honours job.heads_only (frozen backbone, head-only updates)
+HEADS_ONLY = True
+
 def train(job: TrainJob) -> dict:
     import torch
     from tsfm4finance.bench.engines.moirai import MoiraiEngine
@@ -58,7 +61,13 @@ def train(job: TrainJob) -> dict:
             "trained_parameters": trained, "trainable_parameters": count_trainable(f),
             "full_parameters": not job.heads_only, "windows": info, "loss": hist,
             "levels": list(eng._levels), "smoke": job.smoke}
-    ck = save_ckpt(job, f, meta)
+    # `f` is the forecast wrapper, which registers the pretrained model under `module`, so its state
+    # dict keys are prefixed "module." while MoiraiEngine exposes the bare module and
+    # Engine.load_finetuned loads into it without stripping prefixes: the adapted cells could never
+    # apply the checkpoint this trainer produced.
+    inner = getattr(f, "module", f)
+    meta["checkpoint_prefix"] = "module." if inner is not f else ""
+    ck = save_ckpt(job, inner, meta)
     free_gpu()
     return {"model": job.model_key, "series": job.series, "budget": job.budget,
             "checkpoint": ck, "steps": n_steps, "final_loss": hist["steps"][-1][1],

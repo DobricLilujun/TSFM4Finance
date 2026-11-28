@@ -142,7 +142,10 @@ def build_for_series(base: str, domain: str) -> list[str]:
 
     # ---- 2) volatility-regime classification (next 21-day realized vol tercile) ----
     fv = _fwd_vol(close, _VOLREG_H)
-    train_fv = fv[:n_train]
+    # fv[t] looks _VOLREG_H days *ahead* of t, so the last _VOLREG_H train-origin values already
+    # contain validation returns: calibrating the tercile cut-points on them leaks held-out data
+    # into the supposedly train-only regime labels.
+    train_fv = fv[:max(0, n_train - _VOLREG_H)]
     cuts = np.nanquantile(train_fv, [1 / 3, 2 / 3])
     reg = np.full(len(close), np.nan)
     ok = ~np.isnan(fv)

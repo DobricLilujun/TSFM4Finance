@@ -50,6 +50,9 @@ class FTResult:
     first_loss: float
     seconds: float
     seed: int
+    #: the file form of `checkpoint` ({"model": state_dict, "meta": ...}), which is what
+    #: Engine.load_finetuned and the cell worker consume; `checkpoint` itself is a save_pretrained dir
+    ckpt_file: str = ""
 
     def to_dict(self) -> dict:
         return asdict(self)
@@ -237,7 +240,14 @@ def finetune(train_close: np.ndarray, out_dir: str | Path, dataset: str = "",
             "lr": lr, "batch_size": bs, "seed": seed, "loss_first": first, "loss_last": last,
             "loss_curve": losses[:: max(1, len(losses) // 40)]}
     (out / "finetune_meta.json").write_text(json.dumps(meta, indent=2))
-    res = FTResult(checkpoint=str(out), dataset=dataset, k_windows=int(k_windows or len(wins)),
+    # `save_pretrained` writes a model directory, but the arena's adapted-cell contract
+    # (Engine.load_finetuned) loads {"model": state_dict, "meta": ...} from a *file*. Without this
+    # export, a TimesFM fine-tune had no discoverable checkpoint: the planner looked at
+    # job.ckpt_path(), found nothing, and the cell was scored as zero-shot while being labelled
+    # fine-tuned.
+    state_file = out / "state_dict.pt"
+    torch.save({"model": module.state_dict(), "meta": meta}, state_file)
+    res = FTResult(checkpoint=str(out), ckpt_file=str(state_file), dataset=dataset, k_windows=int(k_windows or len(wins)),
                    context=context, steps=steps, epochs=ep, lr=lr, batch_size=bs,
                    first_loss=first, final_loss=last, seconds=time.time() - t0, seed=seed)
     return res

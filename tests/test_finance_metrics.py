@@ -208,3 +208,24 @@ def test_relative_skill_and_scrps():
     assert relative_skill(6.0, 5.0) == pytest.approx(-0.2)
     assert scaled_crps(0.5, 2.0) == pytest.approx(0.25)
     assert math.isnan(relative_skill(float("nan"), 5.0))
+
+
+def test_directional_accuracy_on_price_levels_is_the_change_metric_not_the_sign():
+    """A level series is positive everywhere, so sign(pred) == sign(truth) == +1 and a forecast that
+    is wrong about every move scores 1.0. The bench scored exactly that for every asset-return row."""
+    import numpy as np
+
+    from tsfm_eval.metrics import directional_accuracy, directional_accuracy_change
+
+    ctx_last = 100.0
+    truth = np.array([105.0, 100.0])          # up then down
+    pred = np.array([95.0, 110.0])            # down then up: both wrong
+    assert np.isclose(directional_accuracy(pred, truth), 1.0), "the sign metric is vacuous on levels"
+    assert np.isclose(directional_accuracy_change(pred, truth, last_context=ctx_last), 0.0)
+    # the context->step-1 move counts: without it the denominator would depend on the call site
+    half = directional_accuracy_change(pred, truth)          # interior only: -5 vs +5 -> wrong
+    assert np.isclose(half, 0.0)
+    assert np.isclose(directional_accuracy_change(np.array([105.0]), np.array([105.0]),
+                                                  last_context=100.0), 1.0)
+    assert np.isclose(directional_accuracy_change(np.array([105.0]), np.array([95.0]),
+                                                  last_context=100.0), 0.0)

@@ -17,6 +17,9 @@ from .common import (TrainJob, autocast, count_trainable, free_gpu, log_step,
 HEADS = ("head", "projection", "forecast")
 
 
+# the trainer honours job.heads_only (frozen backbone, head-only updates)
+HEADS_ONLY = True
+
 def train(job: TrainJob) -> dict:
     import torch
     from momentfm import MOMENTPipeline

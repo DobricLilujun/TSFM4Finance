@@ -17,6 +17,9 @@ from .common import (LEVELS, TrainJob, autocast, combined_loss_t, count_trainabl
 HEADS = ("quantile_head", "prediction_head", "output", "head")
 
 
+# the trainer honours job.heads_only (frozen backbone, head-only updates)
+HEADS_ONLY = True
+
 def train(job: TrainJob) -> dict:
     import torch
     from tsfm4finance.bench.config import load_grid
@@ -51,8 +54,10 @@ def train(job: TrainJob) -> dict:
         if q is not None and eng.levels:
             q = q.float()
             if q.ndim == 4:
-                q = q[:, :, :, 0]
-            q = q.reshape(q.shape[0], -1)[:, :job.horizon, :]
+                q = q[:, :, :, 0]                      # (B, H, n_levels, 1) -> (B, H, n_levels)
+            # flatten()ing to 2-D and then slicing three dimensions raised IndexError on every TTM
+            # run that exposed quantiles; the quantile axis must survive, and only the horizon is cut
+            q = q[:, :job.horizon, :] if q.ndim == 3 else q.reshape(q.shape[0], -1)
             loss = combined_loss_t(q, y, list(eng.levels))
         else:
             loss = torch.abs(mean.reshape(mean.shape[0], -1)[:, :job.horizon] - y).mean()

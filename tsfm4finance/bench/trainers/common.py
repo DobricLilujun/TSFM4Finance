@@ -76,7 +76,10 @@ def train_windows(series: str, horizon: int, ctx: int, seed: int = 0,
     y = tr[target].to_numpy(dtype=float)
     windows: list[tuple[np.ndarray, np.ndarray]] = []
     ctx_eff = int(ctx)
-    for start in range(ctx_eff, len(y) - horizon):
+    # the last legal origin is the one whose target *ends* at len(y): an exclusive bound here drops a
+    # real training example, and for a train split of exactly ctx+horizon observations it leaves the
+    # window list empty - the family trainers then fail on an empty batch
+    for start in range(ctx_eff, len(y) - horizon + 1):
         c = y[start - ctx_eff:start]
         t = y[start:start + horizon]
         if len(c) != ctx_eff or len(t) < horizon:      # equal-length batches: the

@@ -18,6 +18,10 @@ from .common import REPO, TrainJob
 KRONOS = REPO / "third_party" / "Kronos"
 
 
+# this trainer updates the whole model: it cannot honour job.heads_only, so the CLI rejects
+# that combination instead of labelling a full-model run as an ablation
+HEADS_ONLY = False
+
 def prepare(job: TrainJob) -> dict:
     """Train-split OHLCV -> ``finetune_csv/data/<series>.csv`` (their schema)."""
     from tsfm4finance.bench.download.common import load_dataset
@@ -27,8 +31,14 @@ def prepare(job: TrainJob) -> dict:
     out_dir.mkdir(parents=True, exist_ok=True)
     csv_path = out_dir / f"{job.series}.csv"
     df = tr.copy()
-    df.index.name = "timestamps"
-    df.reset_index()[["timestamps"] + cols].to_csv(csv_path, index=False)
+    # the split frames carry the market date in a `timestamp` column and a default RangeIndex;
+    # naming the index "timestamps" and resetting it exported row numbers (0,1,2,...) as the candle
+    # calendar, so the fine-tune CSV lost the dates Kronos needs for its time features
+    if "timestamp" in df.columns:
+        out_df = df.rename(columns={"timestamp": "timestamps"})
+    else:
+        out_df = df.rename_axis("timestamps").reset_index()
+    out_df[["timestamps"] + cols].to_csv(csv_path, index=False)
     cfg_dir = KRONOS / "finetune_csv" / "configs"
     cfg_dir.mkdir(parents=True, exist_ok=True)
     cfg_path = cfg_dir / f"{job.model_key}__{job.series}__{job.budget}.json"

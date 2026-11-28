@@ -33,6 +33,16 @@ needs_results = pytest.mark.skipif(
     not RESULTS_FILE.exists(),
     reason=f"sweep artifact {RESULTS_FILE} not present (run reports/run_sweep_pass1.sh)")
 
+def require_task_dataset(suffix: str) -> Path:
+    """The derived task datasets (`sp500_daily_dir5`, `_trade`, ...) are a third artifact class:
+    built by the sweep's `tasks` stage from the base corpus. Skip with the name of the stage that
+    produces them instead of failing on a machine where nobody ran it."""
+    d = DATA / "open" / f"{DS}_{suffix}"
+    if not (d / "meta.json").exists():
+        pytest.skip(f"{d} not built (run bench.tasks / the sweep 'tasks' stage)")
+    return d
+
+
 
 def _splits(name: str = DS):
     d = DATA / "open" / name
@@ -142,8 +152,7 @@ def test_normalized_difference_one_equals_seasonal_naive():
                                          ("extreme", "anomaly"), ("trade", "trading")])
 @needs_corpus
 def test_real_task_datasets_exist_and_are_spec_compliant(suffix, task):
-    d = DATA / "open" / f"{DS}_{suffix}"
-    assert d.exists(), f"missing dataset {d}"
+    d = require_task_dataset(suffix)
     meta = json.loads((d / "meta.json").read_text())
     assert meta["task"] == task and meta["open"] is True
     tr = pd.read_parquet(d / "train.parquet")
@@ -157,7 +166,7 @@ def test_real_task_datasets_exist_and_are_spec_compliant(suffix, task):
 @needs_corpus
 def test_direction_labels_use_the_future_and_have_no_leakage_into_features():
     """label[t] must equal sign of the return over (t, t+5]; prices at t are the features."""
-    d = DATA / "open" / f"{DS}_dir5"
+    d = require_task_dataset("dir5")
     full = pd.concat([pd.read_parquet(d / f"{s}.parquet") for s in
                       ("train", "validation", "test")], ignore_index=True)
     c = full["close"].to_numpy(dtype=float)
@@ -170,7 +179,7 @@ def test_direction_labels_use_the_future_and_have_no_leakage_into_features():
 @needs_corpus
 def test_extreme_labels_use_only_prior_data():
     """The expanding-MAD threshold at t must come from returns strictly before t."""
-    d = DATA / "open" / f"{DS}_extreme"
+    d = require_task_dataset("extreme")
     full = pd.concat([pd.read_parquet(d / f"{s}.parquet") for s in
                       ("train", "validation", "test")], ignore_index=True)
     c = full["close"].to_numpy(dtype=float)
@@ -202,7 +211,7 @@ def test_extreme_labels_use_only_prior_data():
 
 @needs_corpus
 def test_volreg_cutpoints_come_from_train_only():
-    d = DATA / "open" / f"{DS}_volreg"
+    d = require_task_dataset("volreg")
     meta = json.loads((d / "meta.json").read_text())
     tr = pd.read_parquet(d / "train.parquet")
     counts = tr["label"].value_counts()

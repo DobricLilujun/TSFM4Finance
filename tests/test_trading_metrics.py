@@ -57,3 +57,18 @@ def test_the_arena_shim_and_the_package_agree():
     import tsfm4finance.core.metrics as shim
     for name in ("trading_metrics", "max_drawdown", "ic_signal", "TRADING_COST_GRID"):
         assert getattr(shim, name) is getattr(__import__("tsfm_eval.metrics", fromlist=[name]), name)
+
+
+def test_the_trading_task_is_a_first_class_task_type():
+    """`bench.tasks` writes meta.json with task="trading"; if the enum does not have that member the
+    dataset cannot be loaded, and if composite_score has no scorer the leaderboard call raises
+    KeyError. Both halves are pinned here."""
+    from tsfm_eval.metrics import composite_score
+    from tsfm_eval.schemas import TaskType
+
+    assert TaskType("trading") is TaskType.TRADING
+    s = composite_score(TaskType.TRADING, {"sharpe_net": 1.0, "ic": 0.05, "hit_rate": 0.55})
+    assert 0.0 <= s <= 1.0
+    # costs are what separate the two rows, so the score must move with them
+    gross = composite_score(TaskType.TRADING, {"sharpe_net": 1.2, "ic": 0.05, "hit_rate": 0.55})
+    assert gross > s

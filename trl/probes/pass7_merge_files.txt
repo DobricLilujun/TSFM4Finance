@@ -1,0 +1,14 @@
+# Merge order for the 32-window table (pass 7 + pass 7b). Newest-wins per cell.
+# This list is only complete once pass 7b lands on both machines; until then it would publish a
+# mixed-budget table, which the report now refuses to do silently (it prints the WARNING naming each
+# model's requested budget). Keep pass-6 (8-window) lanes OUT of this list: a share at 8 windows is a
+# different measurement, not an earlier draft of the same one.
+#
+# trux first, watson last: for cells both machines scored, the A6000 (CUDA) row is the one published.
+reports/pass7_trux_win/lane_cuda-a.jsonl
+reports/pass7_trux_win/lane_cuda-b.jsonl
+reports/pass7_watson_win/lane_win32.jsonl
+reports/pass7b_trux_32/lane_cuda-a.jsonl
+reports/pass7b_trux_32/lane_cuda-b.jsonl
+reports/pass7b_trux_32/lane_cpu.jsonl
+reports/pass7b_watson_32/lane32.jsonl

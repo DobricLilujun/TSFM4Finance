@@ -374,9 +374,11 @@ the same cells: `arima > chronos-bolt-small` 58.3% -> 83.3%, `chronos-2 > chrono
 70.5%, and the "tie" `chronos-bolt-small` vs `chronos-2` resolves *against* bolt-small (53.8% ->
 38.6%). Only `chronos-bolt-base` vs `chronos-t5-small` stays a tie at every window count (48.5/50.0/
 47.0). The intervals below measure corpus sampling, not window sampling; the two errors are
-independent and both are in the number. Pass 7b (`probes/watson/watson_pass7b_rest32.sh`) moves the
-other 11 model keys to 32 windows so the whole table shares one protocol; until then the ranks below
-are 8-window ranks. See docs/08 and `probes/window_sensitivity.py`.
+independent and both are in the number. Pass 7b (`probes/watson/watson_pass7b_rest32.sh` plus a trux lane run) moves the
+other 11 model keys to 32 windows so the whole table shares one protocol; until it lands the ranks
+below are 8-window ranks, and `probes/pass7_merge_files.txt` is the merge that replaces them (it
+deliberately excludes the 8-window lanes - a share at 8 windows is a different measurement, not an
+earlier draft of the same one). See docs/08 and `probes/window_sensitivity.py`.
 
 What that says, and what it does not:
 

@@ -8,6 +8,8 @@ reaped, and it produced exactly that silent stall."""
 import subprocess
 from pathlib import Path
 
+REPO = Path(__file__).resolve().parents[1]
+
 HERE = Path(__file__).resolve().parent.parent
 SCRIPT = HERE / "probes" / "trux" / "bridge" / "trux_dispatch.sh"
 
@@ -58,3 +60,24 @@ def test_an_empty_bridge_starts_at_one(tmp_path):
     r = _dispatch(b, tmp_path)
     assert r.returncode == 0, r.stderr
     assert "queued job_001.sh" in r.stdout, r.stdout
+
+
+def test_a_flag_before_the_job_path_is_not_mistaken_for_the_job(tmp_path):
+    """`trux_dispatch.sh --hold job.sh` used to read `--hold` as the job path, then fail the
+    GENERATED-stamp check on it: the error named a flag, and the real job was never queued."""
+    dispatch = REPO / "probes" / "trux" / "bridge" / "trux_dispatch.sh"
+    bridge = tmp_path / "spark_bridge"
+    for d in ("inbox", "inbox_done", "outbox"):
+        (bridge / d).mkdir(parents=True)
+    import datetime
+    stamp = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    job = tmp_path / "job.sh"
+    job.write_text(f"#!/usr/bin/env bash\n# GENERATED {stamp} by gpu7_generate.sh from t.sh\necho hi\n")
+    env = {**__import__("os").environ, "BRIDGE": str(bridge)}
+    p = subprocess.run(["bash", str(dispatch), "--hold", str(job)],
+                       capture_output=True, text=True, timeout=30, env=env)
+    assert p.returncode == 0, p.stderr[-300:]
+    assert list((bridge / "hold").glob("*.sh"))
+    bad = subprocess.run(["bash", str(dispatch), "--nope", str(job)],
+                         capture_output=True, text=True, timeout=30, env=env)
+    assert bad.returncode == 2 and "unknown flag" in bad.stderr

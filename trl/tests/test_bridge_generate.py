@@ -149,9 +149,100 @@ def test_the_python_inside_the_templates_compiles(tmp_path):
     for tpl in sorted(t for t in (REPO / "probes" / "trux" / "bridge").glob("gpu7_*.sh")
                       if t.name != "gpu7_generate.sh"):
         text = tpl.read_text()
-        blocks = re.findall(r"<<'PY'\n(.*?)\nPY\n", text, flags=re.S)
-        for i, block in enumerate(blocks):
+        # any quoted heredoc, not just one named PY: a template may name its blocks
+        blocks = re.findall(r"<<'([A-Z_]+)'\n(.*?)\n\1\n", text, flags=re.S)
+        for i, (marker, block) in enumerate(blocks):
             try:
                 ast.parse(block)
             except SyntaxError as e:
-                raise AssertionError(f"{tpl.name} python block {i}: {e}") from e
+                raise AssertionError(f"{tpl.name} python block {i} ({marker}): {e}") from e
+
+
+def _pick_device_fn(text: str) -> str:
+    """Lift the device chooser out of a template so it can be run for real."""
+    import re
+    m = re.search(r"^(free_mib\(\) \{.*?^pick_device\(\) \{.*?^\}$\n?)", text, flags=re.S | re.M)
+    assert m, "no free_mib/pick_device pair found"
+    return m.group(1)
+
+
+def _run_chooser(tmp_path, free_mib_output: str, floor: str = "4000", wait: str = "0",
+                 retry: str = "1") -> tuple[str, str]:
+    tpl = (REPO / "probes" / "trux" / "bridge" / "gpu7_060_windows.sh").read_text()
+    stub = tmp_path / "envs" / "core" / "bin"
+    stub.mkdir(parents=True, exist_ok=True)
+    (stub / "python").write_text(f"#!{__import__('sys').executable}\nprint({free_mib_output!r})\n")
+    (stub / "python").chmod(0o755)
+    script = tmp_path / "chooser.sh"
+    script.write_text(f"ENVROOT={tmp_path}/envs GPU_FLOOR_MIB={floor} GPU_WAIT_SECS={wait} "
+                      f"GPU_RETRY_SECS={retry}\n" + _pick_device_fn(tpl) + "\npick_device\n")
+    p = __import__("subprocess").run(["bash", str(script)], capture_output=True, text=True, timeout=30)
+    return p.stdout.strip(), p.stderr
+
+
+def test_the_device_chooser_returns_only_a_device_name(tmp_path):
+    """`DEV=$(pick_device)` captures stdout, so a progress line printed by the chooser becomes
+    the device string and the lane runs with --device '  waiting for the GPU: 1305 MiB free...'.
+    The function's stdout must be exactly cuda or cpu; its narration belongs on stderr."""
+    out, _ = _run_chooser(tmp_path, "99999")
+    assert out == "cuda"
+    out, err = _run_chooser(tmp_path, "0", floor="4000", wait="2", retry="1")
+    assert out == "cpu", f"the chooser leaked progress into its return value: {out!r}"
+    assert "waiting for the GPU" in err                 # narration belongs on stderr
+    out, _ = _run_chooser(tmp_path, "4300", floor="4000")
+    assert out == "cuda"   # the floor is a wait, not a verdict
+
+
+def test_a_queued_bridge_job_can_be_held_back_before_the_worker_claims_it(tmp_path):
+    """job_023 was dispatched, then the memory audit said 1.1 GiB free: a CPU chronos lane would
+    have taken most of a day. Until the Spark worker moves a file into inbox_done it is still
+    trux's to take back, so --hold exists to stage a generated job without releasing it."""
+    dispatch = REPO / "probes" / "trux" / "bridge" / "trux_dispatch.sh"
+    bridge = tmp_path / "spark_bridge"
+    for d in ("inbox", "inbox_done", "outbox"):
+        (bridge / d).mkdir(parents=True)
+    job = tmp_path / "job.sh"
+    import datetime
+    stamp = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    job.write_text(f"#!/usr/bin/env bash\n# GENERATED {stamp} by gpu7_generate.sh from t.sh\necho hi\n")
+    p = __import__("subprocess").run(
+        ["bash", str(dispatch), "--hold", str(job)],
+        capture_output=True, text=True, timeout=30,
+        env={**__import__("os").environ, "BRIDGE": str(bridge)})
+    assert p.returncode == 0, p.stderr[-400:]
+    held = list((bridge / "hold").glob("*.sh"))
+    assert held, "nothing staged in hold/"
+    assert not list((bridge / "inbox").glob("job_*.sh")), "the job reached the inbox anyway"
+    # releasing it is the same command without --hold, on the held file
+    p2 = __import__("subprocess").run(
+        ["bash", str(dispatch), str(held[0])],
+        capture_output=True, text=True, timeout=30,
+        env={**__import__("os").environ, "BRIDGE": str(bridge)})
+    assert p2.returncode == 0, p2.stderr[-400:]
+    assert list((bridge / "inbox").glob("job_*.sh")), "the held job never reached the inbox"
+
+
+def test_the_bridge_example_assigns_values_the_shell_will_not_execute(tmp_path):
+    """`TRUX_SSH=ssh -i $HOME/.ssh/key -o ...` is not a value with spaces, it is an assignment of
+    "ssh" followed by the shell trying to run `-i /home/.../key` as a command. On trux that
+    truncated the endpoint, the generator died under set -e, and its stale /tmp output got
+    dispatched. So every multi-word value in the example must be quoted."""
+    ex = (REPO / "probes" / "trux" / "bridge" / "bridge.env.example").read_text()
+    bad = []
+    for ln in ex.splitlines():
+        if not ln or ln.startswith("#") or "=" not in ln:
+            continue
+        name, _, val = ln.partition("=")
+        if not name.replace("_", "").isalpha():
+            continue
+        if (" " in val.strip() or "$" in val) and not val.strip().startswith(('"', "'")):
+            bad.append(name)
+    assert not bad, f"unquoted multi-word values: {bad} - source would run their tail as a command"
+    # and the file must actually source cleanly in a clean environment
+    p = __import__("subprocess").run(
+        ["bash", "-c", f"set -u; . {REPO / 'probes' / 'trux' / 'bridge' / 'bridge.env.example'}; "
+                       'echo BRIDGE_SSH=[$BRIDGE_SSH]'],
+        capture_output=True, text=True, timeout=30)
+    assert p.returncode == 0, p.stderr[-300:]
+    assert "command not found" not in p.stderr
+    assert p.stdout.strip().startswith("BRIDGE_SSH=[ssh ")

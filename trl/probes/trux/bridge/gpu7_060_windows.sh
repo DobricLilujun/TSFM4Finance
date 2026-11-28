@@ -75,16 +75,40 @@ for s in $SERIES_LIST; do
 done
 echo "  pulled: $missing | present: $(ls -1 "$DATA" | wc -l)"
 
+# This box is shared and its free memory swings from 1 GiB to 40 GiB within minutes. A one-shot
+# memory read that says "CPU it is" would put a 200M-parameter sweep on 20 CPU cores for most of a
+# day, so here the floor is a wait, not a verdict: poll for room, and only then fall back - and say
+# so in the log, because the device column of every row depends on which branch was taken.
+GPU_FLOOR_MIB=${GPU_FLOOR_MIB:-4000}
+GPU_WAIT_SECS=${GPU_WAIT_SECS:-2700}
+GPU_RETRY_SECS=${GPU_RETRY_SECS:-120}
+free_mib() {
+  "$ENVROOT/core/bin/python" -c '
+import torch
+print(torch.cuda.mem_get_info(0)[0] >> 20 if torch.cuda.is_available() else 0)
+' 2>/dev/null || echo 0
+}
+pick_device() {
+  local now end
+  end=$(( $(date +%s) + GPU_WAIT_SECS ))
+  while :; do
+    f=$(free_mib)
+    if [ "$f" -ge "$GPU_FLOOR_MIB" ]; then echo cuda; return; fi
+    now=$(date +%s)
+    if [ "$now" -ge "$end" ]; then
+      echo "  WARN: still only $f MiB free after ${GPU_WAIT_SECS}s; this lane runs on CPU and its rows will say device=cpu" >&2
+      echo cpu; return
+    fi
+    echo "  waiting for the GPU: $f MiB free (floor $GPU_FLOOR_MIB), retry in ${GPU_RETRY_SECS}s" >&2
+    sleep "$GPU_RETRY_SECS"
+  done
+}
 DEVICE=${DEVICE:-}
-if [ -z "$DEVICE" ]; then
-  DEVICE=$("$ENVROOT/core/bin/python" -c '
-import sys, torch
-if not torch.cuda.is_available():
-    print("cpu"); sys.exit()
-print("cuda" if (torch.cuda.mem_get_info(0)[0] >> 20) >= 4000 else "cpu")
-' 2>/dev/null || echo cpu)
+if [ -n "$DEVICE" ]; then
+  echo "-- device: $DEVICE (requested explicitly; no memory poll)"
+else
+  echo "-- device: chosen per lane by free memory (floor ${GPU_FLOOR_MIB} MiB, up to ${GPU_WAIT_SECS}s of waiting)"
 fi
-echo "-- device: $DEVICE (torch-selected, 4 GiB floor)"
 
 MODELS=naive,seasonal_naive,arima,theta,chronos-bolt-small,chronos-bolt-base,chronos-2,chronos-t5-small
 ARGS=()
@@ -92,12 +116,17 @@ for s in $SERIES_LIST; do ARGS+=(--series "$DATA/$s"); done
 for MW in 32 64; do
   OUT=$OUTDIR/gpu7_pass7_win$MW.jsonl
   echo "== windows=$MW -> $OUT"
+  # re-decide per window count: the first lane can finish while someone else frees the card.
+  # A lane picks one device and keeps it for every cell, so a stale choice would mislabel
+  # an entire lane file.
+  if [ -n "$DEVICE" ]; then DEV=$DEVICE; else DEV=$(pick_device); fi
+  echo "  device for this lane: $DEV"
   # each window count is its own lane file on purpose: same protocol signature means
   # mergeable rows, and 32-window rows must never supersede 8-window ones
   "$ENVROOT/core/bin/python" -u "$REPO/scripts/sweep_evaluate.py" \
     "${ARGS[@]}" --envs "$ENVROOT" --models "$MODELS" \
     --horizons 21,63 --max-windows "$MW" --ctx 256 --seed 0 \
-    --out "$OUT" --device "$DEVICE" --fresh
+    --out "$OUT" --device "$DEV" --fresh
   "$ENVROOT/core/bin/python" - "$OUT" <<'SUMMARY'
 import json, sys
 recs = [json.loads(l) for l in open(sys.argv[1]) if l.strip()]

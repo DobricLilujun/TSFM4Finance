@@ -1,20 +1,43 @@
 #!/usr/bin/env bash
 # trux side: enqueue a job for the Spark worker, optionally wait for its log.
-#   trux_dispatch.sh job.sh [--wait] [--timeout 5400]
+#   trux_dispatch.sh job.sh [--wait] [--timeout 5400] [--hold]
+#
+# --hold stages the job in $BRIDGE/hold/ instead of the inbox. Until the worker moves a job into
+# inbox_done it is still trux's to take back, so a job can be queued and then withdrawn - which is
+# how a pass-7 lane was stopped after the audit showed 1.1 GiB free on the Spark box (a CPU lane of
+# that size would have taken most of a day). Release it later by dispatching the held path.
 # endpoints (bridge dir, hosts, keys) live in an untracked sibling file; see
 # bridge.env.example. Public tree carries no lab hostnames or scratch paths.
 _BRIDGE_DIR="$(cd "$(dirname "$0")" && pwd)"
 [ -f "$_BRIDGE_DIR/bridge.env" ] && . "$_BRIDGE_DIR/bridge.env"
 set -u
 BRIDGE=${BRIDGE:?BRIDGE unset - copy bridge.env.example to bridge.env}
-job=${1:?job script required}; shift || true
-wait=0; timeout_s=5400
-while [ $# -gt 0 ]; do case $1 in --wait) wait=1;; --timeout) timeout_s=$2; shift;; esac; shift; done
+# flags first or last, both work: `--hold job.sh` is how the operator types it, and a job
+# named --hold is not a thing worth supporting
+job=""; wait=0; timeout_s=5400; hold=0
+while [ $# -gt 0 ]; do
+  case $1 in
+    --wait) wait=1 ;;
+    --timeout) timeout_s=$2; shift ;;
+    --hold) hold=1 ;;
+    -*) echo "FATAL: unknown flag $1" >&2; exit 2 ;;
+    *) [ -z "$job" ] && job=$1 || { echo "FATAL: more than one job given ($job, $1)" >&2; exit 2; } ;;
+  esac
+  shift
+done
+[ -n "$job" ] || { echo "FATAL: no job script given (usage: trux_dispatch.sh job.sh [--wait] [--timeout SECS] [--hold])" >&2; exit 2; }
 [ -f "$BRIDGE/outbox/heartbeat" ] || { echo "no heartbeat yet: the worker has not dialed in (or is dead)" >&2; }
 if [ -f "$BRIDGE/outbox/heartbeat" ]; then
   age=$(( $(date +%s) - $(stat -c %Y "$BRIDGE/outbox/heartbeat") ))
   echo "heartbeat ${age}s old:"; sed 's/^/  /' "$BRIDGE/outbox/heartbeat"
   [ "$age" -gt 900 ] && echo "WARNING: worker silent for ${age}s — results may be stale" >&2
+fi
+if [ "$hold" = 1 ]; then
+  # staged, not queued: no number is allocated, because the job may never be released
+  mkdir -p "$BRIDGE/hold"
+  install -m 0644 "$job" "$BRIDGE/hold/$(basename "$job")"
+  echo "held $job -> $BRIDGE/hold/ (release: trux_dispatch.sh $BRIDGE/hold/$(basename "$job"))"
+  exit 0
 fi
 # Number from the highest number ever seen, not from how many are finished. The worker only
 # runs an inbox job that has no outbox log of the same name, so reusing a number is not a

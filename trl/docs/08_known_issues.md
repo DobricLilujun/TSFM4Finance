@@ -954,3 +954,37 @@ on another stack** (gap = reproducibility), **superseded by a protocol change** 
 that change), **identical signature** (gap = run variance). Two tests pin the direction: the same
 bytes on two machines must not say "protocol change", and 8-vs-32 windows on one machine must not say
 "another stack".
+
+## The GPU floor was written as a verdict, and it would have put a 200M sweep on CPU
+
+`gpu7_050_extra5.sh` picks its device once, at launch: if torch reports less than 4 GiB free, the
+lane runs on CPU and says so. That was the right fix for `nvidia-smi` answering `[N/A]` on a GB10,
+but pass 7 exposed the other half of the problem. The audit before job_023 showed **1.1 GiB free**,
+and this lane is 8 models x 66 series x 2 horizons at 32 and then 64 windows: ~2,100 cells of
+Chronos inference. On 20 CPU cores that is most of a day, on the GPU it is under an hour, and the
+free memory on that box swings from 1 GiB to 40 GiB within minutes because it is shared.
+
+So the floor became a **wait**: `pick_device` polls torch every `GPU_RETRY_SECS` (default 120 s) for
+up to `GPU_WAIT_SECS` (default 45 min), and only then falls back to CPU - with a `WARN` in the log,
+because the `device` column of every row in that lane file depends on which branch was taken. The
+choice is also re-made **per lane file**, not once per job: a lane is one device for all its cells,
+so a decision made before a 10-hour lane would mislabel the second half of it.
+
+Two traps this surfaced, both now tested:
+
+* `DEV=$(pick_device)` captures **stdout**, so the `waiting for the GPU: 1173 MiB free` progress line
+  became the device string, and the sweep would have run with
+  `--device '  waiting for the GPU: 1173 MiB free ...'`. A function whose return value is captured
+  may narrate only on stderr - `test_the_device_chooser_returns_only_a_device_name` runs the real
+  chooser against a stub interpreter and asserts the stdout is exactly `cuda` or `cpu`.
+* A **queued bridge job is still yours until the worker claims it.** The Spark worker only learns a
+  job exists by moving it from `inbox/` to `inbox_done/`, so until that move, `mv` it back and it
+  never ran. `trux_dispatch.sh --hold` makes that deliberate: stage a generated job in `hold/`
+  (no number allocated, stamp still validated), release it later with the same command. job_023 was
+  withdrawn this way after the memory audit; job_024 is the version above.
+
+And while wiring the `--hold` test: `trux_dispatch.sh --hold job.sh` read `--hold` as the **job
+path** and rejected it for missing a GENERATED stamp, and the repo's own `bridge.env.example` still
+carried the unquoted-ssh-value bug that killed job_021 (`TRUX_SSH=ssh -i ...` assigns `ssh`, then the
+shell tries to run `-i`). Both are pinned: flags are now parsed positionally with an explicit
+unknown-flag failure, and every multi-word value in the example is quoted and sourced by a test.
